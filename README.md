@@ -1,9 +1,19 @@
 # hungry_geese
+
+![hungry_geese](https://storage.googleapis.com/kaggle-competitions/kaggle/25401/logos/header.png?t=2021-01-22-07-12-33)
+
 Multiplayer agent competition in a Snake like environment
 
 https://www.kaggle.com/c/hungry-geese
 
+## Goal
+
+I want to learn more about MuZero by applying it to this challenge. I do not want to devote too much
+time to the challenge, ideally two weeks, less than one month.
+I'm planning to present the learnings to the Jedi Council after the challenge.
+
 ## Methodology
+
 I'm following [CRISP-DM 1.0](https://www.the-modeling-agency.com/crisp-dm.pdf) methodology for the reports.
 
 I have skipped Evaluation and Deployment steps because they are not usually done on Kaggle.
