@@ -21,7 +21,50 @@ to make a lot of submissions. Sometimes is not easy to have a good correlation b
 validation score and LB score
 --->
 
+I have decided to implement an internal league of agents to measure progress. Ideally I could train
+my models completely isolated from Kaggle and submit a single perfect agent to the leaderboard.
+That would be very epic.
+
+![alphastar league](res/2021-02-20-10-24-50.png)
+
+### Theory about ranking
+
+[Youtube Ranking Systems: Elo, TrueSkill and Your Own](https://www.youtube.com/watch?v=VnOVLBbYlU0)
+
+#### [Elo rating system](https://en.wikipedia.org/wiki/Elo_rating_system)
+
+Having a score 400 points higher means that you will win 90% of the times. If the number of matches is big enough the players will reach equilibrium.
+
+In our case Agents are stationary, they do not improve over time. So I only need to find the relative position to existing agents.
+
+Problems could arise if a new agent is not able to win all the previous agents. In that case the
+rating will not converge unless the match distribution is fixed. So I have to create an environment
+where each new agent is trained against all previous ones and learns to beat them all.
+
+Some links:
+
+- [Elo sucks — better multiplayer rating systems for smaller games](https://medium.com/acolytefight/elo-sucks-better-multiplayer-rating-systems-for-smaller-games-8ca588ee652f)
+- [Multiplayer Elo](http://www.tckerrigan.com/Misc/Multiplayer_Elo)
+
+#### [TrueSkill](https://en.wikipedia.org/wiki/TrueSkill)
+
+TrueSkill is more complex and powerful than Elo, and I think it is used on Kaggle or something similar.
+
+However I think Elo is enough for my problem and I will use it.
+
+### Ranking definition
+
+- I will use Elo ranking
+- Greedy agent will have a fixed score of 1000
+- I will train a first model that is able to beat the greedy agent consistently, and then another one
+that is able to beat agents 1 and 2, and so on
+- Old agent scores will be fixed, and I will just compute the ranking for the new agent
+- New agents will be initialized with the ranking of the best existing agent
+- To adapt to multiplayer Elo I will consider that on each match the agent has won over agents with
+lower score and has lose over agents with greater score
+
 ## Iteration 1. Iteration_title
+
 <!---
 The work is done using short iterations. Each iteration needs to have a very
 clear goal. This allows to gain greater knowledge of the problem on each iteration.
