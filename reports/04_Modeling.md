@@ -63,7 +63,7 @@ that is able to beat agents 1 and 2, and so on
 - To adapt to multiplayer Elo I will consider that on each match the agent has won over agents with
 lower score and has lose over agents with greater score
 
-## Iteration 1. Iteration_title
+## Iteration 1. Deep Q Learning
 
 <!---
 The work is done using short iterations. Each iteration needs to have a very
@@ -71,6 +71,14 @@ clear goal. This allows to gain greater knowledge of the problem on each iterati
 --->
 
 ### Goal
+
+I'm going to start with the simplest powerful approach that I can think of: Deep Q learning. On this
+iteration I would like to see how far a model trained this way can go and how long does it take to
+learn.
+
+### Links
+
+https://www.kaggle.com/victordelafuente/dqn-goose-with-stable-baselines3-pytorch#Using-our-custom-environment
 
 ### Development
 
