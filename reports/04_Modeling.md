@@ -1,13 +1,17 @@
 # Modeling
 
 ## Select modeling technique
+
 <!---Document the actual modeling technique that is to be used. If multiple
 techniques are applied, perform this task separately for each technique.
 Many modeling techniques make specific assumptions about the data—for example,
 that all attributes have uniform distributions, no missing values allowed,
 class attribute must be symbolic, etc. Record any such assumptions made. --->
 
+I will be using Reinforcement Learning techniques in this challlenge.
+
 ## Generate test design
+
 <!---Describe the intended plan for training, testing, and evaluating the models.
 A primary component of the plan is determining how to divide the available dataset
 into training, test, and validation datasets.
@@ -63,7 +67,46 @@ that is able to beat agents 1 and 2, and so on
 - To adapt to multiplayer Elo I will consider that on each match the agent has won over agents with
 lower score and has lose over agents with greater score
 
-## Iteration 1. Deep Q Learning
+## Iteration 1. Hand coded agents
+
+<!---
+The work is done using short iterations. Each iteration needs to have a very
+clear goal. This allows to gain greater knowledge of the problem on each iteration.
+--->
+
+### Goal
+
+On a first step I'm going to develop or download from the forum hand-coded agents. This will
+allow to implement the ranking system.
+
+### Links
+
+### Development
+
+#### Agents from the forum
+
+- https://www.kaggle.com/ilialar/risk-averse-greedy-goose
+- https://www.kaggle.com/ilialar/goose-on-a-healthy-diet
+- https://www.kaggle.com/ihelon/hungry-geese-agents-comparison
+- https://www.kaggle.com/leontkh/hard-coded-passive-aggressive-agent
+
+#### My agent
+
+I would like to create an agent that only grows if there are bigger agents than him. I will only
+implement it if it is not already implemented on the forum
+
+#### Championship
+
+I'm going to run matches between all the agents by selecting them randomly and use the results
+to compute the first Elo ranking. I will check that at least there are two different agents
+on each match.
+
+I could play with different speeds for the Elo rating and see the effect.
+
+### Results
+
+
+## Iteration 2. Deep Q Learning
 
 <!---
 The work is done using short iterations. Each iteration needs to have a very
