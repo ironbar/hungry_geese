@@ -105,6 +105,22 @@ I could play with different speeds for the Elo rating and see the effect.
 
 ### Results
 
+| model                   | ranking |
+|-------------------------|---------|
+| boilergoose             | 1269    |
+| besthoarder             | 1227    |
+| crazy_goose             | 1186    |
+| risk_averse_goose       | 1176    |
+| goose_on_a_healthy_diet | 1157    |
+| straightforward_bfs     | 1004    |
+| greedy                  | 981     |
+| greedyhoarder           | 766     |
+| random_plus             | 706     |
+| random                  | 523     |
+
+So this is very interesting, we have compared many hard-coded agents and see that there are much stronger agents than greedy. For example boilergoose will beat greedy agent 83% of the times.
+
+This gives us a very good start point to train reinforcement learning agents. We should aim to create a first RL agent that scores around 1500. Then aim to 1700, 1900... and create a ladder of improving agents.
 
 ## Iteration 2. Deep Q Learning
 
