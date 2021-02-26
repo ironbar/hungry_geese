@@ -1,6 +1,6 @@
 # hungry_geese
 
-![hungry_geese](https://storage.googleapis.com/kaggle-competitions/kaggle/25401/logos/header.png?t=2021-01-22-07-12-33)
+![hungry_geese](reports/res/2021-02-26-13-31-46.png)
 
 Multiplayer agent competition in a Snake like environment
 
