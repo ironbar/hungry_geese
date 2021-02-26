@@ -59,7 +59,8 @@ However I think Elo is enough for my problem and I will use it.
 ### Ranking definition
 
 - I will use Elo ranking
-- Greedy agent will have a fixed score of 1000
+- I will compute ranking for hard-coded agents first, and I won't update those scores since I expect
+that the RL agents will be better
 - I will train a first model that is able to beat the greedy agent consistently, and then another one
 that is able to beat agents 1 and 2, and so on
 - Old agent scores will be fixed, and I will just compute the ranking for the new agent
@@ -67,7 +68,7 @@ that is able to beat agents 1 and 2, and so on
 - To adapt to multiplayer Elo I will consider that on each match the agent has won over agents with
 lower score and has lose over agents with greater score
 
-## Iteration 1. Hand coded agents
+## Iteration 1. Hard coded agents
 
 <!---
 The work is done using short iterations. Each iteration needs to have a very
@@ -76,7 +77,7 @@ clear goal. This allows to gain greater knowledge of the problem on each iterati
 
 ### Goal
 
-On a first step I'm going to develop or download from the forum hand-coded agents. This will
+On a first step I'm going to develop or download from the forum hard-coded agents. This will
 allow to implement the ranking system.
 
 ### Links
@@ -138,6 +139,16 @@ learn.
 ### Links
 
 https://www.kaggle.com/victordelafuente/dqn-goose-with-stable-baselines3-pytorch#Using-our-custom-environment
+
+### Game interface
+
+In order to be able to train an agent I have to first create a game interface that provides the information
+in the best way for our model.
+
+- Transform the board into a 3d tensor
+- Remember last movements
+- Compute useful features
+- Save the whole episode for later training
 
 ### Development
 
