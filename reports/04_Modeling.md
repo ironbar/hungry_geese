@@ -91,11 +91,6 @@ allow to implement the ranking system.
 - https://www.kaggle.com/ihelon/hungry-geese-agents-comparison
 - https://www.kaggle.com/leontkh/hard-coded-passive-aggressive-agent
 
-#### My agent
-
-I would like to create an agent that only grows if there are bigger agents than him. I will only
-implement it if it is not already implemented on the forum
-
 #### Championship
 
 I'm going to run matches between all the agents by selecting them randomly and use the results
