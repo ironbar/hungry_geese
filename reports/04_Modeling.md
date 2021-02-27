@@ -148,3 +148,8 @@ in the best way for our model.
 ### Development
 
 ### Results
+
+<!---
+Simetries: order of the other agents, vertical, horizontal
+If applying all the simetries I will multiply the data by: 6*2*2=24
+--->
