@@ -80,8 +80,6 @@ clear goal. This allows to gain greater knowledge of the problem on each iterati
 On a first step I'm going to develop or download from the forum hard-coded agents. This will
 allow to implement the ranking system.
 
-### Links
-
 ### Development
 
 #### Agents from the forum
@@ -145,7 +143,33 @@ in the best way for our model.
 - Compute useful features
 - Save the whole episode for later training
 
+### Study Kaggle Environments library
+
+Let's first have a look at the library to better undertand how to deal with it.
+
+There is an [OpenAI Gym interface](https://github.com/Kaggle/kaggle-environments#training) that may
+be useful to simplify training.
+
+The other option is to use [step](https://github.com/Kaggle/kaggle-environments#stepping) on the environment.
+However this requires to compute the action for all the agents.
+
 ### Development
+
+```bash
+Agent
+    Model
+    State or GameInterface
+        update(observation, configuration)
+        render(state)
+        history()
+        reset()
+```
+
+Do everything with tests.
+
+I could pretrain the Q function using matches from the best hard-coded agent.
+
+Start with a single processor, leave the process of paralellization for the future.
 
 ### Results
 
