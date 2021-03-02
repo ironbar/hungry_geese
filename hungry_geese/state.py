@@ -1,5 +1,7 @@
 import numpy as np
 
+from kaggle_environments.envs.hungry_geese.hungry_geese import adjacent_positions
+
 class GameState():
     """
     Class that stores all observations and creates a game state made of the board
@@ -18,12 +20,12 @@ class GameState():
         """
         if self.history:
             self.rewards.append(get_reward(observation, self.history[-1], configuration))
-        self.history.append(observation)
         if self.configuration is None:
             self.configuration = configuration
 
         self.features.append(self._compute_features(observation))
         self.boards.append(self._create_board(observation))
+        self.history.append(observation)
 
     def render_board(self, board):
         """
@@ -41,6 +43,21 @@ class GameState():
             render += np.expand_dims(goose, axis=2).astype(np.uint8)*idx_to_color[idx]
 
         render += np.expand_dims(board[:, :, -1], axis=2).astype(np.uint8)*255
+        return render
+
+    def render_next_movements(self, board):
+        """
+        Creates an rgb image to show the avaible next movements, our agent is the red one
+        """
+        render = np.zeros(board.shape[:2] + (3,), dtype=np.uint8)
+        idx_to_color = {
+            0: np.array([85, 0, 0], dtype=np.uint8),
+            1: np.array([0, 85, 0], dtype=np.uint8),
+            2: np.array([0, 0, 85], dtype=np.uint8),
+            3: np.array([0, 85, 85], dtype=np.uint8),
+        }
+        for idx in range(4):
+            render += np.expand_dims(board[:, :, idx*4+3], axis=2).astype(np.uint8)*idx_to_color[idx]
         return render
 
     def reset(self):
@@ -82,9 +99,13 @@ class GameState():
                 flat_board[goose[0], idx*4] = 1 # head
                 flat_board[goose[-1], idx*4+1] = 1 # tail
                 flat_board[goose, idx*4+2] = 1 # body
-                # TODO: next movements
+                next_movements = adjacent_positions(goose[0], rows=self.configuration['rows'], columns=self.configuration['columns'])
+                flat_board[next_movements, idx*4+3] = 1 # next movements
+                if self.history:
+                    flat_board[self.history[-1]['geese'][idx][0], idx*4+3] = 0 # previous head position
         flat_board[observation['food'], -1] = 1
         board = np.reshape(flat_board, (self.configuration['rows'], self.configuration['columns'], len(observation['geese'])*4+1))
+        #TODO: egocentric view
         return board
 
 def get_steps_to_shrink(step, hunger_rate):
