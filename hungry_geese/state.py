@@ -7,12 +7,14 @@ class GameState():
     Class that stores all observations and creates a game state made of the board
     and some features that are useful for planning
     """
-    def __init__(self):
+    def __init__(self, egocentric_board=True):
         self.history = []
         self.boards = []
         self.features = []
         self.rewards = []
+        self.actions = []
         self.configuration = None
+        self.egocentric_board = egocentric_board
 
     def update(self, observation, configuration):
         """
@@ -26,6 +28,9 @@ class GameState():
         self.features.append(self._compute_features(observation))
         self.boards.append(self._create_board(observation))
         self.history.append(observation)
+
+    def add_action(self, action):
+        self.actions.append(action)
 
     def render_board(self, board):
         """
@@ -68,6 +73,7 @@ class GameState():
         self.boards = []
         self.features = []
         self.rewards = []
+        self.actions = []
         self.configuration = None
 
     def _compute_features(self, observation):
@@ -105,7 +111,11 @@ class GameState():
                     flat_board[self.history[-1]['geese'][idx][0], idx*4+3] = 0 # previous head position
         flat_board[observation['food'], -1] = 1
         board = np.reshape(flat_board, (self.configuration['rows'], self.configuration['columns'], len(observation['geese'])*4+1))
-        #TODO: egocentric view
+        if self.egocentric_board:
+            goose = observation['geese'][observation['index']]
+            if goose:
+                head_position = get_head_position(goose[0], self.configuration['columns'])
+                board = make_board_egocentric(board, head_position)
         return board
 
 def get_steps_to_shrink(step, hunger_rate):
@@ -149,3 +159,41 @@ def _get_terminal_reward(current_observation, previous_observation):
 
 def get_n_geese_alive(geese):
     return len([goose for goose in geese if goose])
+
+def make_board_egocentric(board, head_position):
+    """ Modifies the view of the board so the goose head is at the center"""
+    row, col = head_position
+    board = center_rows(row, board)
+    board = center_cols(col, board)
+    return board
+
+def center_rows(row, board):
+    new_board = board.copy()
+    half = board.shape[0]//2
+    if row < half:
+        offset = half - row
+        new_board[offset:] = board[:-offset]
+        new_board[:offset] = board[-offset:]
+    elif row > half:
+        offset = row - half
+        new_board[:-offset] = board[offset:]
+        new_board[-offset:] = board[:offset]
+    return new_board
+
+def center_cols(col, board):
+    new_board = board.copy()
+    half = board.shape[1]//2
+    if col < half:
+        offset = half - col
+        new_board[:, offset:] = board[:, :-offset]
+        new_board[:, :offset] = board[:, -offset:]
+    elif col > half:
+        offset = col - half
+        new_board[:, :-offset] = board[:, offset:]
+        new_board[:, -offset:] = board[:, :offset]
+    return new_board
+
+def get_head_position(head, columns):
+    row = head//columns
+    col = head - row*columns
+    return row, col
