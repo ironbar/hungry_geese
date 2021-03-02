@@ -23,12 +23,25 @@ class GameState():
             self.configuration = configuration
 
         self.features.append(self._compute_features(observation))
+        self.boards.append(self._create_board(observation))
 
-    def render(self, board):
+    def render_board(self, board):
         """
-        Creates an rgb image to show the state of the board
+        Creates an rgb image to show the state of the board, our agent is the red one
         """
-        pass
+        render = np.zeros(board.shape[:2] + (3,), dtype=np.uint8)
+        idx_to_color = {
+            0: np.array([85, 0, 0], dtype=np.uint8),
+            1: np.array([0, 85, 0], dtype=np.uint8),
+            2: np.array([0, 0, 85], dtype=np.uint8),
+            3: np.array([0, 85, 85], dtype=np.uint8),
+        }
+        for idx in range(4):
+            goose = board[:, :, idx*4] - board[:, :, idx*4+1] + board[:, :, idx*4+2]*2
+            render += np.expand_dims(goose, axis=2).astype(np.uint8)*idx_to_color[idx]
+
+        render += np.expand_dims(board[:, :, -1], axis=2).astype(np.uint8)*255
+        return render
 
     def reset(self):
         """
@@ -54,6 +67,25 @@ class GameState():
         features[6:9] = [len(observation['geese'][observation['index']]) - \
             len(goose) for idx, goose in enumerate(observation['geese']) if idx != observation['index']]
         return features
+
+    def _create_board(self, observation):
+        """
+        The board will have information about: head, body, tail and next movements
+        Information will be separated in different channels so it is already high level
+        """
+        flat_board = np.zeros((self.configuration['rows']*self.configuration['columns'],
+                              len(observation['geese'])*4+1))
+        goose_order = [observation['index']] + [idx for idx in range(4) if idx != observation['index']]
+        for idx in goose_order:
+            goose = observation['geese'][idx]
+            if goose:
+                flat_board[goose[0], idx*4] = 1 # head
+                flat_board[goose[-1], idx*4+1] = 1 # tail
+                flat_board[goose, idx*4+2] = 1 # body
+                # TODO: next movements
+        flat_board[observation['food'], -1] = 1
+        board = np.reshape(flat_board, (self.configuration['rows'], self.configuration['columns'], len(observation['geese'])*4+1))
+        return board
 
 def get_steps_to_shrink(step, hunger_rate):
     return hunger_rate - step % hunger_rate
