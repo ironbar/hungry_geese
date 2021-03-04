@@ -28,6 +28,7 @@ class GameState():
         self.features.append(self._compute_features(observation))
         self.boards.append(self._create_board(observation))
         self.history.append(observation)
+        return self.boards[-1], self.features[-1]
 
     def add_action(self, action):
         self.actions.append(action)
@@ -77,17 +78,27 @@ class GameState():
         self.configuration = None
 
     def _compute_features(self, observation):
-        features = np.zeros(2 + 2*len(observation['geese']) - 1)
+        """
+        Features convention
+        -------------------
+        0 -> step
+        1 -> steps_to_shrink
+        2 -> steps_to_die
+        3:2 + n_geese -> step to die of the other goose
+        2 + n_geese:1 + 2*n_geese -> len diff with the other goose
+        """
+        n_geese = len(observation['geese'])
+        features = np.zeros(2 + 2*n_geese - 1)
         features[0] = get_steps_to_end(observation['step'], self.configuration['episodeSteps'])
         features[1] = get_steps_to_shrink(
             observation['step'], self.configuration['hunger_rate'])
         features[2] = get_steps_to_die(
             observation['step'], self.configuration['hunger_rate'],
             len(observation['geese'][observation['index']]))
-        features[3:6] = [get_steps_to_die(
+        features[3:2 + n_geese] = [get_steps_to_die(
             observation['step'], self.configuration['hunger_rate'],
             len(goose)) for idx, goose in enumerate(observation['geese']) if idx != observation['index']]
-        features[6:9] = [len(observation['geese'][observation['index']]) - \
+        features[2 + n_geese:1 + 2*n_geese] = [len(observation['geese'][observation['index']]) - \
             len(goose) for idx, goose in enumerate(observation['geese']) if idx != observation['index']]
         return features
 
@@ -95,6 +106,12 @@ class GameState():
         """
         The board will have information about: head, body, tail and next movements
         Information will be separated in different channels so it is already high level
+
+        Channels convention
+        --------------------
+        There are 4*n_geese + 1 channels
+        For each goose we have 4 channels: head, tail, body, next movements
+        The last channel is the location of the food
         """
         flat_board = np.zeros((self.configuration['rows']*self.configuration['columns'],
                               len(observation['geese'])*4+1))
@@ -163,11 +180,11 @@ def get_n_geese_alive(geese):
 def make_board_egocentric(board, head_position):
     """ Modifies the view of the board so the goose head is at the center"""
     row, col = head_position
-    board = center_rows(row, board)
-    board = center_cols(col, board)
+    board = _center_board_rows(row, board)
+    board = _center_board_cols(col, board)
     return board
 
-def center_rows(row, board):
+def _center_board_rows(row, board):
     new_board = board.copy()
     half = board.shape[0]//2
     if row < half:
@@ -180,7 +197,7 @@ def center_rows(row, board):
         new_board[-offset:] = board[:offset]
     return new_board
 
-def center_cols(col, board):
+def _center_board_cols(col, board):
     new_board = board.copy()
     half = board.shape[1]//2
     if col < half:
