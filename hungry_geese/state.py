@@ -7,7 +7,7 @@ class GameState():
     Class that stores all observations and creates a game state made of the board
     and some features that are useful for planning
     """
-    def __init__(self, egocentric_board=True):
+    def __init__(self, egocentric_board=True, normalize_features=True):
         self.history = []
         self.boards = []
         self.features = []
@@ -15,6 +15,7 @@ class GameState():
         self.actions = []
         self.configuration = None
         self.egocentric_board = egocentric_board
+        self.normalize_features = normalize_features
 
     def update(self, observation, configuration):
         """
@@ -88,7 +89,7 @@ class GameState():
         2 + n_geese:1 + 2*n_geese -> len diff with the other goose
         """
         n_geese = len(observation['geese'])
-        features = np.zeros(2 + 2*n_geese - 1)
+        features = np.zeros(2 + 2*n_geese - 1, dtype=np.float32)
         features[0] = get_steps_to_end(observation['step'], self.configuration['episodeSteps'])
         features[1] = get_steps_to_shrink(
             observation['step'], self.configuration['hunger_rate'])
@@ -100,6 +101,10 @@ class GameState():
             len(goose)) for idx, goose in enumerate(observation['geese']) if idx != observation['index']]
         features[2 + n_geese:1 + 2*n_geese] = [len(observation['geese'][observation['index']]) - \
             len(goose) for idx, goose in enumerate(observation['geese']) if idx != observation['index']]
+        if self.normalize_features:
+            features[0] /= self.configuration['episodeSteps']
+            features[1] /= self.configuration['hunger_rate']
+            features[2:2+n_geese] /= self.configuration['episodeSteps']
         return features
 
     def _create_board(self, observation):
@@ -114,7 +119,7 @@ class GameState():
         The last channel is the location of the food
         """
         flat_board = np.zeros((self.configuration['rows']*self.configuration['columns'],
-                              len(observation['geese'])*4+1))
+                              len(observation['geese'])*4+1), dtype=np.float32)
         goose_order = [observation['index']] + [idx for idx in range(4) if idx != observation['index']]
         for idx in goose_order:
             goose = observation['geese'][idx]
