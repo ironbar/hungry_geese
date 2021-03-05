@@ -5,3 +5,5 @@ notebooks/.ipynb_checkpoints/*
 .vscode/*
 .eggs/*
 .pytest_cache/*
+.coverage
+htmlcov/*
