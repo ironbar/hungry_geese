@@ -22,3 +22,6 @@ class ConstantAgentWithState():
         self.state.update(observation, configuration)
         self.state.add_action(self.action)
         return self.action
+
+    def reset(self):
+        self.state.reset()
