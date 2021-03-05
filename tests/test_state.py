@@ -24,6 +24,7 @@ def test_steps_to_shrink(step, hunger_rate, steps_to_shrink):
     (39, 40, 2, 41),
     (39, 40, 3, 81),
     (19, 20, 1, 1),
+    (19, 20, 0, 0),
 ])
 def test_steps_to_die(step, hunger_rate, goose_len, steps_to_die):
     assert steps_to_die == get_steps_to_die(step, hunger_rate, goose_len)
