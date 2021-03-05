@@ -118,9 +118,10 @@ class GameState():
         For each goose we have 4 channels: head, tail, body, next movements
         The last channel is the location of the food
         """
-        flat_board = np.zeros((self.configuration['rows']*self.configuration['columns'],
-                              len(observation['geese'])*4+1), dtype=np.float32)
-        goose_order = [observation['index']] + [idx for idx in range(4) if idx != observation['index']]
+        n_geese = len(observation['geese'])
+        flat_board = np.zeros((self.configuration['rows']*self.configuration['columns'], n_geese*4+1),
+                              dtype=np.float32)
+        goose_order = [observation['index']] + [idx for idx in range(n_geese) if idx != observation['index']]
         for idx in goose_order:
             goose = observation['geese'][idx]
             if goose:
