@@ -1,6 +1,7 @@
 import pytest
 from kaggle_environments import make
 
+from hungry_geese.state import GameState
 from hungry_geese.agents import SuicideAgent, ConstantAgentWithState, ConstantAgent
 
 @pytest.mark.parametrize('steps_to_suicide', [2, 3, 4])
@@ -24,3 +25,21 @@ def test_game_state_two_geese(steps_to_suicide):
     assert len(ret) == steps_to_suicide + 2
     assert len(agent.state.rewards) == steps_to_suicide + 1
     assert agent.state.rewards[-1] == 1
+
+def test_render_board():
+    env = make('hungry_geese', configuration=dict(episodeSteps=200))
+    trainer = env.train([None, "greedy"])
+    configuration = env.configuration
+    obs = trainer.reset()
+    state = GameState()
+    board, features = state.update(obs, configuration)
+    state.render_board(board)
+
+def test_render_next_movements():
+    env = make('hungry_geese', configuration=dict(episodeSteps=200))
+    trainer = env.train([None, "greedy"])
+    configuration = env.configuration
+    obs = trainer.reset()
+    state = GameState()
+    board, features = state.update(obs, configuration)
+    state.render_next_movements(board)

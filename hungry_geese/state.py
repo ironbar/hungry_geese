@@ -38,6 +38,7 @@ class GameState():
         """
         Creates an rgb image to show the state of the board, our agent is the red one
         """
+        n_geese = board.shape[-1]//4
         render = np.zeros(board.shape[:2] + (3,), dtype=np.uint8)
         idx_to_color = {
             0: np.array([85, 0, 0], dtype=np.uint8),
@@ -45,7 +46,7 @@ class GameState():
             2: np.array([0, 0, 85], dtype=np.uint8),
             3: np.array([0, 85, 85], dtype=np.uint8),
         }
-        for idx in range(4):
+        for idx in range(n_geese):
             goose = board[:, :, idx*4] - board[:, :, idx*4+1] + board[:, :, idx*4+2]*2
             render += np.expand_dims(goose, axis=2).astype(np.uint8)*idx_to_color[idx]
 
@@ -56,6 +57,7 @@ class GameState():
         """
         Creates an rgb image to show the avaible next movements, our agent is the red one
         """
+        n_geese = board.shape[-1]//4
         render = np.zeros(board.shape[:2] + (3,), dtype=np.uint8)
         idx_to_color = {
             0: np.array([85, 0, 0], dtype=np.uint8),
@@ -63,7 +65,7 @@ class GameState():
             2: np.array([0, 0, 85], dtype=np.uint8),
             3: np.array([0, 85, 85], dtype=np.uint8),
         }
-        for idx in range(4):
+        for idx in range(n_geese):
             render += np.expand_dims(board[:, :, idx*4+3], axis=2).astype(np.uint8)*idx_to_color[idx]
         return render
 
