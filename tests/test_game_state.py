@@ -11,15 +11,16 @@ def test_game_state_two_geese(steps_to_suicide):
     ret = env.run([agent, SuicideAgent('NORTH', steps_to_suicide=steps_to_suicide)])
     # Give the last state as input
     agent(ret[-1][0]['observation'], env.configuration)
-    [print(step) for step in ret]
     assert len(ret) == steps_to_suicide + 2
     assert len(agent.state.rewards) == steps_to_suicide + 1
     assert agent.state.rewards[-1] == 1
 
-    # agent.reset()
-    # ret = env.run([agent, SuicideAgent('NORTH', steps_to_suicide=steps_to_suicide)])
-    # # Give the last state as input
-    # agent(ret[-1][0]['observation'], env.configuration)
-    # assert len(ret) == steps_to_suicide + 2
-    # assert len(agent.state.rewards) == steps_to_suicide + 1
-    # assert agent.state.rewards[-1] == 1
+    agent.reset()
+    env.reset(num_agents=2)
+    ret = env.run([agent, SuicideAgent('NORTH', steps_to_suicide=steps_to_suicide)])
+    # Give the last state as input
+    agent(ret[-1][0]['observation'], env.configuration)
+    [print(step) for step in ret]
+    assert len(ret) == steps_to_suicide + 2
+    assert len(agent.state.rewards) == steps_to_suicide + 1
+    assert agent.state.rewards[-1] == 1
