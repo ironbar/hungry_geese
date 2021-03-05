@@ -11,6 +11,7 @@ random.seed(7)
 def test_epsilon_agent_makes_legal_actions(action, epsilon):
     agent_base = ConstantAgent(action)
     agent = EpsilonAgent(agent_base, epsilon)
+    agent.reset()
     actions = [agent(None, None) for _ in range(100)]
     for previous_action, action in zip(actions[:-1], actions[1:]):
         assert action != opposite_action(previous_action)
