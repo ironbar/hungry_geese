@@ -19,3 +19,6 @@ coverage: clean-pyc
 
 clean: clean-pyc
 	rm -r htmlcov .coverage
+
+env-export:
+	conda env export > environment.yml
