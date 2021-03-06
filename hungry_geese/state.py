@@ -1,6 +1,9 @@
 import numpy as np
+import tensorflow.keras as keras
 
 from kaggle_environments.envs.hungry_geese.hungry_geese import adjacent_positions
+
+from hungry_geese.definitions import ACTION_TO_IDX
 
 class GameState():
     """
@@ -82,6 +85,26 @@ class GameState():
         self.rewards = []
         self.actions = []
         self.configuration = None
+
+    def prepare_data_for_training(self):
+        """
+        Returns
+        --------
+        boards: np.array
+            Boards of the episode with shape (steps, 7, 11, 17) when 4 players
+        features: np.array
+            Features of the episode with shape (steps, 9) when 4 players
+        actions: np.array
+            Actions took during the episode with one hot encoding (steps, 4)
+        rewards: np.array
+            Cumulative reward received during the episode (steps,)
+        """
+        cumulative_reward = np.cumsum(self.rewards[::-1])[::-1]
+        actions = np.array(self.actions[:-1])
+        for action, idx in ACTION_TO_IDX.items():
+            actions[actions == action] = idx
+        actions = keras.utils.to_categorical(actions, num_classes=4)
+        return np.array(self.boards[:-1]), np.array(self.features[:-1]), actions, cumulative_reward
 
     def _compute_features(self, observation):
         """
