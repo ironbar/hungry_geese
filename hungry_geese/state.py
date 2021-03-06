@@ -34,6 +34,9 @@ class GameState():
     def add_action(self, action):
         self.actions.append(action)
 
+    def update_last_action(self, action):
+        self.actions[-1] = action
+
     def render_board(self, board):
         """
         Creates an rgb image to show the state of the board, our agent is the red one

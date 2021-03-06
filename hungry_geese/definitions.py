@@ -11,3 +11,12 @@ SUBMISSION_PATH = os.path.join(DATASET_PATH, 'data', 'submission_format.csv')
 LIBRARY_PATH = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 """
 import os
+
+ACTIONS = ['NORTH', 'EAST', 'SOUTH', 'WEST']
+
+ACTION_TO_IDX = {
+    'NORTH': 0,
+    'EAST': 1,
+    'SOUTH': 2,
+    'WEST': 3,
+}

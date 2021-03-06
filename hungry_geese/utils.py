@@ -4,11 +4,11 @@ Functions commonly used in the challenge
 import time
 import random
 
+from hungry_geese.definitions import ACTIONS
+
 def get_timestamp():
     time_stamp = time.strftime("%Y_%m_%d_%H_%M_%S")
     return time_stamp
-
-ACTIONS = ['NORTH', 'EAST', 'SOUTH', 'WEST']
 
 def opposite_action(action):
     action_to_opposite = {
