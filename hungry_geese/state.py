@@ -1,5 +1,6 @@
 import numpy as np
 import tensorflow.keras as keras
+from itertools import permutations
 
 from kaggle_environments.envs.hungry_geese.hungry_geese import adjacent_positions
 
@@ -248,3 +249,49 @@ def get_head_position(head, columns):
     row = head//columns
     col = head - row*columns
     return row, col
+
+def vertical_simmetry(data):
+    boards = data[0][:, ::-1].copy()
+    actions = data[2].copy()
+    # change north by south and viceversa
+    actions[:, 0] = data[2][:, 2]
+    actions[:, 2] = data[2][:, 0]
+    return boards, data[1], actions, data[-1]
+
+def horizontal_simmetry(data):
+    boards = data[0][:, :, ::-1].copy()
+    actions = data[2].copy()
+    # change west by east and viceversa
+    actions[:, 1] = data[2][:, 3]
+    actions[:, 3] = data[2][:, 1]
+    return boards, data[1], actions, data[-1]
+
+def player_simmetry(data, new_positions):
+    boards = data[0].copy()
+    features = data[1].copy()
+    for old_idx, new_idx in enumerate(new_positions):
+        boards[:, :, :, 4*(new_idx+1):4*(new_idx+2)] = data[0][:, :, :, 4*(old_idx+1):4*(old_idx+2)]
+        features[:, 3+new_idx] = data[1][:, 3+old_idx]
+        features[:, 6+new_idx] = data[1][:, 6+old_idx]
+    return boards, features, data[2], data[3]
+
+def apply_all_simetries(data):
+    all_data = []
+
+    data_vertical = vertical_simmetry(data)
+    data_horizontal = horizontal_simmetry(data)
+    data_both = vertical_simmetry(horizontal_simmetry(data))
+    all_permutations = list(permutations([0, 1, 2]))
+    for new_positions in all_permutations:
+        all_data.append(player_simmetry(data, new_positions))
+        all_data.append(player_simmetry(data_vertical, new_positions))
+        all_data.append(player_simmetry(data_horizontal, new_positions))
+        all_data.append(player_simmetry(data_both, new_positions))
+    return combine_data(all_data)
+
+def combine_data(all_data):
+    boards = np.concatenate([_data[0] for _data in all_data])
+    features = np.concatenate([_data[1] for _data in all_data])
+    actions = np.concatenate([_data[2] for _data in all_data])
+    rewards = np.concatenate([_data[3] for _data in all_data])
+    return boards, features, actions, rewards

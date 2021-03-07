@@ -3,6 +3,7 @@ Functions commonly used in the challenge
 """
 import time
 import random
+import tensorflow as tf
 
 from hungry_geese.definitions import ACTIONS
 
@@ -28,3 +29,7 @@ def random_legal_action(previous_action):
         options = ACTIONS
     action = random.choice(options)
     return action
+
+def log_to_tensorboard(key, value, epoch, tensorboard_writer):
+    with tensorboard_writer.as_default():
+        tf.summary.scalar(key, value, step=epoch)

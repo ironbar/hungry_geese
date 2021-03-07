@@ -1,0 +1,8 @@
+epochs: 100
+episodes_per_epoch: 10
+model_params: null
+epsilon: 0.1
+other_agents:
+  - greedy
+  - greedy
+  - greedy
