@@ -55,3 +55,13 @@ def test_agent_makes_constant_actions(train_info, model):
     actions = [agent(*train_info) for _ in range(100)]
     _, counts = np.unique(actions, return_counts=True)
     assert counts[0] == 100
+
+@pytest.mark.parametrize('model', [FakeModelOhe()])
+def test_agent_reset(train_info, model):
+    agent = QValueAgent(model)
+    agent.reset()
+    assert not agent.state.history
+    agent(*train_info)
+    assert agent.state.history
+    agent.reset()
+    assert not agent.state.history
