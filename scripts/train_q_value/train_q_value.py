@@ -30,7 +30,9 @@ def train_q_value(args):
 
     model = simple_model()
     training_model = create_model_for_training(model)
-    training_model.compile(optimizer='Adam', loss='mean_squared_error')
+    optimizer = tf.keras.optimizers.get(conf.get('optimizer', 'Adam'))
+    optimizer.learning_rate = learning_rate=conf.get('learning_rate', 1e-3)
+    training_model.compile(optimizer=optimizer, loss='mean_squared_error')
     base_agent = QValueAgent(model)
     epsilon_agent = EpsilonAgent(base_agent, epsilon=conf['epsilon'])
 

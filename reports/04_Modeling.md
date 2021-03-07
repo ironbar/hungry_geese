@@ -171,6 +171,11 @@ I could pretrain the Q function using matches from the best hard-coded agent.
 
 Start with a single processor, leave the process of paralellization for the future.
 
+#### Playing against random agents
+
+To verify that the model is able to learn I'm going to play against random agents. It should be
+easy to learn to beat them.
+
 ### Results
 
 <!---
