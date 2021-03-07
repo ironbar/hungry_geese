@@ -14,6 +14,7 @@ from hungry_geese.utils import log_to_tensorboard, log_configuration_to_tensorbo
 from hungry_geese.agents import EpsilonAgent, QValueAgent
 from hungry_geese.model import simple_model, create_model_for_training
 from hungry_geese.state import combine_data, apply_all_simetries
+from hungry_geese.definitions import ACTIONS
 
 def main(args=None):
     if args is None:
@@ -48,12 +49,16 @@ def train_q_value(args):
 
         log_to_tensorboard('mean_reward', get_mean_reward(agent_data), epoch, tensorboard_writer)
         log_to_tensorboard('mean_steps', get_mean_steps(agent_data), epoch, tensorboard_writer)
-        log_to_tensorboard('epsilon_mean_reward', get_mean_reward(epsilon_data), epoch, tensorboard_writer)
-        log_to_tensorboard('epsilon_mean_steps', get_mean_steps(epsilon_data), epoch, tensorboard_writer)
+        log_to_tensorboard('epsilon/mean_reward', get_mean_reward(epsilon_data), epoch, tensorboard_writer)
+        log_to_tensorboard('epsilon/mean_steps', get_mean_steps(epsilon_data), epoch, tensorboard_writer)
         log_to_tensorboard('episodes', (epoch+1)*conf['episodes_per_epoch'], epoch, tensorboard_writer)
 
-        all_data = agent_data + epsilon_data
-        all_data = combine_data(all_data)
+        agent_data = combine_data(agent_data)
+        epsilon_data = combine_data(epsilon_data)
+        log_action_distribution(agent_data[2], epoch, tensorboard_writer)
+        log_action_distribution(epsilon_data[2], epoch, tensorboard_writer, prefix='epsilon_')
+
+        all_data = combine_data([agent_data, epsilon_data])
         all_data = apply_all_simetries(all_data)
         ret = training_model.fit(x=all_data[:3], y=all_data[-1], epochs=1, verbose=False)
         log_to_tensorboard('loss', ret.history['loss'][-1], epoch, tensorboard_writer)
@@ -74,6 +79,12 @@ def get_mean_reward(all_data):
 def get_mean_steps(all_data):
     steps = [len(data[3]) for data in all_data]
     return np.mean(steps)
+
+def log_action_distribution(actions, epoch, tensorboard_writer, prefix=''):
+    action_distribution = np.sum(actions, axis=0)
+    action_distribution /= np.sum(action_distribution)
+    for idx, name in enumerate(ACTIONS):
+        log_to_tensorboard('%saction_distribution/%s' % (prefix, name), action_distribution[idx], epoch, tensorboard_writer)
 
 
 def parse_args(args):
