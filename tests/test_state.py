@@ -4,7 +4,7 @@ from kaggle_environments import make
 from hungry_geese.state import (
     get_steps_to_shrink, get_steps_to_die, get_steps_to_end, get_n_geese_alive,
     get_reward, GameState, horizontal_simmetry, vertical_simmetry, player_simmetry,
-    permutations, combine_data
+    permutations, combine_data, apply_all_simetries
 )
 
 @pytest.mark.parametrize('step, hunger_rate, steps_to_shrink',  [
@@ -94,3 +94,7 @@ def test_player_simmetry_is_invertible(train_data, new_positions):
 def test_combine_data(train_data):
     new_data = combine_data([train_data, train_data])
     assert len(new_data[0]) == len(train_data[0])*2
+
+def test_apply_all_simetries(train_data):
+    new_data = apply_all_simetries(train_data)
+    assert len(new_data[0]) == len(train_data[0])*24
