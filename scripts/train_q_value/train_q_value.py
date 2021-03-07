@@ -32,7 +32,7 @@ def train_q_value(args):
     epsilon_agent = EpsilonAgent(base_agent, epsilon=0.1)
 
     env = make('hungry_geese', configuration=dict(episodeSteps=200))
-    trainer = env.train([None, "greedy", "greedy", "greedy"])
+    trainer = env.train([None] + conf['other_agents'])
     configuration = env.configuration
 
     tensorboard_writer = tf.summary.create_file_writer(os.path.dirname(os.path.realpath(args.config_path)))
