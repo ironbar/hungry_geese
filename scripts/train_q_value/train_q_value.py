@@ -64,6 +64,10 @@ def train_q_value(args):
         all_data = apply_all_simetries(all_data)
         ret = training_model.fit(x=all_data[:3], y=all_data[-1], epochs=1, verbose=False)
         log_to_tensorboard('loss', ret.history['loss'][-1], epoch, tensorboard_writer)
+        if not epoch % conf.get('save_period', 1):
+            model.save(os.path.join(os.path.dirname(os.path.realpath(args.config_path)), 'model.h5'), include_optimizer=False)
+        if not epoch % conf.get('checkpoint_period', 100):
+            model.save(os.path.join(os.path.dirname(os.path.realpath(args.config_path)), 'checkpoint_%04d.h5' % epoch), include_optimizer=False)
 
 def play_episode(agent, trainer, configuration):
     agent.reset()

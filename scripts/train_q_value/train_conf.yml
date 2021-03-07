@@ -1,8 +1,12 @@
-epochs: 100
-episodes_per_epoch: 10
+epochs: 1000
+episodes_per_epoch: 20
 model_params: null
 epsilon: 0.1
+optimizer: Adam
+learning_rate: 1.e-5
+save_period: 2
+checkpoint_period: 100
 other_agents:
   - greedy
   - greedy
-  - greedy
+  - /mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/forum/agents/random_plus.py
