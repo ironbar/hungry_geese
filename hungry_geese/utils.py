@@ -33,3 +33,8 @@ def random_legal_action(previous_action):
 def log_to_tensorboard(key, value, epoch, tensorboard_writer):
     with tensorboard_writer.as_default():
         tf.summary.scalar(key, value, step=epoch)
+
+def log_configuration_to_tensorboard(configuration, tensorboard_writer, step=0):
+    with tensorboard_writer.as_default():
+        for key, value in configuration.items():
+            tf.summary.text(key, str(value), step=step)

@@ -10,7 +10,7 @@ os.environ['CUDA_VISIBLE_DEVICES'] = ''
 from kaggle_environments import make
 import tensorflow as tf
 
-from hungry_geese.utils import log_to_tensorboard
+from hungry_geese.utils import log_to_tensorboard, log_configuration_to_tensorboard
 from hungry_geese.agents import EpsilonAgent, QValueAgent
 from hungry_geese.model import simple_model, create_model_for_training
 from hungry_geese.state import combine_data, apply_all_simetries
@@ -24,18 +24,19 @@ def main(args=None):
 def train_q_value(args):
     with open(args.config_path, 'r') as f:
         conf = yaml.safe_load(f)
+    tensorboard_writer = tf.summary.create_file_writer(os.path.dirname(os.path.realpath(args.config_path)))
+    log_configuration_to_tensorboard(conf, tensorboard_writer)
 
     model = simple_model()
     training_model = create_model_for_training(model)
     training_model.compile(optimizer='Adam', loss='mean_squared_error')
     base_agent = QValueAgent(model)
-    epsilon_agent = EpsilonAgent(base_agent, epsilon=0.1)
+    epsilon_agent = EpsilonAgent(base_agent, epsilon=conf['epsilon'])
 
     env = make('hungry_geese', configuration=dict(episodeSteps=200))
     trainer = env.train([None] + conf['other_agents'])
     configuration = env.configuration
 
-    tensorboard_writer = tf.summary.create_file_writer(os.path.dirname(os.path.realpath(args.config_path)))
     initial_epoch = conf.get('initial_epoch', 0)
     for epoch in tqdm(range(initial_epoch, initial_epoch + conf['epochs']), desc='Epochs'):
         agent_data, epsilon_data = [], []
@@ -44,10 +45,12 @@ def train_q_value(args):
             agent_data.append(base_agent.state.prepare_data_for_training())
             play_episode(epsilon_agent, trainer, configuration)
             epsilon_data.append(base_agent.state.prepare_data_for_training())
+
         log_to_tensorboard('mean_reward', get_mean_reward(agent_data), epoch, tensorboard_writer)
         log_to_tensorboard('mean_steps', get_mean_steps(agent_data), epoch, tensorboard_writer)
         log_to_tensorboard('epsilon_mean_reward', get_mean_reward(epsilon_data), epoch, tensorboard_writer)
         log_to_tensorboard('epsilon_mean_steps', get_mean_steps(epsilon_data), epoch, tensorboard_writer)
+        log_to_tensorboard('episodes', (epoch+1)*conf['episodes_per_epoch'], epoch, tensorboard_writer)
 
         all_data = agent_data + epsilon_data
         all_data = combine_data(all_data)
