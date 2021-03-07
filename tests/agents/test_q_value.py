@@ -65,3 +65,16 @@ def test_agent_reset(train_info, model):
     assert agent.state.history
     agent.reset()
     assert not agent.state.history
+
+def test_agent_update_previous_action(train_info):
+    agent = QValueAgent(FakeModelOhe())
+    agent(*train_info)
+
+    assert agent.previous_action == 'NORTH'
+    assert agent.state.actions[-1] == 'NORTH'
+    assert len(agent.state.actions) == 1
+
+    agent.update_previous_action('SOUTH')
+    assert agent.previous_action == 'SOUTH'
+    assert agent.state.actions[-1] == 'SOUTH'
+    assert len(agent.state.actions) == 1
