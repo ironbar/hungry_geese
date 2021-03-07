@@ -34,14 +34,6 @@ class FakeModelRandom():
     def predict(self, *args, **kwargs):
         return np.random.uniform(size=(1, 4))
 
-@pytest.fixture
-def train_info():
-    env = make('hungry_geese', configuration=dict(episodeSteps=200))
-    trainer = env.train([None, "greedy", "greedy", "greedy"])
-    configuration = env.configuration
-    obs = trainer.reset()
-    return obs, configuration
-
 def test_agent_reset(train_info):
     base_agent = QValueAgent(FakeModelRandom())
     agent = EpsilonAgent(base_agent, 1)

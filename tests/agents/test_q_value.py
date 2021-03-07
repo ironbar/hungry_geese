@@ -1,7 +1,6 @@
 import pytest
 import random
 import numpy as np
-from kaggle_environments import make
 
 from hungry_geese.agents import QValueAgent
 from hungry_geese.utils import ACTIONS, opposite_action
@@ -22,13 +21,6 @@ class FakeModelOhe():
         ohe[0, 0] = 1
         return ohe
 
-@pytest.fixture
-def train_info():
-    env = make('hungry_geese', configuration=dict(episodeSteps=200))
-    trainer = env.train([None, "greedy", "greedy", "greedy"])
-    configuration = env.configuration
-    obs = trainer.reset()
-    return obs, configuration
 
 @pytest.mark.parametrize('model', [FakeModelRandom(), FakeModelUniform(), FakeModelOhe()])
 def test_agent_makes_legal_actions(train_info, model):
