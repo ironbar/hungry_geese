@@ -31,7 +31,8 @@ def train_q_value(args):
     model = simple_model()
     training_model = create_model_for_training(model)
     optimizer = tf.keras.optimizers.get(conf.get('optimizer', 'Adam'))
-    optimizer.learning_rate = learning_rate=conf.get('learning_rate', 1e-3)
+    learning_rate_schedule = lambda x: np.interp(x, conf['learning_rate']['epochs'], conf['learning_rate']['values'])
+
     training_model.compile(optimizer=optimizer, loss='mean_squared_error')
     base_agent = QValueAgent(model)
     epsilon_agent = EpsilonAgent(base_agent, epsilon=conf['epsilon'])
@@ -42,6 +43,8 @@ def train_q_value(args):
 
     initial_epoch = conf.get('initial_epoch', 0)
     for epoch in tqdm(range(initial_epoch, initial_epoch + conf['epochs']), desc='Epochs'):
+        optimizer.learning_rate = learning_rate_schedule(epoch)
+        log_to_tensorboard('lr', learning_rate_schedule(epoch), epoch, tensorboard_writer)
         agent_data, epsilon_data = [], []
         for episode in range(conf['episodes_per_epoch']//2):
             play_episode(base_agent, trainer, configuration)
