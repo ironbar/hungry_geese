@@ -12,6 +12,7 @@ def simple_model():
 
     mlp_input = keras.layers.concatenate([board_encoder, features_input])
     output = keras.layers.Dense(16, activation='relu')(mlp_input)
+    output = keras.layers.Dense(16, activation='tanh')(output)
     output = keras.layers.Dense(4, activation='linear')(output)
 
     model = keras.models.Model(inputs=[board_input, features_input], outputs=output)
