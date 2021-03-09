@@ -15,10 +15,7 @@ class RandomPlus:
         self.last_action = action
         return action.name
 
-cached_random_plus_agents = {}
+random_plus_agent = RandomPlus()
 
 def agent(obs, config):
-    index = obs["index"]
-    if index not in cached_random_plus_agents:
-        cached_random_plus_agents[index] = RandomPlus()
-    return cached_random_plus_agents[index]()
+    return random_plus_agent()

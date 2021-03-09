@@ -155,6 +155,8 @@ However this requires to compute the action for all the agents.
 
 ### Development
 
+#### Design
+
 ```bash
 Agent
     Model
@@ -174,9 +176,14 @@ Start with a single processor, leave the process of paralellization for the futu
 #### Playing against random agents
 
 To verify that the model is able to learn I'm going to play against random agents. It should be
-easy to learn to beat them.
+easy to learn to beat them. I have been able to train a model that apparently beats the random
+agent consistently, however it is struggling to beat the greedy player.
+
+Let's evaluate the agents to verify this.
 
 ### Results
+
+- It is hard to train a model to learn the Q value function, learning rate is critical
 
 <!---
 Simetries: order of the other agents, vertical, horizontal
