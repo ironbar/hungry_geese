@@ -28,7 +28,12 @@ def train_q_value(args):
     tensorboard_writer = tf.summary.create_file_writer(os.path.dirname(os.path.realpath(args.config_path)))
     log_configuration_to_tensorboard(conf, tensorboard_writer)
 
-    model = simple_model()
+    model_path = os.path.join(os.path.dirname(os.path.realpath(args.config_path)), 'model.h5')
+    if os.path.exists(model_path):
+        print('Loading model')
+        model = tf.keras.models.load_model(model_path)
+    else:
+        model = simple_model()
     training_model = create_model_for_training(model)
     optimizer = tf.keras.optimizers.get(conf.get('optimizer', 'Adam'))
     learning_rate_schedule = lambda x: np.interp(x, conf['learning_rate']['epochs'], conf['learning_rate']['values'])

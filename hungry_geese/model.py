@@ -2,8 +2,8 @@ import tensorflow.keras as keras
 
 def simple_model():
     # TODO: parametric model
-    board_input = keras.layers.Input((7, 11, 17))
-    features_input = keras.layers.Input((9,))
+    board_input = keras.layers.Input((7, 11, 17), name='board_input')
+    features_input = keras.layers.Input((9,), name='features_input')
 
     board_encoder = board_input
     for _ in range(3):
@@ -19,7 +19,7 @@ def simple_model():
     return model
 
 def create_model_for_training(model):
-    input_mask = keras.layers.Input((4,))
+    input_mask = keras.layers.Input((4,), name='input_mask')
     output = keras.backend.sum(input_mask*model.output, axis=-1)
     new_model = keras.models.Model(inputs=(model.inputs + [input_mask]), outputs=output)
     return new_model
