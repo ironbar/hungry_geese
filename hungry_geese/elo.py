@@ -9,15 +9,16 @@ class EloRanking():
 
         Parameters
         -----------
-        agents : list of str
-            Name of the agents that will be used in the ranking
+        initial_ranking : dict
+            Dictionary that matches the name of the agents to the initial elo scores. If unknown
+            it is recommended to start with 1000.
         agents_to_update  : set of str
             Name of the agents that can be updated, agents not in the list will have fixed score
         k : float
             Elo speed constant, it seems that 8 is ok for our problem
         verbose : bool
         """
-        self.ranking = initial_ranking
+        self.ranking = {key: [value] for key, value in initial_ranking.items()}
         self.agents_to_update = agents_to_update
         self.k = k
         self.verbose = verbose

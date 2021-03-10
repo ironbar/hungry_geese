@@ -181,6 +181,15 @@ agent consistently, however it is struggling to beat the greedy player.
 
 Let's evaluate the agents to verify this.
 
+We have been able to train a model that is better than random. When it plays against 3 random
+agents it beats them consistently, however that's not the case when more than one q value agents
+are used, which suggest collisions.
+
+This raises concerns also about evaluating agents when there is no upper bound. We get very
+optmistic scores.
+
+#### Playing against greedy agents
+
 ### Results
 
 - It is hard to train a model to learn the Q value function, learning rate is critical
