@@ -8,15 +8,15 @@ from hungry_geese.utils import ACTIONS, opposite_action
 random.seed(7)
 
 class FakeModelUniform():
-    def predict(self, *args, **kwargs):
+    def predict_step(self, *args, **kwargs):
         return np.ones((1, 4))
 
 class FakeModelRandom():
-    def predict(self, *args, **kwargs):
+    def predict_step(self, *args, **kwargs):
         return np.random.uniform(size=(1, 4))
 
 class FakeModelOhe():
-    def predict(self, *args, **kwargs):
+    def predict_step(self, *args, **kwargs):
         ohe = np.zeros((1, 4))
         ohe[0, 0] = 1
         return ohe

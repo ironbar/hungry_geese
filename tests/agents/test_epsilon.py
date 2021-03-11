@@ -31,7 +31,7 @@ def test_epsilon_agent_random_action_probability(action, epsilon, expected_actio
     assert expected_action_probability == pytest.approx(matches/n_runs, abs=5e-2)
 
 class FakeModelRandom():
-    def predict(self, *args, **kwargs):
+    def predict_step(self, *args, **kwargs):
         return np.random.uniform(size=(1, 4))
 
 def test_agent_reset(train_info):

@@ -12,7 +12,7 @@ class QValueAgent():
 
     def __call__(self, observation, configuration):
         board, features = self.state.update(observation, configuration)
-        q_value = self.model.predict([np.expand_dims(board, axis=0), np.expand_dims(features, axis=0)])[0]
+        q_value = np.array(self.model.predict_step([np.expand_dims(board, axis=0), np.expand_dims(features, axis=0)])[0])
         action = ACTIONS[self.select_action(q_value)]
         self.previous_action = action
         self.state.add_action(action)
