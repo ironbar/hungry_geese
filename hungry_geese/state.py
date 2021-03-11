@@ -101,7 +101,7 @@ class GameState():
             Cumulative reward received during the episode (steps,)
         """
         cumulative_reward = np.cumsum(self.rewards[::-1])[::-1]
-        actions = np.array(self.actions[:-1])
+        actions = np.array(self.actions[:len(cumulative_reward)])
         for action, idx in ACTION_TO_IDX.items():
             actions[actions == action] = idx
         actions = keras.utils.to_categorical(actions, num_classes=4)

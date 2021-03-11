@@ -188,11 +188,18 @@ are used, which suggest collisions.
 This raises concerns also about evaluating agents when there is no upper bound. We get very
 optmistic scores.
 
+The truth ranking is around 866 points compared to 706 by random pluss and 981 by greedy.
+
 #### Playing against greedy agents
+
+First experiments reveal a score almost identical to the greedy agent, however when using more than one agent the score drops to 905 compared to 981 of the greedy agent.
 
 ### Results
 
 - It is hard to train a model to learn the Q value function, learning rate is critical
+- The Q function is not easy. It depends on the agents we are facing and on the policy of our agent.
+Moreover learning the reward function is not easy, because we have to predict what the other agents
+are going to do. So this is an argument in favour of learning a policy instead of a value function
 
 <!---
 Simetries: order of the other agents, vertical, horizontal
