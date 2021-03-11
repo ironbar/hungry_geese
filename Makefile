@@ -13,7 +13,7 @@ test: clean-pyc
 	python setup.py test
 
 coverage: clean-pyc
-	coverage run -m pytest tests
+	coverage run -m --source hungry_geese pytest tests
 	coverage html --omit="tests/*,*/__init__.py"
 	xdg-open  htmlcov/index.html
 
