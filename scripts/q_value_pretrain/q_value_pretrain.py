@@ -8,6 +8,7 @@ import logging
 
 from kaggle_environments import make
 import tensorflow as tf
+from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 
 from hungry_geese.model import simple_model, create_model_for_training
 from hungry_geese.callbacks import (
@@ -39,10 +40,10 @@ def train_q_value(args):
     training_model = create_model_for_training(model)
     optimizer = tf.keras.optimizers.get(conf.get('optimizer', 'Adam'))
     optimizer.learning_rate = conf.get('learning_rate', 1e-3)
-    training_model.compile('Adam', loss='mean_squared_error')
+    training_model.compile(optimizer, loss='mean_squared_error')
     log_ram_usage()
 
-    callbacks = create_callbacks(conf, model_dir, conf['fit_params']['epochs'])
+    callbacks = create_callbacks(conf['callbacks'], model_dir, conf['fit_params']['epochs'])
     log_ram_usage()
 
     training_model.fit(
@@ -76,29 +77,19 @@ def create_callbacks(conf, model_folder, max_epochs):
         LogGPU(),
         LogETA(max_epochs),
         tensorboard_callback,
-        # TensorBoardExtended(profile_batch=0, log_dir=os.path.join(model_folder, 'logs')),
         GarbageCollector(),
     ]
-    # if 'security_checkpoint_period' in conf:
-    #     callbacks.append(PeriodModelCheckpoint(
-    #         model_folder,
-    #         period=conf['security_checkpoint_period']))
-    # if 'PeriodModelCheckpoint' in conf:
-    #     logger.info('Adding PeriodModelCheckpoint with parameters: %s' % \
-    #                  str(conf['PeriodModelCheckpoint']))
-    #     callbacks.append(PeriodModelCheckpoint(
-    #         folder=model_folder, **conf['PeriodModelCheckpoint']))
-    # if 'ReduceLROnPlateau' in conf:
-    #     callbacks.append(ReduceLROnPlateau(**conf['ReduceLROnPlateau']))
-    # if 'EarlyStopping' in conf:
-    #     logger.info('Adding EarlyStopping callback')
-    #     callbacks.append(EarlyStopping(**conf['EarlyStopping']))
-    # for key in conf:
-    #     if 'ModelCheckpoint' in key and not 'PeriodModelCheckpoint' in key:
-    #         logger.info('Adding %s callback' % key)
-    #         conf[key]['filepath'] = os.path.join(model_folder, conf[key]['filename'])
-    #         conf[key].pop('filename')
-    #         callbacks.append(ModelCheckpoint(**conf[key]))
+    if 'ReduceLROnPlateau' in conf:
+        callbacks.append(ReduceLROnPlateau(**conf['ReduceLROnPlateau']))
+    if 'EarlyStopping' in conf:
+        logger.info('Adding EarlyStopping callback')
+        callbacks.append(EarlyStopping(**conf['EarlyStopping']))
+    for key in conf:
+        if 'ModelCheckpoint' in key and not 'PeriodModelCheckpoint' in key:
+            logger.info('Adding %s callback' % key)
+            conf[key]['filepath'] = os.path.join(model_folder, conf[key]['filename'])
+            conf[key].pop('filename')
+            callbacks.append(ModelCheckpoint(**conf[key]))
     return callbacks
 
 
