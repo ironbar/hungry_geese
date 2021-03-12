@@ -2,12 +2,15 @@
 Functions commonly used in the challenge
 """
 import os
+import logging
 import psutil
 import time
 import random
 import tensorflow as tf
 
 from hungry_geese.definitions import ACTIONS
+
+logger = logging.getLogger(__name__)
 
 def get_timestamp():
     time_stamp = time.strftime("%Y_%m_%d_%H_%M_%S")
@@ -51,3 +54,11 @@ def get_ram_usage_and_available():
 
 def get_cpu_usage():
     return psutil.cpu_percent()
+
+def log_ram_usage():
+    ram_usage, ram_available = get_ram_usage_and_available()
+    #logger.info('ram_memory', used=round(ram_usage, 2), available=round(ram_available, 2))
+    logger.info('ram_memory used: %.2f GB\t available: %.2f GB' % (ram_usage, ram_available))
+
+def configure_logging():
+    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')

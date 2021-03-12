@@ -200,6 +200,16 @@ class LogGPU(Callback):
             self._gpu_temperature[gpu_idx].append(temperature)
 
 
+class GarbageCollector(Callback):
+    """
+    Simple callback that collects garbage at the end of each epoch
+    """
+    # pylint: disable=W0613, R0201
+
+    def on_epoch_end(self, epoch, logs=None):
+        gc.collect()
+
+
 def get_available_gpu_index():
     """ Returns a list with the available gpu index """
     # pylint: disable= R1705
