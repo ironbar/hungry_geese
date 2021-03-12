@@ -10,6 +10,9 @@ from kaggle_environments import make
 import tensorflow as tf
 
 from hungry_geese.model import simple_model, create_model_for_training
+from hungry_geese.callbacks import (
+    LogEpochTime, LogLearningRate, LogRAM, LogCPU, LogGPU, LogETA
+)
 
 def main(args=None):
     if args is None:
@@ -31,9 +34,7 @@ def train_q_value(args):
     train_data = load_data(conf['train'])
     val_data = load_data(conf['val'])
 
-    callbacks = [
-        tf.keras.callbacks.TensorBoard(log_dir=os.path.join(model_dir, 'logs'), profile_batch=0)
-    ]
+    callbacks = create_callbacks(conf, model_dir, conf['fit_params']['epochs'])
 
     training_model.fit(
         x=train_data[:3], y=train_data[-1], validation_data=(val_data[:3], val_data[-1]),
@@ -43,6 +44,50 @@ def load_data(filepath):
     logging.info('loading %s' % filepath)
     data = np.load(filepath)
     return data['boards'], data['features'], data['actions'], data['rewards']
+
+def create_callbacks(conf, model_folder, max_epochs):
+    """
+    Params
+    -------
+    conf : dict
+        Configuration of the callbacks from the train configuration file
+    """
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(
+        log_dir=os.path.join(model_folder, 'logs'), profile_batch=0)
+    tensorboard_callback._supports_tf_logs = False
+    callbacks = [
+        LogEpochTime(),
+        LogLearningRate(),
+        LogRAM(),
+        LogCPU(),
+        LogGPU(),
+        LogETA(max_epochs),
+        tensorboard_callback,
+        # TensorBoardExtended(profile_batch=0, log_dir=os.path.join(model_folder, 'logs')),
+        # GarbageCollector(),
+    ]
+    # if 'security_checkpoint_period' in conf:
+    #     callbacks.append(PeriodModelCheckpoint(
+    #         model_folder,
+    #         period=conf['security_checkpoint_period']))
+    # if 'PeriodModelCheckpoint' in conf:
+    #     logger.info('Adding PeriodModelCheckpoint with parameters: %s' % \
+    #                  str(conf['PeriodModelCheckpoint']))
+    #     callbacks.append(PeriodModelCheckpoint(
+    #         folder=model_folder, **conf['PeriodModelCheckpoint']))
+    # if 'ReduceLROnPlateau' in conf:
+    #     callbacks.append(ReduceLROnPlateau(**conf['ReduceLROnPlateau']))
+    # if 'EarlyStopping' in conf:
+    #     logger.info('Adding EarlyStopping callback')
+    #     callbacks.append(EarlyStopping(**conf['EarlyStopping']))
+    # for key in conf:
+    #     if 'ModelCheckpoint' in key and not 'PeriodModelCheckpoint' in key:
+    #         logger.info('Adding %s callback' % key)
+    #         conf[key]['filepath'] = os.path.join(model_folder, conf[key]['filename'])
+    #         conf[key].pop('filename')
+    #         callbacks.append(ModelCheckpoint(**conf[key]))
+    return callbacks
+
 
 
 def parse_args(args):

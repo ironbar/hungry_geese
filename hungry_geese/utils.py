@@ -1,6 +1,8 @@
 """
 Functions commonly used in the challenge
 """
+import os
+import psutil
 import time
 import random
 import tensorflow as tf
@@ -38,3 +40,14 @@ def log_configuration_to_tensorboard(configuration, tensorboard_writer, step=0):
     with tensorboard_writer.as_default():
         for key, value in configuration.items():
             tf.summary.text(key, str(value), step=step)
+
+def get_ram_usage_and_available():
+    process = psutil.Process(os.getpid())
+    ram_usage = process.memory_info().rss/1e9
+    stats = psutil.virtual_memory()  # returns a named tuple
+    ram_available = getattr(stats, 'available')/1e9
+    return ram_usage, ram_available
+
+
+def get_cpu_usage():
+    return psutil.cpu_percent()
