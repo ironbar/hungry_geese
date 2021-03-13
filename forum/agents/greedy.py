@@ -45,8 +45,13 @@ class GreedyAgent:
                 (self.last_action is None or action != self.last_action.opposite())
             )
         }
-
-        action = min(actions, key=actions.get) if any(actions) else random.choice([action for action in Action])
+        if any(actions):
+            action = min(actions, key=actions.get)
+        else:
+            if self.last_action is not None:
+                action = random.choice([action for action in Action if action != self.last_action.opposite()])
+            else:
+                action = random.choice([action for action in Action])
         self.last_action = action
         return action.name
 
