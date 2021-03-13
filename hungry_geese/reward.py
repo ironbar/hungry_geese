@@ -4,6 +4,8 @@ import numpy as np
 def get_reward(current_observation, previous_observation, configuration, reward_name):
     if reward_name == 'sparse_reward':
         return get_sparse_reward(current_observation, previous_observation, configuration)
+    elif reward_name.startswith('ranking_reward'):
+        return get_ranking_reward(current_observation, reward_name)
     else:
         raise KeyError(reward_name)
 
@@ -11,6 +13,15 @@ def get_reward(current_observation, previous_observation, configuration, reward_
 def get_cumulative_reward(rewards, reward_name):
     if reward_name == 'sparse_reward':
         return np.cumsum(rewards[::-1])[::-1]
+    elif reward_name.startswith('ranking_reward'):
+        window_size = int(reward_name.split('_')[3])
+        rewards = np.array(rewards)
+        for idx in range(1, window_size):
+            rewards[:-window_size] += rewards[window_size:]
+        rewards[:-window_size] /= window_size
+        for idx in range(2, window_size):
+            rewards[-idx] /= idx
+        return rewards
     else:
         raise KeyError(reward_name)
 

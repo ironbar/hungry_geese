@@ -1,7 +1,8 @@
 import pytest
+import numpy as np
 
 from hungry_geese.reward import (
-    get_n_geese_alive, get_sparse_reward, get_ranking_reward
+    get_n_geese_alive, get_sparse_reward, get_ranking_reward, get_cumulative_reward
 )
 
 @pytest.mark.parametrize('geese, n',  [
@@ -36,3 +37,12 @@ def test_sparse_reward(current_observation, previous_observation, configuration,
 ])
 def test_ranking_reward(current_observation, reward_name, reward):
     assert reward == get_ranking_reward(current_observation, reward_name)
+
+@pytest.mark.parametrize("rewards, reward_name, cumulative_reward",[
+    (np.ones(5), 'ranking_reward_-1_2', np.ones(5)),
+    (np.ones(5), 'ranking_reward_-1_3', np.ones(5)),
+    (np.ones(5), 'ranking_reward_-1_1', np.ones(5)),
+    (np.ones(5), 'ranking_reward_-1_4', np.ones(5)),
+])
+def test_get_cumulative_reward(rewards, reward_name, cumulative_reward):
+    assert (cumulative_reward == get_cumulative_reward(rewards, reward_name)).all()
