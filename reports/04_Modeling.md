@@ -306,6 +306,16 @@ Problems of this approach:
 - The more we look into the future the more complex the function becomes, we could probably probe this
 experimentally
 
+#### Implementation
+
+Since it is possible that I could develop new reward functions in the future, I think I should make
+a function that receives a keyword and computes reward using that keyword. This will take a little
+bit of more work today, but will save time in the future.
+
+#### Pretraining on random agents game
+
+Let's start by pretraining on random agents game to see how different the training loss and the agent's performance is when training on this loss.
+
 ### Results
 
 <!---
