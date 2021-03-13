@@ -10,7 +10,7 @@ clean-pyc:
 	find . -name '__pycache__' -exec rm -fr {} +
 
 test: clean-pyc
-	python setup.py test
+	pytest tests -x --disable-warnings
 
 coverage: clean-pyc
 	coverage run -m --source hungry_geese pytest tests

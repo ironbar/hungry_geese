@@ -312,6 +312,8 @@ Since it is possible that I could develop new reward functions in the future, I 
 a function that receives a keyword and computes reward using that keyword. This will take a little
 bit of more work today, but will save time in the future.
 
+I will call the new reward the `ranking_reward`, and the previous existing reward the `sparse_reward`.
+
 #### Pretraining on random agents game
 
 Let's start by pretraining on random agents game to see how different the training loss and the agent's performance is when training on this loss.

@@ -1,11 +1,18 @@
 import numpy as np
 
-def get_reward(current_observation, previous_observation, configuration):
-    """ Computes the reward for the previous action"""
+
+def get_reward(current_observation, previous_observation, configuration, reward_name):
+    if reward_name == 'sparse_reward':
+        return get_sparse_reward(current_observation, previous_observation, configuration)
+    else:
+        raise KeyError(reward_name)
+
+def get_sparse_reward(current_observation, previous_observation, configuration):
+    """ Computes the sparse reward for the previous action"""
     if current_observation['geese'][current_observation['index']]:
         is_terminal_step = current_observation['step'] == configuration['episodeSteps'] -1
         if is_terminal_step:
-            return _get_terminal_reward(current_observation, previous_observation)
+            return _get_terminal_sparse_reward(current_observation, previous_observation)
         else:
             # Give reward if some geese has died
             return get_n_geese_alive(previous_observation['geese']) - get_n_geese_alive(current_observation['geese'])
@@ -13,7 +20,7 @@ def get_reward(current_observation, previous_observation, configuration):
         # Then the agent has died
         return -1
 
-def _get_terminal_reward(current_observation, previous_observation):
+def _get_terminal_sparse_reward(current_observation, previous_observation):
     reward = get_n_geese_alive(previous_observation['geese']) - get_n_geese_alive(current_observation['geese'])
     goose_len = len(current_observation['geese'][current_observation['index']])
     for idx, goose in enumerate(current_observation['geese']):
@@ -30,5 +37,8 @@ def _get_terminal_reward(current_observation, previous_observation):
 def get_n_geese_alive(geese):
     return len([goose for goose in geese if goose])
 
-def get_cumulative_reward(rewards):
-    return np.cumsum(rewards[::-1])[::-1]
+def get_cumulative_reward(rewards, reward_name):
+    if reward_name == 'sparse_reward':
+        return np.cumsum(rewards[::-1])[::-1]
+    else:
+        raise KeyError(reward_name)
