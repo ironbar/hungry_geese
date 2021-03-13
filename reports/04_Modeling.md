@@ -190,9 +190,20 @@ optmistic scores.
 
 The truth ranking is around 866 points compared to 706 by random pluss and 981 by greedy.
 
+![q value learning against random agents](res/2021-03-13-08-39-03.png)
+
 #### Playing against greedy agents
 
-First experiments reveal a score almost identical to the greedy agent, however when using more than one agent the score drops to 905 compared to 981 of the greedy agent.
+First experiments reveal a score almost identical to the greedy agent, however when using more than
+one agent the score drops to 905 compared to 981 of the greedy agent.
+
+![q value learning against greedy agents](res/2021-03-13-08-41-16.png)
+
+#### Pretrain the agent on random agent games
+
+#### Pretrain the agent on epsilon greedy agent games
+
+#### Pretrain the agent on greedy agent games
 
 ### Results
 
