@@ -239,10 +239,28 @@ are going to do. So this is an argument in favour of learning a policy instead o
 
 At the start of the game there is no information to predict the Q value function.
 
+![undefinied Q value function at the start](res/2021-03-13-09-25-33.png)
+
 I sugggest to update the reward to be the ranking of the goose on the next step. I have to better
 think about propagation of the information backwards.
 
+## Iteration 3. Exploring other reward functions
+
+### Goal
+
+The goal is to see if using other reward functions may simplify the Q value function and thus enable
+learning from agents such as the greedy agent.
+
+### Development
+
+### Results
+
 <!---
-Simetries: order of the other agents, vertical, horizontal
-If applying all the simetries I will multiply the data by: 6*2*2=24
+## Iteration n. title
+
+### Goal
+
+### Development
+
+### Results
 --->
