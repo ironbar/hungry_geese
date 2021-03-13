@@ -223,6 +223,8 @@ In the plot above it is seen that the loss achieved when pretraining on random a
 around 1.32, while for epsilon greedy agent game is 1.66 and 1.68 for greedy games. This may
 suggest that the more advanced the agent the more complex the Q value function.
 
+I have tried increasing the agent capacity but there was overfit to the train set.
+
 ### Results
 
 - It is hard to train a model to learn the Q value function, learning rate is critical
