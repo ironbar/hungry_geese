@@ -45,6 +45,8 @@ def test_ranking_reward(current_observation, reward_name, reward):
     (np.ones(5), 'ranking_reward_-1_4', np.ones(5)),
     (np.array([1., 1, 3]), 'ranking_reward_-1_3', np.array([5/3, 2, 3])),
     (np.array([1., 0, 2]), 'ranking_reward_-1_3', np.array([1, 1, 2])),
+    (np.ones(1), 'ranking_reward_-1_1', np.ones(1)),
+    (np.ones(1), 'ranking_reward_-1_2', np.ones(1)),
 ])
 def test_get_cumulative_reward(rewards, reward_name, cumulative_reward):
     assert (cumulative_reward == get_cumulative_reward(rewards, reward_name)).all()

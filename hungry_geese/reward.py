@@ -15,6 +15,8 @@ def get_cumulative_reward(rewards, reward_name):
         return np.cumsum(rewards[::-1])[::-1]
     elif reward_name.startswith('ranking_reward'):
         window_size = int(reward_name.split('_')[3])
+        if window_size > len(rewards):
+            window_size = len(rewards)
         cumulative_reward = np.array(rewards)
         for idx in range(1, window_size):
             cumulative_reward[:-idx] += rewards[idx:]
