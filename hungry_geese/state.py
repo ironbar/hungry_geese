@@ -12,7 +12,7 @@ class GameState():
     Class that stores all observations and creates a game state made of the board
     and some features that are useful for planning
     """
-    def __init__(self, egocentric_board=True, normalize_features=True):
+    def __init__(self, egocentric_board=True, normalize_features=True, reward_name='sparse_reward'):
         self.history = []
         self.boards = []
         self.features = []
@@ -21,13 +21,14 @@ class GameState():
         self.configuration = None
         self.egocentric_board = egocentric_board
         self.normalize_features = normalize_features
+        self.reward_name = reward_name
 
     def update(self, observation, configuration):
         """
         Saves the observation to history and returns the state of the game
         """
         if self.history:
-            self.rewards.append(get_reward(observation, self.history[-1], configuration))
+            self.rewards.append(get_reward(observation, self.history[-1], configuration, self.reward_name))
         if self.configuration is None:
             self.configuration = configuration
 
@@ -101,7 +102,7 @@ class GameState():
         rewards: np.array
             Cumulative reward received during the episode (steps,)
         """
-        cumulative_reward = get_cumulative_reward(self.rewards)
+        cumulative_reward = get_cumulative_reward(self.rewards, self.reward_name)
         actions = np.array(self.actions[:len(cumulative_reward)])
         for action, idx in ACTION_TO_IDX.items():
             actions[actions == action] = idx

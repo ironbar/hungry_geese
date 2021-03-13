@@ -1,6 +1,6 @@
 import pytest
 
-from hungry_geese.reward import get_n_geese_alive, get_reward
+from hungry_geese.reward import get_n_geese_alive, get_sparse_reward
 
 @pytest.mark.parametrize('geese, n',  [
     ([[1], [1]], 2),
@@ -22,5 +22,5 @@ def test_get_n_geese_alive(geese, n):
     ({'geese': [[1], [2, 3], [3, 4], [4, 5]], 'index':0, 'step': 5}, {'geese': [[1], [2], [3], [4]]}, {'episodeSteps': 6}, 0),
     ({'geese': [[], [2], [3], [4]], 'index':0, 'step': 5}, {'geese': [[1], [2], [3], [4]]}, {'episodeSteps': 6}, -1),
 ])
-def test_reward(current_observation, previous_observation, configuration, reward):
-    assert reward == get_reward(current_observation, previous_observation, configuration)
+def test_sparse_reward(current_observation, previous_observation, configuration, reward):
+    assert reward == get_sparse_reward(current_observation, previous_observation, configuration)
