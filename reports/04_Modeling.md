@@ -253,6 +253,59 @@ learning from agents such as the greedy agent.
 
 ### Development
 
+#### Current reward function
+
+Let's remember how the current reward function is implemented:
+
+- If the step is not terminal the reward is zero except some of the other geese has died in the previous
+step. For each dead goose the reward is 1.
+- If the step is terminal then if the goose has died the reward is -1, otherwise it gets 1 for each
+living smaller goose and 0.5 for living goose of the same size.
+
+That is the definition of the reward for each state. The cumulative reward is computed by summing
+all the received rewards without any discount factor. The maximum cumulative reward is 3, and the minimun
+is -1.
+
+The problems of this reward function are:
+
+- The relation between the state of the game and the reward is undefined. For example at the start of
+the game there is no way to know which agent will win so there is no option to predict the reward.
+- The problem above leads to have a very big upper bound when learning the q value function
+
+The advantages of this reward function are:
+
+- Maximizing this reward function ensures that we maximize the expected score on the leaderboard
+- Reward is given when other goose die, which encourages to be a goose killer
+
+#### Alternative reward function proposal
+
+To solve the problem of being undefined I propose the following reward
+
+- If the step is not terminal give a reward that is the current ranking of the agent. Give a reward
+of 1 for each smaller goose and 0.5 for each goose of the same size
+- If the step is terminal and the agent dies then give a negative reward, otherwise return the ranking
+as defined above
+
+If I compute the cumulative reward by summing without discount factor then again I will have an undefined
+Q value function, since the result of the episode is unknown. Instead I propose to use a discount factor,
+or even better a moving average. The advantage of the moving average is that we get good bounds for the
+cumulative reward, which does not happen when using discount factor. The size of the window will be a
+parameter to tune, the bigger the size of the window the more the model will have to look to the future.
+
+Advantages of this approach:
+
+- If we use a window of 1 (do not look into the future) then the q value function is much clearly defined.
+Of course there is some uncertainty because movements of the other players are unknown, but it is a much
+more simpler function than the previous one
+- There are still incentives to kill other gooses if they have the same size or bigger than us
+- There are incentives to be bigger than the other gooses, but not to be much bigger
+- Maximizing this function also leads to maximizing leaderboard score
+
+Problems of this approach:
+
+- The more we look into the future the more complex the function becomes, we could probably probe this
+experimentally
+
 ### Results
 
 <!---
