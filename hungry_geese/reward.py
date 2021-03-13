@@ -15,13 +15,13 @@ def get_cumulative_reward(rewards, reward_name):
         return np.cumsum(rewards[::-1])[::-1]
     elif reward_name.startswith('ranking_reward'):
         window_size = int(reward_name.split('_')[3])
-        rewards = np.array(rewards)
+        cumulative_reward = np.array(rewards)
         for idx in range(1, window_size):
-            rewards[:-window_size] += rewards[window_size:]
-        rewards[:-window_size] /= window_size
-        for idx in range(2, window_size):
-            rewards[-idx] /= idx
-        return rewards
+            cumulative_reward[:-idx] += rewards[idx:]
+        cumulative_reward[:-window_size] /= window_size
+        for idx in range(2, window_size + 1):
+            cumulative_reward[-idx] /= idx
+        return cumulative_reward
     else:
         raise KeyError(reward_name)
 
