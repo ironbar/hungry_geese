@@ -314,6 +314,13 @@ bit of more work today, but will save time in the future.
 
 I will call the new reward the `ranking_reward`, and the previous existing reward the `sparse_reward`.
 
+The new `ranking_reward` has two parameters:
+
+- Reward when the agent dies
+- Window for averaging rewards (backwards averaging)
+
+I'm going to supply both parameters in the name, for example `ranking_reward_-1_2` means the reward when dying will be -1 and the window for averaging will be 2. They are probably related.
+
 #### Pretraining on random agents game
 
 Let's start by pretraining on random agents game to see how different the training loss and the agent's performance is when training on this loss.

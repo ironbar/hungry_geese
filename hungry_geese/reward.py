@@ -7,6 +7,14 @@ def get_reward(current_observation, previous_observation, configuration, reward_
     else:
         raise KeyError(reward_name)
 
+
+def get_cumulative_reward(rewards, reward_name):
+    if reward_name == 'sparse_reward':
+        return np.cumsum(rewards[::-1])[::-1]
+    else:
+        raise KeyError(reward_name)
+
+
 def get_sparse_reward(current_observation, previous_observation, configuration):
     """ Computes the sparse reward for the previous action"""
     if current_observation['geese'][current_observation['index']]:
@@ -19,6 +27,7 @@ def get_sparse_reward(current_observation, previous_observation, configuration):
     else:
         # Then the agent has died
         return -1
+
 
 def _get_terminal_sparse_reward(current_observation, previous_observation):
     reward = get_n_geese_alive(previous_observation['geese']) - get_n_geese_alive(current_observation['geese'])
@@ -34,11 +43,23 @@ def _get_terminal_sparse_reward(current_observation, previous_observation):
                 reward += 0.5
     return reward
 
+
 def get_n_geese_alive(geese):
     return len([goose for goose in geese if goose])
 
-def get_cumulative_reward(rewards, reward_name):
-    if reward_name == 'sparse_reward':
-        return np.cumsum(rewards[::-1])[::-1]
-    else:
-        raise KeyError(reward_name)
+def get_ranking_reward(current_observation, reward_name):
+    geese_len = [len(goose) for goose in current_observation['geese']]
+    goose_len = geese_len[current_observation['index']]
+    if goose_len: # then it is alive
+        reward = 0
+        for idx, other_goose_len in enumerate(geese_len):
+            if idx == current_observation['index']:
+                continue
+            if other_goose_len < goose_len:
+                reward += 1
+            elif other_goose_len == goose_len:
+                reward += 0.5
+        return reward
+    else: # the agent has died
+        return float(reward_name.split('_')[2])
+
