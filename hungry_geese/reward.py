@@ -1,3 +1,4 @@
+import numpy as np
 
 def get_reward(current_observation, previous_observation, configuration):
     """ Computes the reward for the previous action"""
@@ -28,3 +29,6 @@ def _get_terminal_reward(current_observation, previous_observation):
 
 def get_n_geese_alive(geese):
     return len([goose for goose in geese if goose])
+
+def get_cumulative_reward(rewards):
+    return np.cumsum(rewards[::-1])[::-1]

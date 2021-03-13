@@ -5,7 +5,7 @@ from itertools import permutations
 from kaggle_environments.envs.hungry_geese.hungry_geese import adjacent_positions
 
 from hungry_geese.definitions import ACTION_TO_IDX
-from hungry_geese.reward import get_reward
+from hungry_geese.reward import get_reward, get_cumulative_reward
 
 class GameState():
     """
@@ -101,7 +101,7 @@ class GameState():
         rewards: np.array
             Cumulative reward received during the episode (steps,)
         """
-        cumulative_reward = np.cumsum(self.rewards[::-1])[::-1]
+        cumulative_reward = get_cumulative_reward(self.rewards)
         actions = np.array(self.actions[:len(cumulative_reward)])
         for action, idx in ACTION_TO_IDX.items():
             actions[actions == action] = idx
