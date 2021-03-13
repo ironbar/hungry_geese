@@ -17,12 +17,12 @@ def get_cumulative_reward(rewards, reward_name):
         window_size = int(reward_name.split('_')[3])
         if window_size > len(rewards):
             window_size = len(rewards)
-        cumulative_reward = np.array(rewards)
+        cumulative_reward = np.array(rewards, dtype=np.float32)
+        mask = np.ones_like(cumulative_reward)
         for idx in range(1, window_size):
             cumulative_reward[:-idx] += rewards[idx:]
-        cumulative_reward[:-window_size] /= window_size
-        for idx in range(2, window_size + 1):
-            cumulative_reward[-idx] /= idx
+            mask[:-idx] += 1
+        cumulative_reward /= mask
         return cumulative_reward
     else:
         raise KeyError(reward_name)
