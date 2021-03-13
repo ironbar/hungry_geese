@@ -201,9 +201,27 @@ one agent the score drops to 905 compared to 981 of the greedy agent.
 
 #### Pretrain the agent on random agent games
 
-#### Pretrain the agent on epsilon greedy agent games
+The bigger the train dataset the better, but gains are diminishing.
 
-#### Pretrain the agent on greedy agent games
+By pretraining the model on this data the agent is able to achieve an impressive elo score of around
+1140, much better than random (706) and greedy (981). So we were able to outperform the iterative
+q value learning simply by pretraining.
+
+![pretrained agent on random agent games](res/2021-03-13-08-56-42.png)
+
+#### Pretrain the agent on epsilon-greedy or greedy agent games
+
+After the success of pretraining on random agents it seemed logical to try with greedy or epsilon-greedy
+agents pretrain. However the resulting agents are no better than the greedy agent.
+
+My explanation for this behaviour is that the Q value function becomes too complex and the model is
+unable to learn it.
+
+![comparison of losses](res/2021-03-13-09-02-04.png)
+
+In the plot above it is seen that the loss achieved when pretraining on random agent games is
+around 1.32, while for epsilon greedy agent game is 1.66 and 1.68 for greedy games. This may
+suggest that the more advanced the agent the more complex the Q value function.
 
 ### Results
 
@@ -211,6 +229,16 @@ one agent the score drops to 905 compared to 981 of the greedy agent.
 - The Q function is not easy. It depends on the agents we are facing and on the policy of our agent.
 Moreover learning the reward function is not easy, because we have to predict what the other agents
 are going to do. So this is an argument in favour of learning a policy instead of a value function
+- We have been able to train an agent to become better than the random agent
+- We have been able to pretrain an agent on random agents game to become better than greedy agent
+- We have discovered that current Q value function is very complex and difficult to learn
+
+### Arguments against Q value function
+
+At the start of the game there is no information to predict the Q value function.
+
+I sugggest to update the reward to be the ranking of the goose on the next step. I have to better
+think about propagation of the information backwards.
 
 <!---
 Simetries: order of the other agents, vertical, horizontal
