@@ -36,7 +36,8 @@ def train_q_value(args):
 
     log_ram_usage()
     logger.info('creating model')
-    model = simple_model()
+    model = simple_model(**conf['model_params'])
+    model.summary()
     training_model = create_model_for_training(model)
     optimizer = tf.keras.optimizers.get(conf.get('optimizer', 'Adam'))
     optimizer.learning_rate = conf.get('learning_rate', 1e-3)
