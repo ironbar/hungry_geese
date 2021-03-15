@@ -325,6 +325,65 @@ I'm going to supply both parameters in the name, for example `ranking_reward_-1_
 
 Let's start by pretraining on random agents game to see how different the training loss and the agent's performance is when training on this loss.
 
+| model                                                     | elo score | validation loss |
+|-----------------------------------------------------------|-----------|-----------------|
+| Baseline_sparse_reward_80000                              | 1140      | ~1.3            |
+| 03_ranking_reward_-1_1_40000                              | 995       | 0.13            |
+| 04_ranking_reward_-1_2_10000episodes                      | 1102      | 0.18            |
+| 05_ranking_reward_-1_3_10000episodes                      | 1109      | 0.20            |
+| 06_ranking_reward_-1_4_10000episodes                      | 1071      | 0.23            |
+| 08_ranking_reward_-1_4_10000episodes_encoder_x32          | 1002      | 0.28            |
+| 07_ranking_reward_-1_5_10000episodes                      | 992       | 0.25            |
+| 09_ranking_reward_-2_5_10000episodes                      | 1102      | 0.39            |
+| 10_ranking_reward_-4_5_10000episodes                      | 1138      | 0.79            |
+| 11_ranking_reward_-4_5_80000episodes                      | 1116      | 0.751           |
+| 12_ranking_reward_-4_5_80000episodes_reduce_lr_on_plateau | 1230      | 0.747           |
+
+- The loss of the new reward function is much smaller compared to sparse reward baseline, the direct comparison is 1.3 vs 0.13
+- Clearly using only 1 step lookahead is not optimal
+- The number of steps looakhead and the dead reward is related, as shown by the experiments with 5 steps.
+- The bigger the lookahead steps the more complex the function as shown by the validation loss
+- The model with reduce lr on plateau achieves the best elo score, although training loss is similar
+
+So this experiments probe that the loss is much smaller with the new reward, and we were able to train
+a better agent than the baseline.
+
+#### Pretraining on greedy or epsilon greedy games
+
+| agent               | model               | elo score |
+|---------------------|---------------------|-----------|
+| greedy              | -                   | 981       |
+| greedy              | ranking_reward_-1_3 | 1023      |
+| greedy              | ranking_reward_-2_3 | 1083      |
+| greedy              | ranking_reward_-4_3 | 1068      |
+| epsilon 0.05 greedy | ranking_reward_-1_3 | 1121      |
+| epsilon 0.05 greedy | ranking_reward_-2_3 | 1095      |
+| epsilon 0.05 greedy | ranking_reward_-4_3 | 1087      |
+
+We were able to improve over greedy agent score. It seems that epsilon greedy playing helps slightly.
+With the previous reward we were unable to do this.
+
+#### Pretraining on boilergoose games
+
+So now we want to try to improve over the current best agent: boilergoose.
+
+| agent                    | model               | elo score |
+|--------------------------|---------------------|-----------|
+| boilergoose              | -                   | 1269      |
+| boilergoose              | ranking_reward_-2_3 | 744       |
+| boilergoose 0.05 epsilon | ranking_reward_-2_3 | 1021      |
+| boilergoose 0.02 epsilon | ranking_reward_-2_3 | 1019      |
+| boilergoose 0.01 epsilon | ranking_reward_-2_3 | 1055      |
+| combo1                   | ranking_reward_-2_3 | 890       |
+
+So far I have been unable to learn a q value function that can be unrolled as a better policy than
+boilergoose. If I cannot do it then I could not do either the cycle of evaluation and improvement.
+
+![evaluation and improvement iterative cycle](res/2021-03-15-11-23-08.png)
+
+So I have to solve this problem. Maybe I need a model with more capacity.
+
+
 ### Results
 
 <!---
