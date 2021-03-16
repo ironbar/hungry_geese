@@ -305,6 +305,22 @@ Epoch 3/3
 2021-03-15 16:34:23,541 - __main__ - INFO - Ram usage: 19.0 GB  available: 42.1 GB
 ```
 
+## Learnings
+
+It seems that is creating an internal tf.dataset and that's what creates the double size in RAM memory.
+However when I create the tf.dataset myself it is much slower.
+
+Can I recreate the problem in colab?
+No, the problem does not manifest on colab
+
+If using a generator the problem does not happen.
+
+Disabling eager execution solves the RAM problem, but at the cost of being much slower.
+
+https://github.com/tensorflow/tensorflow/issues/31312
+
+The problem remains unsolved, I suggest to use a generator to feed the data and avoid memory problems.
+
 ## Ideas
 
 - Tf.data
@@ -312,3 +328,4 @@ Epoch 3/3
 
 ```bash
 ```
+

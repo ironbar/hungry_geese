@@ -4,6 +4,8 @@ import numpy as np
 import tensorflow as tf
 import tensorflow.keras as keras
 import logging
+import gc
+import time
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -33,17 +35,23 @@ logger.info('Model created')
 log_ram_usage_and_available()
 
 n_samples = int(1e7)
-x = np.random.uniform(size=(n_samples, input_features)).astype(np.float32)
-y = np.random.uniform(size=(n_samples, output_features)).astype(np.float32)
+x = np.ones((n_samples, input_features), dtype=np.float32)
+y = np.ones((n_samples, output_features), dtype=np.float32)
 logger.info('Input size: %.1f GB' % (x.nbytes/1e9))
 logger.info('Data created')
-log_ram_usage_and_available()
+for _ in range(3):
+    time.sleep(1)
+    log_ram_usage_and_available()
 model.fit(x, y, epochs=3, batch_size=8096, callbacks=[LogRAM()], shuffle=False)
-
+log_ram_usage_and_available()
+for _ in range(3):
+    gc.collect()
+    time.sleep(1)
+    log_ram_usage_and_available()
 
 # def create_dataset(n_samples):
-#     x = np.random.uniform(size=(n_samples, input_features)).astype(np.float32)
-#     y = np.random.uniform(size=(n_samples, output_features)).astype(np.float32)
+#     x = np.ones((n_samples, input_features), dtype=np.float32)
+#     y = np.ones((n_samples, output_features), dtype=np.float32)
 #     logger.info('Input size: %.1f GB' % (x.nbytes/1e9))
 #     dataset = tf.data.Dataset.from_tensor_slices((x, y)).batch(8096).prefetch(10)
 #     del x
@@ -53,4 +61,10 @@ model.fit(x, y, epochs=3, batch_size=8096, callbacks=[LogRAM()], shuffle=False)
 # dataset = create_dataset(int(1e7))
 # logger.info('Data created')
 # log_ram_usage_and_available()
+# gc.collect()
+# log_ram_usage_and_available()
 # model.fit(dataset, epochs=3, callbacks=[LogRAM()])
+# log_ram_usage_and_available()
+# for _ in range(3):
+#     gc.collect()
+#     log_ram_usage_and_available()
