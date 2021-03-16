@@ -383,6 +383,14 @@ boilergoose. If I cannot do it then I could not do either the cycle of evaluatio
 
 So I have to solve this problem. Maybe I need a model with more capacity.
 
+| agent  | model | elo score | validation loss |
+|--------|-------|-----------|-----------------|
+| combo1 | x16   | 890       | 0.054           |
+| combo1 | x32   | 1007      | 0.047           |
+| combo1 | x64   | 1026      | 0.041           |
+| combo1 | x128  | 1026      | 0.040           |
+
+We were able to improve the score, but it is far from the 1269 score of the boilergoose model.
 
 ### Results
 
