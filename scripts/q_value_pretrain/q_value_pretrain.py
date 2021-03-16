@@ -5,6 +5,7 @@ import numpy as np
 import yaml
 from tqdm import tqdm
 import logging
+from functools import partial
 
 from kaggle_environments import make
 import tensorflow as tf
@@ -47,9 +48,32 @@ def train_q_value(args):
     callbacks = create_callbacks(conf['callbacks'], model_dir, conf['fit_params']['epochs'])
     log_ram_usage()
 
+    train_generator = generator(train_data, conf['train_batch_size'])
+    val_generator = generator(val_data, conf['val_batch_size'])
+
+    # train_generator = tf.data.Dataset.from_generator(partial(generator, train_data, conf['train_batch_size']))
+    # val_generator = tf.data.Dataset.from_generator(partial(generator, val_data, conf['val_batch_size']))
+
+    # train_generator = train_generator.prefetch(10)
+
     training_model.fit(
-        x=train_data[:3], y=train_data[-1], validation_data=(val_data[:3], val_data[-1]),
+        x=train_generator, validation_data=val_generator,
         callbacks=callbacks, **conf['fit_params'])
+
+def generator(train_data, batch_size):
+    idx_range = np.arange(len(train_data[0]))
+    num_splits = len(idx_range)//batch_size
+    logger.info('Looping over the train set will take %i steps' % num_splits)
+    while 1:
+        np.random.shuffle(idx_range)
+        for idx in range(num_splits):
+            split_idx = idx_range[idx*batch_size:(idx+1)*batch_size]
+            x = (train_data[0][split_idx],
+                 train_data[1][split_idx],
+                 train_data[2][split_idx])
+            y = train_data[3][split_idx]
+            yield (x, y)
+
 
 def load_data(filepath):
     logger.info('loading %s' % filepath)
