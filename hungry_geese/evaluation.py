@@ -18,17 +18,17 @@ def play_matches_in_parallel(agents, sample_agents_func, max_workers=20, n_match
     sample_agents_func : func
         Function that returns random keys of the agents for playing a game
     """
-    pool = ProcessPoolExecutor(max_workers=max_workers)
-    matches_results = []
-    matches_agents = []
-    submits = []
-    for i in range(n_matches):
-        sampled_keys = sample_agents_func()
-        submits.append(pool.submit(play_game, agents=[agents[key] for key in sampled_keys]))
-        matches_agents.append(sampled_keys)
-    monitor_progress(submits, running_on_notebook)
+    with ProcessPoolExecutor(max_workers=max_workers) as pool:
+        matches_results = []
+        matches_agents = []
+        submits = []
+        for i in range(n_matches):
+            sampled_keys = sample_agents_func()
+            submits.append(pool.submit(play_game, agents=[agents[key] for key in sampled_keys]))
+            matches_agents.append(sampled_keys)
+        monitor_progress(submits, running_on_notebook)
 
-    matches_results = [submit.result()[0] for submit in submits]
+        matches_results = [submit.result()[0] for submit in submits]
     return matches_agents, matches_results
 
 def play_game(agents):
