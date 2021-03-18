@@ -392,6 +392,29 @@ So I have to solve this problem. Maybe I need a model with more capacity.
 
 We were able to improve the score, but it is far from the 1269 score of the boilergoose model.
 
+#### Improving RAM memory usage
+
+| experiment                                   | RAM usage (%) | epoch time (s) | GPU usage(%) |
+|----------------------------------------------|---------------|----------------|--------------|
+| numpy array                                  | 62.26         | 11.2           | 43           |
+| generators                                   | 36            | 32             | 16           |
+| generator enqueuer                           | 37.9          | 25.8           | 21           |
+| generator enqueuer 2 workers multiprocessing | 36.9          | 76             | 8            |
+| dataset from generator                       | 36.6          | 26             | 25           |
+
+I have tried to solve the issue of using double RAM memory than expected. However in all the experiments
+that I have been able to reduce the RAM usage the epoch size has increased also a lot.
+
+The difference in speed comes because when using numpy arrays it takes a lot of time to start the
+training. So it seems to be optimizing something that it does not optimize otherwise. Maybe I need
+to solve the issue with ptxas.
+
+- Recover original script, compare the log from tensorboard.
+- Measure sampling time. I'm able to sample audios as fast as needed?
+- Enqueuer without multiprocessing
+- Dataset from numpy
+- Ptxas
+
 ### Results
 
 <!---
