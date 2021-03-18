@@ -409,6 +409,10 @@ The difference in speed comes because when using numpy arrays it takes a lot of 
 training. So it seems to be optimizing something that it does not optimize otherwise. Maybe I need
 to solve the issue with ptxas.
 
+I have been able to solve ptxas problem, thus I want to repeat the experiments to see if anything
+changes. I will be using a smaller file so I can train with both gpus so I speedup training.
+Automate steps per epoch, and create a script for each experiment.
+
 - Recover original script, compare the log from tensorboard.
 - Measure sampling time. I'm able to sample audios as fast as needed?
 - Enqueuer without multiprocessing
