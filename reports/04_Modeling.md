@@ -413,11 +413,31 @@ I have been able to solve ptxas problem, thus I want to repeat the experiments t
 changes. I will be using a smaller file so I can train with both gpus so I speedup training.
 Automate steps per epoch, and create a script for each experiment.
 
-- Recover original script, compare the log from tensorboard.
-- Measure sampling time. I'm able to sample audios as fast as needed?
-- Enqueuer without multiprocessing
-- Dataset from numpy
-- Ptxas
+Both dataset from generator and generator enqueuer take twice the time as giving the numpy array as
+input.
+
+Using dataset from numpy array is very slow, the speed test reveals that looping over the epoch
+takes 13 seconds.
+
+| experiment             | RAM usage (%) | epoch time (s) | GPU usage(%) |
+|------------------------|---------------|----------------|--------------|
+| numpy array            | 33            | 4.7            | 44           |
+| generator enqueuer     | 20            | 11.1           | 20           |
+| dataset from generator | 20            | 10.6           | 22           |
+| dataset from numpy     | 33            | 16             | 18           |
+
+Some links:
+
+- https://stackoverflow.com/questions/51541610/why-is-tensorflows-tf-data-package-slowing-down-my-code
+- https://github.com/tensorflow/tensorflow/issues/39750
+- https://github.com/tensorflow/tensorflow/issues/40634
+- https://github.com/tensorflow/tensorflow/issues/31312
+
+I think that the best option is to try compiling tensorflow from source. I'm going to do it on
+a clone of the conda environment.
+
+- Compile tensorflow from source
+- Create a training test and check what happens when we call fit with the data
 
 ### Results
 

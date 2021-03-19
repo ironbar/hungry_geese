@@ -55,28 +55,6 @@ def train_q_value(args):
     val_generator = generator(val_data, conf['val_batch_size'])
 
 
-    # Enqueuer
-    generator_params = dict(use_multiprocessing=False)
-    train_generator = tf.keras.utils.GeneratorEnqueuer(train_generator, **generator_params)
-    val_generator = tf.keras.utils.GeneratorEnqueuer(val_generator, **generator_params)
-    start_params = dict(workers=1, max_queue_size=10)
-    train_generator.start(**start_params)
-    val_generator.start(**start_params)
-
-    # test sampling speed
-    sampling_speed_generator = train_generator.get()
-    t0 = time.time()
-    for _ in tqdm(range(conf['fit_params']['steps_per_epoch']), desc='sampling speed test'):
-        next(sampling_speed_generator)
-    logger.info('It takes %.1f seconds to sample enough data for an epoch' % (time.time() - t0))
-
-    training_model.fit(
-        x=train_generator.get(), validation_data=val_generator.get(),
-        callbacks=callbacks, **conf['fit_params'])
-    train_generator.stop()
-    val_generator.stop()
-
-
     # Dataset
     # (967816, 7, 11, 17), (967816, 9), (967816, 4), (967816,)]
     output_signature = (
@@ -88,9 +66,19 @@ def train_q_value(args):
     train_generator = train_generator.prefetch(10)
     val_generator = val_generator.prefetch(10)
 
+    add_default_steps_if_missing(conf, train_data, val_data)
     training_model.fit(
         x=train_generator, validation_data=val_generator,
         callbacks=callbacks, **conf['fit_params'])
+
+
+def add_default_steps_if_missing(conf, train_data, val_data):
+    conf['fit_params']['steps_per_epoch'] = conf['fit_params'].get(
+        'steps_per_epoch', len(train_data[0])//conf['train_batch_size'])
+    conf['fit_params']['validation_steps'] = conf['fit_params'].get(
+        'validation_steps', len(val_data[0])//conf['val_batch_size'])
+    logger.info('fit_params: %s' % str(conf['fit_params']))
+
 
 def generator(train_data, batch_size):
     idx_range = np.arange(len(train_data[0]))
@@ -115,6 +103,7 @@ def load_data(filepath):
     logger.info('data types: %s' % str([array.dtype for array in output]))
     logger.info('data shapes: %s' % str([array.shape for array in output]))
     return output
+
 
 def create_callbacks(conf, model_folder, max_epochs):
     """
