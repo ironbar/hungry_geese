@@ -459,6 +459,24 @@ So I will keep using numpy implementation althought it uses too much RAM. If som
 I will install cuda and try tensorflow compilation. Maybe installing cuda this days is easier since
 I have seen that there is an option to install it with apt.
 
+At least we have installed ptxas and model compilation now is faster.
+
+#### Pretrain on epsilon greedy agent that plays versus greedy agents
+
+I have realized that maybe the approach that I followed when training the random agent does not
+have sense anymore. The agent that plays should be epsilon greedy to explore the space, but the
+other players should play as good as possible. Otherwise I'm only playing against weak agents.
+
+On this experiment I want to play with the model capacity to see if I can improve results and
+also with batch size to see if I can speed up training.
+
+| agent               | model               | elo score |
+|---------------------|---------------------|-----------|
+| greedy              | -                   | 981       |
+| greedy              | ranking_reward_-2_3 | 1083      |
+| epsilon 0.05 greedy | ranking_reward_-2_3 | 1095      |
+| epsilon 0.05 greedy vs greedy | ranking_reward_-2_3 | -      |
+
 ### Results
 
 <!---
