@@ -434,10 +434,30 @@ Some links:
 - https://github.com/tensorflow/tensorflow/issues/31312
 
 I think that the best option is to try compiling tensorflow from source. I'm going to do it on
-a clone of the conda environment.
+a clone of the conda environment. However I have found that there is a file missing cuda.h that is
+necessary to compile tensorflow. So instead I'm going to try to isntall tensorflow from conda.
 
-- Compile tensorflow from source
-- Create a training test and check what happens when we call fit with the data
+```bash
+conda create -n goose_dev pytest rope pylint tqdm numpy pandas scikit-learn ipython ipykernel tensorflow-gpu=2.4.1
+source activate goose_dev
+pip install kaggle_environments nvidia-ml-py3 pyyaml psutil
+python setup.py develop
+conda install -c conda-forge cudatoolkit-dev
+```
+
+The disadvantage is that it does not come with cuda11, so it takes forever to start training.
+
+Summary:
+
+- Using numpy and cuda11 is the fastest training, but requires twice as RAM
+- Using a generator results in correct RAM usage, but training is twice slower
+- Using tensorflow from conda uses cuda10 and it takes forever to start, and uses twice as RAM
+- I could not compile tensorflow from source because I don't have a proper cuda installation.
+This might the the only viable option.
+
+So I will keep using numpy implementation althought it uses too much RAM. If some day I feel adventurous
+I will install cuda and try tensorflow compilation. Maybe installing cuda this days is easier since
+I have seen that there is an option to install it with apt.
 
 ### Results
 
