@@ -60,5 +60,5 @@ def log_ram_usage():
     #logger.info('ram_memory', used=round(ram_usage, 2), available=round(ram_available, 2))
     logger.info('ram_memory used: %.2f GB\t available: %.2f GB' % (ram_usage, ram_available))
 
-def configure_logging():
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+def configure_logging(level=logging.DEBUG):
+    logging.basicConfig(level=level, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')

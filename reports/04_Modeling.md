@@ -510,6 +510,8 @@ is not hurting too much greedy and random but does hurt boilergoose
 - Data augmentation on training with a generator could be useful
 - Try with other agents, maybe boilergoose is special
 
+#### Pretrain on epsilon risk_averse_goose agent that plays versus risk_averse_goose agents
+
 ### Results
 
 <!---
