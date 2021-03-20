@@ -512,6 +512,28 @@ is not hurting too much greedy and random but does hurt boilergoose
 
 #### Pretrain on epsilon risk_averse_goose agent that plays versus risk_averse_goose agents
 
+| experiment                                  | reward              | parameters | loss  | elo score multiagent | elo score single agent |
+|---------------------------------------------|---------------------|------------|-------|----------------------|------------------------|
+| risk_averse_goose                           |                     |            |       | 1176                 | 1176                   |
+| epsilon 02 vs greedy                        | ranking_reward_-4_4 | x16        | 0.12  | 990                  | 1075                   |
+| epsilon 02 vs greedy                        | ranking_reward_-4_4 | x128       | 0.111 | 1012                 | 1077                   |
+| epsilon 02 vs greedy data augmentation      | ranking_reward_-4_4 | x128       | 0.10  | 965                  | 1114                   |
+| epsilon 02 vs greedy more data augmentation | ranking_reward_-4_4 | x128       | 0.096 | 1032                 | 1119                   |
+
+With a single agent we are approaching the baseline score, but still not reach it. Clearly using
+data augmentation has a big effect on the loss function and so it seems on the single agent elo
+score. This allows to use more complex models for training.
+
+I can see that it does not model the danger correctly. For example when there is a goose head in the 
+upper right corner then the other goose can move to two locations, so I should see danger in both locations, 
+but I only see danger in one. This may mean that I need more exploration and/or maybe more variability on the other agents.
+
+TODO: add drawing
+
+Also it seems to be very inmediate when predicting the value, does not seem to look too much into the future.
+
+So it seems that more exploration is needed, maybe on the agent, or maybe on the oponents.
+
 ### Results
 
 <!---

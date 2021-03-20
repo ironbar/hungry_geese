@@ -9,10 +9,12 @@ class QValueAgent():
         self.model = model
         self.state = GameState()
         self.previous_action = None
+        self.q_values = []
 
     def __call__(self, observation, configuration):
         board, features = self.state.update(observation, configuration)
         q_value = np.array(self.model.predict_step([np.expand_dims(board, axis=0), np.expand_dims(features, axis=0)])[0])
+        self.q_values.append(q_value.copy())
         action = ACTIONS[self.select_action(q_value)]
         self.previous_action = action
         self.state.add_action(action)
@@ -21,6 +23,7 @@ class QValueAgent():
     def reset(self):
         self.state.reset()
         self.previous_action = None
+        self.q_values = []
 
     def update_previous_action(self, previous_action):
         """ Allows to change previous action if an agent such as epsilon-greedy agent is playing"""

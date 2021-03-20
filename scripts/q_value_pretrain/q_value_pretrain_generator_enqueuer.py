@@ -18,7 +18,7 @@ from hungry_geese.callbacks import (
     LogEpochTime, LogLearningRate, LogRAM, LogCPU, LogGPU, LogETA, GarbageCollector
 )
 from hungry_geese.utils import log_ram_usage, configure_logging
-from hungry_geese.state import vertical_simmetry, horizontal_simmetry
+from hungry_geese.state import vertical_simmetry, horizontal_simmetry, player_simmetry
 
 logger = logging.getLogger(__name__)
 
@@ -109,6 +109,10 @@ def apply_data_augmentation(batch_data):
         batch_data = vertical_simmetry(batch_data)
     if random.randint(0, 1):
         batch_data = horizontal_simmetry(batch_data)
+    if random.uniform(0, 1) > 0.16:
+        all_permutations = [(0, 2, 1), (1, 0, 2), (1, 2, 0), (2, 0, 1), (2, 1, 0)]
+        new_positions = all_permutations[random.randint(0, 4)]
+        batch_data = player_simmetry(batch_data, new_positions)
     return batch_data
 
 
