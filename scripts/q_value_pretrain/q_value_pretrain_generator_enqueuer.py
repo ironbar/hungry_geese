@@ -7,6 +7,7 @@ from tqdm import tqdm
 import logging
 from functools import partial
 import time
+import random
 
 from kaggle_environments import make
 import tensorflow as tf
@@ -17,6 +18,7 @@ from hungry_geese.callbacks import (
     LogEpochTime, LogLearningRate, LogRAM, LogCPU, LogGPU, LogETA, GarbageCollector
 )
 from hungry_geese.utils import log_ram_usage, configure_logging
+from hungry_geese.state import vertical_simmetry, horizontal_simmetry
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +53,7 @@ def train_q_value(args):
     log_ram_usage()
 
 
-    train_generator = generator(train_data, conf['train_batch_size'])
+    train_generator = generator(train_data, conf['train_batch_size'], data_augmentation=conf['data_augmentation'])
     val_generator = generator(val_data, conf['val_batch_size'])
 
 
@@ -86,7 +88,7 @@ def add_default_steps_if_missing(conf, train_data, val_data):
     logger.info('fit_params: %s' % str(conf['fit_params']))
 
 
-def generator(train_data, batch_size):
+def generator(train_data, batch_size, data_augmentation=False):
     idx_range = np.arange(len(train_data[0]))
     num_splits = len(idx_range)//batch_size
     logger.info('Looping over the dataset will take %i steps' % num_splits)
@@ -94,11 +96,20 @@ def generator(train_data, batch_size):
         np.random.shuffle(idx_range)
         for idx in range(num_splits):
             split_idx = idx_range[idx*batch_size:(idx+1)*batch_size]
-            x = (train_data[0][split_idx],
-                 train_data[1][split_idx],
-                 train_data[2][split_idx])
-            y = train_data[3][split_idx]
+            batch_data = [data[split_idx] for data in train_data]
+            if data_augmentation:
+                batch_data = apply_data_augmentation(batch_data)
+            x = (batch_data[0], batch_data[1], batch_data[2])
+            y = batch_data[3]
             yield (x, y)
+
+
+def apply_data_augmentation(batch_data):
+    if random.randint(0, 1):
+        batch_data = vertical_simmetry(batch_data)
+    if random.randint(0, 1):
+        batch_data = horizontal_simmetry(batch_data)
+    return batch_data
 
 
 def load_data(filepath):
