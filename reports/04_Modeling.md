@@ -470,12 +470,45 @@ other players should play as good as possible. Otherwise I'm only playing agains
 On this experiment I want to play with the model capacity to see if I can improve results and
 also with batch size to see if I can speed up training.
 
-| agent               | model               | elo score |
-|---------------------|---------------------|-----------|
-| greedy              | -                   | 981       |
-| greedy              | ranking_reward_-2_3 | 1083      |
-| epsilon 0.05 greedy | ranking_reward_-2_3 | 1095      |
-| epsilon 0.05 greedy vs greedy | ranking_reward_-2_3 | -      |
+All models have been trained with `ranking_reward_-2_3`.
+
+| experiment         | parameters | loss   | elo score |
+|--------------------|------------|--------|-----------|
+| greedy baseline    |            | -      | 981       |
+| greedy vs greedy   |            | -      | 1083      |
+| epsilon vs epsilon |            | -      | 1095      |
+| epsilon vs greedy  | x16        | 0.1149 | 1127      |
+| epsilon vs greedy  | x32        | 0.1086 | 1080      |
+| epsilon vs greedy  | x64        | 0.1042 | 1047      |
+| epsilon vs greedy  | x128       | 0.1029 | 1077      |
+
+There does not seem to be a relation between loss and elo scores. Elo scores are similar to previous
+trainings. In this case there is no improvement for playing against greedy agents. However we are
+already improving over the greedy agent baseline. So probably makes more sense to test this against
+better agents.
+
+#### Pretrain on epsilon boilergoose agent that plays versus boilergoose agents
+
+I have not been able to improve over boilergoose, in fact scores are worse than playing against
+greedy agent.
+
+| experiment           | reward              | parameters | elo score |
+|----------------------|---------------------|------------|-----------|
+| boilergoose baseline |                     |            | 1269      |
+| epsilon vs greedy    | ranking_reward_-2_3 | x16        | 939       |
+| epsilon vs greedy    | ranking_reward_-2_3 | x32        | 1001      |
+| epsilon vs greedy    | ranking_reward_-2_3 | x64        | 965       |
+| epsilon vs greedy    | ranking_reward_-2_3 | x128       | 986       |
+| epsilon vs greedy    | ranking_reward_-4_4 | x16        | 990       |
+| epsilon vs greedy    | ranking_reward_-4_4 | x32        | 990       |
+
+Ideas to solve the problem:
+
+- Dig deeper into reward, to do so decouple the game playing of the state generation
+- Verify that the state generation is correct, maybe there is an error that
+is not hurting too much greedy and random but does hurt boilergoose
+- Data augmentation on training with a generator could be useful
+- Try with other agents, maybe boilergoose is special
 
 ### Results
 
