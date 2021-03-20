@@ -6,6 +6,7 @@ from hungry_geese.agents import QValueAgent
 from hungry_geese.utils import ACTIONS, opposite_action
 
 random.seed(7)
+np.random.seed(7)
 
 class FakeModelUniform():
     def predict_step(self, *args, **kwargs):

@@ -49,4 +49,4 @@ def test_ranking_reward(current_observation, reward_name, reward):
     (np.ones(1), 'ranking_reward_-1_2', np.ones(1)),
 ])
 def test_get_cumulative_reward(rewards, reward_name, cumulative_reward):
-    assert (cumulative_reward == get_cumulative_reward(rewards, reward_name)).all()
+    assert pytest.approx(cumulative_reward) == get_cumulative_reward(rewards, reward_name)
