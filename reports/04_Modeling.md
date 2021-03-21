@@ -548,13 +548,47 @@ So it seems that more exploration is needed, maybe on the agent, or maybe on the
 
 Finally we have been able to train models that are best than the best model: boilergoose with 1269 elo score.
 
+It seems that an epsilon of 0.25 is optimal for this agent.
+
 #### Revisit boilergoose
 
 Let's see if using an epsilon of 0.25 we can improve over boilergoose agent. If that is the case
 then we will save the best q learning agent and try to improve over it.
 
+I get the following scores:
+
+- Elo previous evaluation: 1187
+- Elo best 5 agents: 1285
+- Elon best 5 agents single instance: 1383
+
+So it seems that this agent struggles when more than one instance of itself is present.
+However scores are much better than previous experiment with boilergoose.
+
+#### Learning from another model
+
+To finalize the iteration I want to learn from other model. I have chosen the best model that learned
+from risk_averse_goose. I have trained a powerful agent, but I have doubts of how to measure its goodness.
+
+- If I use all the existing agents then I get a elo score of 1361 compared to 1269 of boilergoose.
+- However if I only use the top 5 agents I get a score of 1398 on multi agent setup and 1421 in a single
+instance setup.
+
+It probably has more sense to use only the top k agents, because there is randomness in the games
+and losing to a bad player such as random could sometimes happen, adding volatility to the scores.
+
+In the other hand playing on a single instance setup I think it may be hiding weaknesses in the agent.
+If two or more instances of the agent results on a worse score then it means the agent is not playing
+correctly.
+
+So I think I should use multiple instances setup and top k agents, being 5 a good choice. I could sometimes
+evaluate using all the agents just to see that everything is in order.
 
 ### Results
+
+We have been able to successfully train the agent quantum that plays by predicting the q value function.
+It has an elo score of 1398, greatly surpassing the best hard-coded agent boilergoose.
+
+I'm going to save it and try to improve over it.
 
 <!---
 ## Iteration n. title
