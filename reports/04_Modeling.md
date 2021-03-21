@@ -534,6 +534,19 @@ Also it seems to be very inmediate when predicting the value, does not seem to l
 
 So it seems that more exploration is needed, maybe on the agent, or maybe on the oponents.
 
+#### Pretrain on epsilon risk_averse_goose agent that plays versus epsilon risk_averse_goose agents
+
+| base agent        | epsilon | elo previous | elo vs best |
+|-------------------|---------|--------------|-------------|
+| random_plus       | 1       | 1140         |             |
+| risk_averse_goose | -       | -            | 1176        |
+| risk_averse_goose | 0.50    | 1252         | 1310        |
+| risk_averse_goose | 0.25    | 1308         | 1359        |
+| risk_averse_goose | 0.1     | 1250         | 1339        |
+| risk_averse_goose | 0.05    | 1229         | 1339        |
+
+Finally we have been able to train models that are best than the best model: boilergoose with 1269 elo score.
+
 ### Results
 
 <!---
