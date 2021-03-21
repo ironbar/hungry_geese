@@ -544,8 +544,15 @@ So it seems that more exploration is needed, maybe on the agent, or maybe on the
 | risk_averse_goose | 0.25    | 1308         | 1359        |
 | risk_averse_goose | 0.1     | 1250         | 1339        |
 | risk_averse_goose | 0.05    | 1229         | 1339        |
+| risk_averse_goose | 0.02    | 1164         | 1316        |
 
 Finally we have been able to train models that are best than the best model: boilergoose with 1269 elo score.
+
+#### Revisit boilergoose
+
+Let's see if using an epsilon of 0.25 we can improve over boilergoose agent. If that is the case
+then we will save the best q learning agent and try to improve over it.
+
 
 ### Results
 
