@@ -550,6 +550,9 @@ Finally we have been able to train models that are best than the best model: boi
 
 It seems that an epsilon of 0.25 is optimal for this agent.
 
+Also it seems that is better to play against epsilon agents, because on the previous experiment I was
+playing against greedy players and results were worse.
+
 #### Revisit boilergoose
 
 Let's see if using an epsilon of 0.25 we can improve over boilergoose agent. If that is the case
@@ -589,6 +592,17 @@ We have been able to successfully train the agent quantum that plays by predicti
 It has an elo score of 1398, greatly surpassing the best hard-coded agent boilergoose.
 
 I'm going to save it and try to improve over it.
+
+## Iteration 4. Ladder of Q learning agents
+
+### Goal
+
+On this iteration I want to start climbing the ladder of Q learning agents. I want to iteratively train
+more and more powerful agents. See where we can get.
+
+### Development
+
+### Results
 
 <!---
 ## Iteration n. title
