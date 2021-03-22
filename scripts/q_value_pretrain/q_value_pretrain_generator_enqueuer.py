@@ -40,10 +40,14 @@ def train_q_value(args):
     val_data = load_data(conf['val'])
 
     log_ram_usage()
-    logger.info('creating model')
-    model = simple_model(**conf['model_params'])
-    model.summary()
-    training_model = create_model_for_training(model)
+    if 'pretrained_model' in conf:
+        logger.info('loading pretrained model: %s' % conf['pretrained_model'])
+        training_model = tf.keras.models.load_model(os.path.join(model_dir, conf['pretrained_model']))
+    else:
+        logger.info('creating model')
+        model = simple_model(**conf['model_params'])
+        model.summary()
+        training_model = create_model_for_training(model)
     optimizer = tf.keras.optimizers.get(conf.get('optimizer', 'Adam'))
     optimizer.learning_rate = conf.get('learning_rate', 1e-3)
     training_model.compile(optimizer, loss='mean_squared_error')
