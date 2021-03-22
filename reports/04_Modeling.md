@@ -602,6 +602,31 @@ more and more powerful agents. See where we can get.
 
 ### Development
 
+#### First iteration: play against epsilon quantum agents
+
+I start the first iteration using quantum agent with epsilon 0.25, the same setup as the previous
+iteration. However I quickly find that the elo score does not improve, it is slightly lower than
+the quantum agent.
+
+![the agent elo worsens with epsilon](res/2021-03-22-12-14-33.png)
+
+Then I have seen that quantum agent with epsilon 0.25 greedy policy has an elo score lower than 900.
+So I'm playing against a very weak agent, and even in that condition I'm able to reach scores between
+around 1350.
+
+I believe that using epsilon greedy policy is good to explore the action space, but the other agents
+should play as good as possible. One simple option is to sample the other agents just like I do
+on evaluation. That way the agent should learn a q value function of that game distribution.
+
+There is a risk of developing some greedy behaviours like jumping to a food when there is risk of
+heating other geese. However it the agent develops that behaviour future agents won't do it because
+they will die. So it seems that we can solve that problem simply by iteratively train more agents.
+
+#### Second iteration: play against the best 5 agents
+
+As explained above I will play against the best 5 agents, and I will use an epsilon of 0.1 instead
+of 0.25.
+
 ### Results
 
 <!---
