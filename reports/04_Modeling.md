@@ -627,6 +627,34 @@ they will die. So it seems that we can solve that problem simply by iteratively 
 As explained above I will play against the best 5 agents, and I will use an epsilon of 0.1 instead
 of 0.25.
 
+| base agent            | elo multi | elo single |
+|-----------------------|-----------|------------|
+| quantum               | 1398      | 1421?      |
+| 40k matches train     | 1238      | 1382       |
+| 80k matches train     | 1290      | 1431       |
+| 40k matches train it2 | 1259      | 1394       |
+
+The agent develops greedy behaviours, even on the second iteration. Moreover it seems that the number
+of matches is relevant, showing a clear improvement when using 80k matches instead of 40.
+
+I could increase the number of matches if I use int8 for storing the data instead of float32.
+
+I also have doubts regarding the reward, is the agent seeing 4 steps into the future?
+
+#### Increase the number of matches
+
+Let's study the influence of the number of matches int the agents performance. First I have to reduce
+the size of the data and memory footprint of the data generation algorithm to enable using bigger
+datasets.
+
+To enable faster experimentation I'm thinking of going back to risk_averse_goose and use epsilon
+greedy for all the players. That is what made quantum agent possible, maybe we can improve over it.
+
+#### Reward study
+
+On a first step visualize games of the agent to see how far the agent foreseen into the future. After
+that make changes on the reward and see how they impact on agent's performance.
+
 ### Results
 
 <!---
