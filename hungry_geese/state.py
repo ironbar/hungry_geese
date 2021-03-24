@@ -107,7 +107,7 @@ class GameState():
         for action, idx in ACTION_TO_IDX.items():
             actions[actions == action] = idx
         actions = keras.utils.to_categorical(actions, num_classes=4)
-        return np.array(self.boards[:len(actions)]), np.array(self.features[:len(actions)]), actions, cumulative_reward
+        return [np.array(self.boards[:len(actions)], dtype=np.int8), np.array(self.features[:len(actions)]), actions, cumulative_reward]
 
     def _compute_features(self, observation):
         """
