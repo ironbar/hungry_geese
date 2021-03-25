@@ -103,7 +103,7 @@ def generator(train_data, batch_size, data_augmentation=False):
             batch_data = [data[split_idx] for data in train_data]
             if data_augmentation:
                 batch_data = apply_data_augmentation(batch_data)
-            x = (batch_data[0], batch_data[1], batch_data[2])
+            x = (batch_data[0].astype(np.float32), batch_data[1], batch_data[2])
             y = batch_data[3]
             yield (x, y)
 
