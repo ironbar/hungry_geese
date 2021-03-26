@@ -650,10 +650,60 @@ datasets.
 To enable faster experimentation I'm thinking of going back to risk_averse_goose and use epsilon
 greedy for all the players. That is what made quantum agent possible, maybe we can improve over it.
 
+![influence of number of matches on elo score](res/2021-03-26-14-27-06.png)
+
+Increasing the number of matches from 40k to 460k had a significative effect on multi agent elo
+score but not on single agent elo score. Due to uncertainty on elo score computation changes need
+to be bigger than 35 to have 80% of confidence and 50 to have 95% of confidence.
+
 #### Reward study
 
 On a first step visualize games of the agent to see how far the agent foreseen into the future. After
 that make changes on the reward and see how they impact on agent's performance.
+
+| reward       | multi | single |
+|--------------|-------|--------|
+| reward_-4_4  | 1368  | 1375   |
+| reward_-10_4 | 1362  | 1384   |
+| reward_-7_3  | 1339  | 1356   |
+| reward_-4_2  | 1300  | 1295   |
+| reward_-4_3  | 1298  | 1399   |
+| reward_-3_2  | 1291  | 1319   |
+| reward_-1_1  | 1058  | 1053   |
+
+There is a clear relation regarding window size, but the death reward does not seem to have a clear effect.
+
+Let's try then with a bigger window size.
+
+|              | multi  | single |
+|--------------|--------|--------|
+| reward_-10_5 | 1376.0 | 1363.0 |
+| reward_-10_6 | 1385.0 | 1386.0 |
+| reward_-10_7 | 1363.0 | 1382.0 |
+
+It seems that 4 is an already good window size.
+
+#### Architecture study
+
+I have tried with variations over the architecture, and the changes are not significative.
+
+|                           | multi  | single |
+|---------------------------|--------|--------|
+| 01_baseline_x128          | 1360.0 | 1391.0 |
+| 02_tanh2                  | 1387.0 | 1391.0 |
+| 03_all_relu               | 1344.0 | 1388.0 |
+| 04_remove_one_convolution | 1360.0 | 1381.0 |
+| 05_smaller_mlp            | 1330.0 | 1368.0 |
+| 06_smaller_encoder        | 1352.0 | 1401.0 |
+| 07_smaller_encoder_tanh2  | 1347.0 | 1417.0 |
+| 08_smaller_encoder_tanh3  | 1325.0 | 1368.0 |
+
+#### Summary
+
+We have experimented with architecture, reward and number of matches without sucess. Let's try
+to improve then the data distribution. I could decrease epsilon on risk_averse_goose to see
+if there is any difference, or I could try with different exploration on q agent. First I want to
+see plots of the influence of epsilon on the score.
 
 ### Results
 
