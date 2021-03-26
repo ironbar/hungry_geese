@@ -528,7 +528,7 @@ I can see that it does not model the danger correctly. For example when there is
 upper right corner then the other goose can move to two locations, so I should see danger in both locations, 
 but I only see danger in one. This may mean that I need more exploration and/or maybe more variability on the other agents.
 
-TODO: add drawing
+![danger at the corners](res/2021-03-26-19-39-57.png)
 
 Also it seems to be very inmediate when predicting the value, does not seem to look too much into the future.
 
@@ -698,6 +698,13 @@ I have tried with variations over the architecture, and the changes are not sign
 | 07_smaller_encoder_tanh2  | 1347.0 | 1417.0 |
 | 08_smaller_encoder_tanh3  | 1325.0 | 1368.0 |
 
+#### Epsilon risk_averse_goose to the limit
+
+I'm going to lower the epsilon, and grow the number of matches as much as possible. Then I will
+see if I can get a significative better result than the current one.
+
+It seems likely that the lower the epsilon the more the games we need to correctly explore.
+
 #### Summary
 
 We have experimented with architecture, reward and number of matches without sucess. Let's try
@@ -708,6 +715,16 @@ see plots of the influence of epsilon on the score.
 ### Results
 
 <!---
+
+It seems that we are blocked on ~1400 scores. No matter which agents we use to play we cannot improve. So let's try with softmax policy.
+
+On a first step evaluate how well the model does on evaluation, and also measure how frequently selects non maximum actions depending on the temperature.
+
+
+
+
+
+
 ## Iteration n. title
 
 ### Goal
