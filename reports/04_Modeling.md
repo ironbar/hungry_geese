@@ -705,6 +705,18 @@ see if I can get a significative better result than the current one.
 
 It seems likely that the lower the epsilon the more the games we need to correctly explore.
 
+Results do not improve.
+
+#### Softmax policy exporation
+
+It seems that we are blocked on ~1400 scores. No matter which agents we use to play we cannot improve. So let's try with softmax policy.
+
+On a first step evaluate how well the model does on evaluation, and also measure how frequently selects non maximum actions depending on the temperature.
+
+With this exploration the agent will not see many deaths from the epsilon greedy policy. So probably
+the best option is to retrain the agent and save models every epoch because it may forget that
+information.
+
 #### Summary
 
 We have experimented with architecture, reward and number of matches without sucess. Let's try
