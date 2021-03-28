@@ -737,6 +737,25 @@ The plot shows that when using softmax policy we can achieve a much more random 
 By surprise I have found that when being evaluated under same circunstances quantum agent gets a lower
 score than the shown on the leaderboard.
 
+#### Automating the improvement cycle
+
+It is not clear if I'm doing progress, but I think I have to automate the process of data generation,
+training and evaluation to be sure. Otherwise I only make one iteration and very likely many iterations
+are needed to see improvements on the policy.
+
+```python
+for epoch in range(max_epochs):
+    generate_train_data() #parallel
+    train_model()
+    evaluate_model() #parallel
+```
+
+I have been doing this on the notebook. The key change with respect to the first experiments is that
+Data generation and evaluation will be done on parallel. Thus progress will be much faster.
+
+I have to create the scripts to do this.
+
+
 ### Results
 
 <!---
