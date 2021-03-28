@@ -8,6 +8,7 @@ import logging
 from functools import partial
 import time
 import random
+import subprocess
 
 from kaggle_environments import make
 import tensorflow as tf
@@ -15,7 +16,7 @@ from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLRO
 
 from hungry_geese.model import simple_model, create_model_for_training
 from hungry_geese.callbacks import (
-    LogEpochTime, LogLearningRate, LogRAM, LogCPU, LogGPU, LogETA, GarbageCollector
+    LogEpochTime, LogLearningRate, LogRAM, LogCPU, LogGPU, LogETA, GarbageCollector, LogConstantValue
 )
 from hungry_geese.utils import log_ram_usage, configure_logging
 from hungry_geese.state import vertical_simmetry, horizontal_simmetry, player_simmetry
@@ -53,16 +54,17 @@ def train_q_value(args):
 
     train_data_path = os.path.join(model_dir, conf['train'])
     model_path = os.path.join(model_dir, conf['pretrained_model'])
+    scores = dict()
     for epoch_idx in range(conf['max_epochs']):
         logger.info('Starting epoch %i' % epoch_idx)
         play_matches(model_path, conf['softmax_scale'], conf['reward'], train_data_path, conf['n_matches_play'])
-        train_model(training_model, train_data_path, conf, callbacks, epoch_idx)
+        train_model(training_model, train_data_path, conf, callbacks, epoch_idx, scores)
         model_path = os.path.join(model_dir, 'epoch_%04d.h5' % epoch_idx)
         training_model.save(model_path, include_optimizer=False)
-        evaluate_model(model_path, conf['n_matches_eval'])
+        scores = evaluate_model(model_path, conf['n_matches_eval'])
 
 
-def train_model(model, train_data_path, conf, callbacks, epoch_idx):
+def train_model(model, train_data_path, conf, callbacks, epoch_idx, scores):
     train_data = load_data(train_data_path)
     train_generator = generator(train_data, conf['train_batch_size'], data_augmentation=conf['data_augmentation'])
     train_generator = tf.keras.utils.GeneratorEnqueuer(train_generator, use_multiprocessing=False)
@@ -70,7 +72,8 @@ def train_model(model, train_data_path, conf, callbacks, epoch_idx):
     log_ram_usage()
     conf['fit_params']['steps_per_epoch'] = len(train_data[0])//conf['train_batch_size']
     initial_epoch = int(epoch_idx*conf['fit_epochs'])
-    model.fit(x=train_generator.get(), callbacks=callbacks, initial_epoch=initial_epoch,
+    aditional_callbacks = [LogConstantValue(key, value) for key, value in scores.items()]
+    model.fit(x=train_generator.get(), callbacks=(aditional_callbacks + callbacks), initial_epoch=initial_epoch,
               epochs=(initial_epoch + conf['fit_epochs']),
               **conf['fit_params'])
     train_generator.stop()
@@ -86,7 +89,12 @@ def play_matches(model_path, softmax_scale, reward_name, train_data_path, n_matc
 def evaluate_model(model_path, n_matches):
     logger.info('Evaluating model')
     command = 'python evaluate_model.py %s --n_matches %i' % (model_path, n_matches)
-    os.system(command)
+    output = subprocess.getoutput(command).split('\n')
+    elo_multi = int(output[-2].split('score: ')[-1])
+    elo_single = int(output[-1].split('score: ')[-1])
+    logger.info('Multi agent elo score: %i' % elo_multi)
+    logger.info('Single agent elo score: %i' % elo_single)
+    return dict(elo_multi=elo_multi, elo_single=elo_single)
 
 
 def generator(train_data, batch_size, data_augmentation=False):
