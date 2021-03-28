@@ -48,6 +48,7 @@ def train_q_value(args):
     optimizer = tf.keras.optimizers.get(conf.get('optimizer', 'Adam'))
     optimizer.learning_rate = conf.get('learning_rate', 1e-3)
     training_model.compile(optimizer, loss='mean_squared_error')
+    callbacks = create_callbacks(model_dir)
     log_ram_usage()
 
     train_data_path = os.path.join(model_dir, conf['train'])
@@ -55,20 +56,23 @@ def train_q_value(args):
     for epoch_idx in range(conf['max_epochs']):
         logger.info('Starting epoch %i' % epoch_idx)
         play_matches(model_path, conf['softmax_scale'], conf['reward'], train_data_path, conf['n_matches_play'])
-        train_model(training_model, train_data_path, conf)
+        train_model(training_model, train_data_path, conf, callbacks, epoch_idx)
         model_path = os.path.join(model_dir, 'epoch_%04d.h5' % epoch_idx)
         training_model.save(model_path, include_optimizer=False)
         evaluate_model(model_path, conf['n_matches_eval'])
 
 
-def train_model(model, train_data_path, conf):
+def train_model(model, train_data_path, conf, callbacks, epoch_idx):
     train_data = load_data(train_data_path)
     train_generator = generator(train_data, conf['train_batch_size'], data_augmentation=conf['data_augmentation'])
     train_generator = tf.keras.utils.GeneratorEnqueuer(train_generator, use_multiprocessing=False)
     train_generator.start(workers=1, max_queue_size=10)
     log_ram_usage()
     conf['fit_params']['steps_per_epoch'] = len(train_data[0])//conf['train_batch_size']
-    model.fit(x=train_generator.get(),**conf['fit_params'])
+    initial_epoch = int(epoch_idx*conf['fit_epochs'])
+    model.fit(x=train_generator.get(), callbacks=callbacks, initial_epoch=initial_epoch,
+              epochs=(initial_epoch + conf['fit_epochs']),
+              **conf['fit_params'])
     train_generator.stop()
 
 
@@ -123,7 +127,7 @@ def load_data(filepath):
     return output
 
 
-def create_callbacks(conf, model_folder, max_epochs):
+def create_callbacks(model_folder):
     """
     Params
     -------
@@ -140,21 +144,9 @@ def create_callbacks(conf, model_folder, max_epochs):
         LogRAM(),
         LogCPU(),
         LogGPU(),
-        LogETA(max_epochs),
         tensorboard_callback,
         GarbageCollector(),
     ]
-    if 'ReduceLROnPlateau' in conf:
-        callbacks.append(ReduceLROnPlateau(**conf['ReduceLROnPlateau']))
-    if 'EarlyStopping' in conf:
-        logger.info('Adding EarlyStopping callback')
-        callbacks.append(EarlyStopping(**conf['EarlyStopping']))
-    for key in conf:
-        if 'ModelCheckpoint' in key and not 'PeriodModelCheckpoint' in key:
-            logger.info('Adding %s callback' % key)
-            conf[key]['filepath'] = os.path.join(model_folder, conf[key]['filename'])
-            conf[key].pop('filename')
-            callbacks.append(ModelCheckpoint(**conf[key]))
     return callbacks
 
 
