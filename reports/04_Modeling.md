@@ -728,6 +728,15 @@ information.
 
 The plot shows that when using softmax policy we can achieve a much more random policy without hurting the score too much.
 
+|         | multi | single |
+|---------|-------|--------|
+| quantum | 1347  | 1373   |
+| it1     | 1415  | 1429   |
+| it2     | 1409  | 1396   |
+
+By surprise I have found that when being evaluated under same circunstances quantum agent gets a lower
+score than the shown on the leaderboard.
+
 ### Results
 
 <!---
