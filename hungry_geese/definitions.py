@@ -11,6 +11,8 @@ SUBMISSION_PATH = os.path.join(DATASET_PATH, 'data', 'submission_format.csv')
 LIBRARY_PATH = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 """
 import os
+import pandas as pd
+import yaml
 
 ACTIONS = ['NORTH', 'EAST', 'SOUTH', 'WEST']
 
@@ -20,3 +22,8 @@ ACTION_TO_IDX = {
     'SOUTH': 2,
     'WEST': 3,
 }
+
+INITIAL_ELO_RANKING = pd.read_csv('/mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/data/elo_ranking.csv', index_col='model')
+
+with open('/mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/data/agents.yml', 'r') as f:
+    AGENT_TO_SCRIPT = yaml.safe_load(f)

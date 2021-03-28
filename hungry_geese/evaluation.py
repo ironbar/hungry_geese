@@ -49,3 +49,4 @@ def monitor_progress(submits, running_on_notebook):
         if progress == len(submits):
             break
     time.sleep(0.1)
+    progress_bar.close()

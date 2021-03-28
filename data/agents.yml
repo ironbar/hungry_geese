@@ -1,0 +1,11 @@
+random: random
+random_plus: /mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/forum/agents/random_plus.py
+greedy: greedy
+risk_averse_goose: /mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/forum/agents/risk_averse_goose.py
+goose_on_a_healthy_diet: /mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/forum/agents/goose_on_a_healthy_diet.py
+straightforward_bfs: /mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/forum/agents/straightforward_bfs.py
+boilergoose: /mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/forum/agents/boilergoose.py
+crazy_goose: /mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/forum/agents/crazy_goose.py
+besthoarder: /mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/forum/agents/besthoarder.py
+greedyhoarder: /mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/forum/agents/greedyhoarder.py
+quantum: /mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/data/agents/quantum/quantum.py
