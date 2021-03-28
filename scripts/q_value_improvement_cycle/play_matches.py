@@ -135,6 +135,7 @@ def create_train_data(matches_results, reward_name, output_path, agent_idx_range
 
 def parse_args(args):
     epilog = """
+    python scripts/q_value_improvement_cycle/play_matches.py /mnt/hdd0/Kaggle/hungry_geese/models/31_iterating_over_softmax_policy/01_it1_2000_lr4e4/pretrained_model.h5 8 ranking_reward_-4_4 delete.npz --n_matches 50
     """
     parser = argparse.ArgumentParser(
         description='Play matches in parallel using a model',
