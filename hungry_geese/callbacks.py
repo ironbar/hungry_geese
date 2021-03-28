@@ -220,3 +220,19 @@ def get_available_gpu_index():
             return []
     else:
         return list(range(nvidia_smi.nvmlDeviceGetCount()))
+
+
+class LogConstantValue(Callback):
+    """
+    """
+    def __init__(self, key, value):
+        super().__init__()
+        self.key = key
+        self.value = value
+        self.already_logged = False
+
+    def on_epoch_end(self, epoch, logs=None):
+        if not self.already_logged:
+            logs[self.key] = self.value
+            self.already_logged = True
+
