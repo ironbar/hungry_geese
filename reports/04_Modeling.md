@@ -707,6 +707,13 @@ It seems likely that the lower the epsilon the more the games we need to correct
 
 Results do not improve.
 
+#### Summary
+
+We have experimented with architecture, reward and number of matches without sucess. Let's try
+to improve then the data distribution. I could decrease epsilon on risk_averse_goose to see
+if there is any difference, or I could try with different exploration on q agent. First I want to
+see plots of the influence of epsilon on the score.
+
 #### Softmax policy exporation
 
 It seems that we are blocked on ~1400 scores. No matter which agents we use to play we cannot improve. So let's try with softmax policy.
@@ -717,23 +724,13 @@ With this exploration the agent will not see many deaths from the epsilon greedy
 the best option is to retrain the agent and save models every epoch because it may forget that
 information.
 
-#### Summary
+![comparison between exploration policies](res/2021-03-28-07-51-14.png)
 
-We have experimented with architecture, reward and number of matches without sucess. Let's try
-to improve then the data distribution. I could decrease epsilon on risk_averse_goose to see
-if there is any difference, or I could try with different exploration on q agent. First I want to
-see plots of the influence of epsilon on the score.
+The plot shows that when using softmax policy we can achieve a much more random policy without hurting the score too much.
 
 ### Results
 
 <!---
-
-It seems that we are blocked on ~1400 scores. No matter which agents we use to play we cannot improve. So let's try with softmax policy.
-
-On a first step evaluate how well the model does on evaluation, and also measure how frequently selects non maximum actions depending on the temperature.
-
-
-
 
 
 
