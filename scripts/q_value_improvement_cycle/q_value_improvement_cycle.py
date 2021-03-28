@@ -36,10 +36,6 @@ def train_q_value(args):
         conf = yaml.safe_load(f)
     model_dir = os.path.dirname(os.path.realpath(args.config_path))
 
-    train_data = load_data(conf['train'])
-    val_data = load_data(conf['val'])
-
-    log_ram_usage()
     if 'pretrained_model' in conf:
         logger.info('loading pretrained model: %s' % conf['pretrained_model'])
         training_model = tf.keras.models.load_model(os.path.join(model_dir, conf['pretrained_model']))
@@ -48,48 +44,45 @@ def train_q_value(args):
         model = simple_model(**conf['model_params'])
         model.summary()
         training_model = create_model_for_training(model)
+
     optimizer = tf.keras.optimizers.get(conf.get('optimizer', 'Adam'))
     optimizer.learning_rate = conf.get('learning_rate', 1e-3)
     training_model.compile(optimizer, loss='mean_squared_error')
     log_ram_usage()
 
-    callbacks = create_callbacks(conf['callbacks'], model_dir, conf['fit_params']['epochs'])
-    log_ram_usage()
+    train_data_path = os.path.join(model_dir, conf['train'])
+    model_path = os.path.join(model_dir, conf['pretrained_model'])
+    for epoch_idx in range(conf['max_epochs']):
+        logger.info('Starting epoch %i' % epoch_idx)
+        play_matches(model_path, conf['softmax_scale'], conf['reward'], train_data_path, conf['n_matches_play'])
+        train_model(training_model, train_data_path, conf)
+        model_path = os.path.join(model_dir, 'epoch_%04d.h5' % epoch_idx)
+        training_model.save(model_path, include_optimizer=False)
+        evaluate_model(model_path, conf['n_matches_eval'])
 
 
+def train_model(model, train_data_path, conf):
+    train_data = load_data(train_data_path)
     train_generator = generator(train_data, conf['train_batch_size'], data_augmentation=conf['data_augmentation'])
-    val_generator = generator(val_data, conf['val_batch_size'])
-
-
-    # Enqueuer
-    generator_params = dict(use_multiprocessing=False)
-    train_generator = tf.keras.utils.GeneratorEnqueuer(train_generator, **generator_params)
-    val_generator = tf.keras.utils.GeneratorEnqueuer(val_generator, **generator_params)
-    start_params = dict(workers=1, max_queue_size=10)
-    train_generator.start(**start_params)
-    val_generator.start(**start_params)
-
-    # test sampling speed
-    add_default_steps_if_missing(conf, train_data, val_data)
-    sampling_speed_generator = train_generator.get()
-    t0 = time.time()
-    for _ in tqdm(range(conf['fit_params']['steps_per_epoch']), desc='sampling speed test'):
-        next(sampling_speed_generator)
-    logger.info('It takes %.1f seconds to sample enough data for an epoch' % (time.time() - t0))
-
-    training_model.fit(
-        x=train_generator.get(), validation_data=val_generator.get(),
-        callbacks=callbacks, **conf['fit_params'])
+    train_generator = tf.keras.utils.GeneratorEnqueuer(train_generator, use_multiprocessing=False)
+    train_generator.start(workers=1, max_queue_size=10)
+    log_ram_usage()
+    conf['fit_params']['steps_per_epoch'] = len(train_data[0])//conf['train_batch_size']
+    model.fit(x=train_generator.get(),**conf['fit_params'])
     train_generator.stop()
-    val_generator.stop()
 
 
-def add_default_steps_if_missing(conf, train_data, val_data):
-    conf['fit_params']['steps_per_epoch'] = conf['fit_params'].get(
-        'steps_per_epoch', len(train_data[0])//conf['train_batch_size'])
-    conf['fit_params']['validation_steps'] = conf['fit_params'].get(
-        'validation_steps', len(val_data[0])//conf['val_batch_size'])
-    logger.info('fit_params: %s' % str(conf['fit_params']))
+def play_matches(model_path, softmax_scale, reward_name, train_data_path, n_matches):
+    logger.info('Playing matches in parallel')
+    command = 'python play_matches.py %s %.1f %s %s --n_matches %i' % (
+        model_path, softmax_scale, reward_name, train_data_path, n_matches)
+    os.system(command)
+
+
+def evaluate_model(model_path, n_matches):
+    logger.info('Evaluating model')
+    command = 'python evaluate_model.py %s --n_matches %i' % (model_path, n_matches)
+    os.system(command)
 
 
 def generator(train_data, batch_size, data_augmentation=False):
@@ -163,7 +156,6 @@ def create_callbacks(conf, model_folder, max_epochs):
             conf[key].pop('filename')
             callbacks.append(ModelCheckpoint(**conf[key]))
     return callbacks
-
 
 
 def parse_args(args):
