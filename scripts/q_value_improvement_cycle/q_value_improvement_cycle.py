@@ -40,11 +40,14 @@ def train_q_value(args):
     if 'pretrained_model' in conf:
         logger.info('loading pretrained model: %s' % conf['pretrained_model'])
         training_model = tf.keras.models.load_model(os.path.join(model_dir, conf['pretrained_model']))
+        model_path = os.path.join(model_dir, conf['pretrained_model'])
     else:
         logger.info('creating model')
         model = simple_model(**conf['model_params'])
         model.summary()
         training_model = create_model_for_training(model)
+        model_path = os.path.join(model_dir, 'random.h5')
+        training_model.save(model_path, include_optimizer=False)
 
     optimizer = tf.keras.optimizers.get(conf.get('optimizer', 'Adam'))
     optimizer.learning_rate = conf.get('learning_rate', 1e-3)
@@ -53,7 +56,6 @@ def train_q_value(args):
     log_ram_usage()
 
     train_data_path = os.path.join(model_dir, conf['train'])
-    model_path = os.path.join(model_dir, conf['pretrained_model'])
     scores = dict()
     for epoch_idx in range(conf['max_epochs']):
         logger.info('Starting epoch %i' % epoch_idx)

@@ -755,6 +755,11 @@ Data generation and evaluation will be done on parallel. Thus progress will be m
 
 I have to create the scripts to do this.
 
+![first experiments](res/2021-03-29-15-11-51.png)
+
+First experiments do not show signs of improvement. I'm going to try to train a model from zero
+to see what happens.
+
 
 ### Results
 
