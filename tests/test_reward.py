@@ -2,7 +2,8 @@ import pytest
 import numpy as np
 
 from hungry_geese.reward import (
-    get_n_geese_alive, get_sparse_reward, get_ranking_reward, get_cumulative_reward
+    get_n_geese_alive, get_sparse_reward, get_ranking_reward, get_cumulative_reward,
+    get_clipped_len_reward
 )
 
 @pytest.mark.parametrize('geese, n',  [
@@ -47,6 +48,31 @@ def test_ranking_reward(current_observation, reward_name, reward):
     (np.array([1., 0, 2]), 'ranking_reward_-1_3', np.array([1, 1, 2])),
     (np.ones(1), 'ranking_reward_-1_1', np.ones(1)),
     (np.ones(1), 'ranking_reward_-1_2', np.ones(1)),
+    (np.array([1., 0, 2]), 'clipped_len_reward_-10_3_2_-5', np.array([1, 1, 2])),
+    (np.array([1., 0, 2]), 'clipped_len_reward_-10_3_2_-5', np.array([1, 1, 2])),
 ])
 def test_get_cumulative_reward(rewards, reward_name, cumulative_reward):
     assert pytest.approx(cumulative_reward) == get_cumulative_reward(rewards, reward_name)
+
+@pytest.mark.parametrize("current_observation, reward_name, reward",[
+    ({'geese': [[1], [2]], 'index':0, 'step': 5}, 'clipped_len_reward_-10_4_2_-5', 0),
+    ({'geese': [[1], [2]], 'index':1, 'step': 5}, 'clipped_len_reward_-10_4_2_-5', 0),
+    ({'geese': [[1, 2], [2]], 'index':0, 'step': 5}, 'clipped_len_reward_-10_4_2_-5', 1),
+    ({'geese': [[1, 2, 3], [2]], 'index':0, 'step': 5}, 'clipped_len_reward_-10_4_2_-5', 2),
+    ({'geese': [[1, 2, 3, 4], [2]], 'index':0, 'step': 5}, 'clipped_len_reward_-10_4_2_-5', 2),
+    ({'geese': [[1, 2, 3, 4], [2]], 'index':0, 'step': 5}, 'clipped_len_reward_-10_4_3_-5', 3),
+    ({'geese': [[1, 2], [2]], 'index':1, 'step': 5}, 'clipped_len_reward_-10_4_2_-5', -1),
+    ({'geese': [[1, 2, 3], [2]], 'index':1, 'step': 5}, 'clipped_len_reward_-10_4_2_-5', -2),
+    ({'geese': [[1, 2, 3, 4], [2]], 'index':1, 'step': 5}, 'clipped_len_reward_-10_4_2_-5', -3),
+    ({'geese': [[1, 2, 3, 4], [2]], 'index':1, 'step': 5}, 'clipped_len_reward_-10_4_3_-2', -2),
+    ({'geese': [[1, 2, 3, 4], []], 'index':1, 'step': 5}, 'clipped_len_reward_-10_4_3_-2', -10),
+    ({'geese': [[1], [2], [3]], 'index':0, 'step': 5}, 'clipped_len_reward_-10_4_2_-5', 0),
+    ({'geese': [[1], [2], [3], [4]], 'index':0, 'step': 5}, 'clipped_len_reward_-10_4_2_-5', 0),
+    ({'geese': [[1, 2, 3, 4], [2, 3, 4], [3, 4], [4]], 'index':0, 'step': 5}, 'clipped_len_reward_-10_4_2_-5', 1),
+    ({'geese': [[1, 2, 3, 4], [2, 3, 4], [3, 4], [4]], 'index':1, 'step': 5}, 'clipped_len_reward_-10_4_2_-5', -1),
+    ({'geese': [[1, 2, 3, 4], [2, 3, 4], [3, 4], [4]], 'index':2, 'step': 5}, 'clipped_len_reward_-10_4_2_-5', -2),
+    ({'geese': [[1, 2, 3, 4], [2, 3, 4], [3, 4], [4]], 'index':3, 'step': 5}, 'clipped_len_reward_-10_4_2_-5', -3),
+    ({'geese': [[1, 2, 3, 4], [2, 3, 4], [3, 4], [4]], 'index':3, 'step': 5}, 'clipped_len_reward_-10_4_2_-2', -2),
+])
+def test_clipped_len_reward(current_observation, reward_name, reward):
+    assert reward == get_clipped_len_reward(current_observation, reward_name)

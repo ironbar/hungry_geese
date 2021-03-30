@@ -778,6 +778,28 @@ Maybe I could try running multiple trainings from zero, and see how the hyperpar
 experiments. Another option is to study matches from the best agent and try to understand why it is
 unable to improve.
 
+![histogram of len of matches](res/2021-03-30-19-28-17.png)
+
+This plots are very relevant. Some insights:
+
+- When using softmax policy almost all matches last 200 steps, the maximum.
+- In the other hand with epsilon greedy policy this number is much more smaller.
+
+So it seems that once the agent becomes too good to survive the whole match it struggles to improve.
+
+Let's study those matches in more detail.
+
+![study of matches that reach end](res/2021-03-30-19-28-51.png)
+
+We can see that there is a lot of variation both in geese len and the difference between geese.
+
+I think we need to update the reward, but not to modify the terminal state. If we modify the terminal
+state it will have small impact on the geese learning. I think we should reward when a geese is growing
+to catch up with the first one, and also to reward the first one when it grows, but not to encourage too much growing.
+
+Currently a goose is only rewarded based on its ranking, which is good but it is sparse.
+
+#### New reward
 
 ### Results
 

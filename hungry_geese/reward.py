@@ -6,6 +6,8 @@ def get_reward(current_observation, previous_observation, configuration, reward_
         return get_sparse_reward(current_observation, previous_observation, configuration)
     elif reward_name.startswith('ranking_reward'):
         return get_ranking_reward(current_observation, reward_name)
+    elif reward_name.startswith('clipped_len_reward'):
+        return get_clipped_len_reward(current_observation, reward_name)
     else:
         raise KeyError(reward_name)
 
@@ -13,8 +15,11 @@ def get_reward(current_observation, previous_observation, configuration, reward_
 def get_cumulative_reward(rewards, reward_name):
     if reward_name == 'sparse_reward':
         return np.cumsum(rewards[::-1])[::-1]
-    elif reward_name.startswith('ranking_reward'):
-        window_size = int(reward_name.split('_')[3])
+    elif reward_name.startswith('ranking_reward') or reward_name.startswith('clipped_len_reward'):
+        if reward_name.startswith('ranking_reward'):
+            window_size = int(reward_name.split('_')[3])
+        elif reward_name.startswith('clipped_len_reward'):
+            window_size = _get_clipped_len_reward_params_from_name(reward_name)[1]
         if window_size > len(rewards):
             window_size = len(rewards)
         cumulative_reward = np.array(rewards, dtype=np.float32)
@@ -60,6 +65,7 @@ def _get_terminal_sparse_reward(current_observation, previous_observation):
 def get_n_geese_alive(geese):
     return len([goose for goose in geese if goose])
 
+
 def get_ranking_reward(current_observation, reward_name):
     geese_len = [len(goose) for goose in current_observation['geese']]
     goose_len = geese_len[current_observation['index']]
@@ -76,3 +82,18 @@ def get_ranking_reward(current_observation, reward_name):
     else: # the agent has died
         return float(reward_name.split('_')[2])
 
+
+def get_clipped_len_reward(current_observation, reward_name):
+    death_reward, window, max_reward, min_reward = _get_clipped_len_reward_params_from_name(reward_name)
+    geese_len = [len(goose) for goose in current_observation['geese']]
+    goose_len = geese_len[current_observation['index']]
+    if goose_len: # then it is alive
+        max_len = max([geese_len[idx] for idx in range(len(geese_len)) if idx != current_observation['index']])
+        len_diff = goose_len - max_len
+        return np.clip(len_diff, min_reward, max_reward)
+    else: # the agent has died
+        return death_reward
+
+def _get_clipped_len_reward_params_from_name(reward_name):
+    death_reward, window, max_reward, min_reward = reward_name.split('_')[3:]
+    return float(death_reward), int(window), float(max_reward), float(min_reward)
