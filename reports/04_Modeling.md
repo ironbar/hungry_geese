@@ -760,6 +760,24 @@ I have to create the scripts to do this.
 First experiments do not show signs of improvement. I'm going to try to train a model from zero
 to see what happens.
 
+![train from zero](res/2021-03-30-17-38-03.png)
+
+Train from zero is successfull and we can achieve a score close to the one that we got with the
+pretrained model. In fact in less than one hour the model reaches a very good level of play.
+However it is unclear why we reach a point where the model is not able to improve.
+Let's think of explanations:
+
+- Parametrization of the training is not optimal (learning rate, number of matches, softmax scale...)
+- More model capacity is needed
+- Q learning function does not allow to improve from there
+- Maybe reward function should be different on the end of the game. It could be happening that terminal
+state is reached frequently and the agent has learnt to survive until that state, but has not learned
+that it needs to reach the final state on the first position.
+
+Maybe I could try running multiple trainings from zero, and see how the hyperparameters affect those
+experiments. Another option is to study matches from the best agent and try to understand why it is
+unable to improve.
+
 
 ### Results
 
