@@ -3,7 +3,7 @@ import numpy as np
 
 from hungry_geese.reward import (
     get_n_geese_alive, get_sparse_reward, get_ranking_reward, get_cumulative_reward,
-    get_clipped_len_reward
+    get_clipped_len_reward, get_grow_and_kill_reward
 )
 
 @pytest.mark.parametrize('geese, n',  [
@@ -50,6 +50,8 @@ def test_ranking_reward(current_observation, reward_name, reward):
     (np.ones(1), 'ranking_reward_-1_2', np.ones(1)),
     (np.array([1., 0, 2]), 'clipped_len_reward_-10_3_2_-5', np.array([1, 1, 2])),
     (np.array([1., 0, 2]), 'clipped_len_reward_-10_3_2_-5', np.array([1, 1, 2])),
+    (np.array([1., 0, 2]), 'grow_and_kill_reward_-1_3_3_1', np.array([1, 1, 2])),
+    (np.array([1., 0, 2]), 'grow_and_kill_reward_-1_3_3_1', np.array([1, 1, 2])),
 ])
 def test_get_cumulative_reward(rewards, reward_name, cumulative_reward):
     assert pytest.approx(cumulative_reward) == get_cumulative_reward(rewards, reward_name)
@@ -76,3 +78,16 @@ def test_get_cumulative_reward(rewards, reward_name, cumulative_reward):
 ])
 def test_clipped_len_reward(current_observation, reward_name, reward):
     assert reward == get_clipped_len_reward(current_observation, reward_name)
+
+@pytest.mark.parametrize("current_observation, previous_observation, reward_name, reward",[
+    ({'geese': [[1], [2]], 'index':0}, {'geese': [[1], [2]], 'index':0}, 'grow_and_kill_reward_-1_8_3_1', 0),
+    ({'geese': [[1, 2], [2]], 'index':0}, {'geese': [[1], [2]], 'index':0}, 'grow_and_kill_reward_-1_8_3_1', 1), #grow
+    ({'geese': [[], [2]], 'index':0}, {'geese': [[1], [2]], 'index':0}, 'grow_and_kill_reward_-1_8_3_1', -1), #die
+    ({'geese': [[], [2]], 'index':1}, {'geese': [[1], [2]], 'index':0}, 'grow_and_kill_reward_-1_8_3_1', 1), #kill
+    ({'geese': [[], [2]], 'index':1}, {'geese': [[1], [2]], 'index':0}, 'grow_and_kill_reward_-1_8_3_2', 2), #kill
+    ({'geese': [[1, 2, 3], [2]], 'index':0}, {'geese': [[1, 2], [2]], 'index':0}, 'grow_and_kill_reward_-1_8_3_1', 1), #grow
+    ({'geese': [[1, 2, 3, 4], [2]], 'index':0}, {'geese': [[1, 2, 3], [2]], 'index':0}, 'grow_and_kill_reward_-1_8_3_1', 1), #grow
+    ({'geese': [[1, 2, 3, 4, 5], [2]], 'index':0}, {'geese': [[1, 2, 3, 4], [2]], 'index':0}, 'grow_and_kill_reward_-1_8_3_1', 0), #do not grow too much
+])
+def test_grow_and_kill_reward(current_observation, previous_observation, reward_name, reward):
+    assert reward == get_grow_and_kill_reward(current_observation, previous_observation, reward_name)
