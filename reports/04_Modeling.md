@@ -799,11 +799,38 @@ to catch up with the first one, and also to reward the first one when it grows, 
 
 Currently a goose is only rewarded based on its ranking, which is good but it is sparse.
 
-#### New reward
+#### New reward: clipped len
+
+The new reward is simply the difference in length between the goose and the leader. If the goose
+is the leader then it's the difference with the second largest goose. Both values are clipped.
+This gives a more informative when the goose is growing but has not improved ranking, it also
+discourages the leader for becoming too big.
+
+However after training with this reward I get very similar results, there is no improvement. When
+observing the matches I notice that I was using a window of 4, and for many of the deaths it was necessary
+to look further into the future. Thus I have tried training a model with a window of 8, and after
+decreasing the learning rate it seems to be achieving better scores than previous experiments.
+
+![training metrics](res/2021-04-01-08-52-44.png)
+
+The pink line learns faster, and the green one achieves higher scores after decreasing the learning rate.
+So it seems that increasing the window size had a positive effect on learning speed, and that we had
+to decrease the learning rate to enable learning more subtle variations of the q learning function.
+
+#### New reward: grow and kill
+
+This reward will give +1 when the goose grows (except when it's the leader and already has some distance
+with the second) and also when other goose die.
+
+It's similar to the previous reward but more simple because the range of rewards is much more limitted.
+That may help learning.
 
 ### Results
 
 <!---
+
+What are the advantages of Q* learning? Check paragraph from Atari paper.
+Also there is no proof of convergence.
 
 
 
