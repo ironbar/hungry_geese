@@ -825,6 +825,22 @@ with the second) and also when other goose die.
 It's similar to the previous reward but more simple because the range of rewards is much more limitted.
 That may help learning.
 
+Surprisingly it achieves worse results than the previous reward.
+
+#### Could be a matter of scale?
+
+In the [forum](https://www.kaggle.com/ks2019/handy-rl-training-notebook) it is said that
+[HandyRL](https://github.com/DeNA/HandyRL) example was trained for 800k matches.
+
+In the other hand the last training played only ~50k matches in 7 hours. Only half of that time was
+devoted to playing, the rest was devoted to evaluation.
+
+For playing and evaluation I use cpu and parallelization. The whole cpu is used, so there is no
+room for improvement there. However I believe that a big jump could be made if using gpu for playing.
+
+However to make gpu faster than cpu I have to made multiple predictions, not one by one. Thus I should
+create a way to play in multiple matches at the same time.
+
 ### Results
 
 <!---
