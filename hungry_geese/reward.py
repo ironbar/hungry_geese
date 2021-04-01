@@ -1,3 +1,25 @@
+"""
+# Reward summary
+
+## Sparse reward
+
+This gives a reward each time that other agent dies. At the end of the
+match it gives an extra reward depending on the ranking.
+
+## Ranking reward
+
+The reward is the current ranking of the agent on the match
+
+## Clipped len reward
+
+The reward is the difference between the leading goose and the agent, clipped.
+If the agent is leading then is the difference with the second.
+
+## Grow and kill reward
+
+Growing gives reward and also the death of the other agents
+"""
+
 import numpy as np
 
 

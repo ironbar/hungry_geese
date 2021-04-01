@@ -833,13 +833,32 @@ In the [forum](https://www.kaggle.com/ks2019/handy-rl-training-notebook) it is s
 [HandyRL](https://github.com/DeNA/HandyRL) example was trained for 800k matches.
 
 In the other hand the last training played only ~50k matches in 7 hours. Only half of that time was
-devoted to playing, the rest was devoted to evaluation.
+devoted to playing, the rest was devoted to evaluation. I'm able to play around 5 matches per second.
+If we estimate the mean match length to be 150 that is 750 steps per second.
 
 For playing and evaluation I use cpu and parallelization. The whole cpu is used, so there is no
 room for improvement there. However I believe that a big jump could be made if using gpu for playing.
 
 However to make gpu faster than cpu I have to made multiple predictions, not one by one. Thus I should
 create a way to play in multiple matches at the same time.
+
+### Results
+
+On this iteration I have:
+
+- Started to use softmax exploration instead of epsilon greedy
+- Automated the process of playing, training and evaluation
+- Understood that we need to look far in the future for take good decisions
+- Could not improve significatively the quantum agent score
+
+## Iteration 5. Scale Q learning
+
+### Goal
+
+The goal of this iteration is to use gpu for playing games and thus be much faster and train on a much
+bigger number of matches.
+
+### Development
 
 ### Results
 
