@@ -936,6 +936,36 @@ evaluations less frequently.
 So I'm going to train on the best configuration so far increasing the model capacity and doing
 evaluation only each 20 epochs. This will make the learning faster.
 
+I don't like the oscilatory behaviour that I see on the loss, some ideas to improve it:
+
+- Increase the number of matches of play
+- Decrease the number of epochs that we train on the data
+- Decrease the learning rate (this did not seem to have effect on a previous experiment)
+- Maybe it is simply randomness or surprise on the metrics
+
+#### Why the problem is very hard
+
+##### Hyperparameters
+
+- Which agents to choose to play with
+- Reward
+- Model architecture
+- Exploration policy
+- Learning rate
+- Number of matches to play
+- Number of epochs to train
+
+All these hyperparameters could be harming the learning capacity of the model.
+
+#### Making a submission
+
+It seems that the submission needs to be a single python file with all the code inside (and also the model)
+
+- https://www.kaggle.com/nejumi/let-s-create-your-agent-by-supervised-learning/
+- https://www.kaggle.com/nejumi/keras-model-trained-by-imitation-learning
+
+By looking at those example I have been able to create my first submission.
+
 ### Results
 
 <!---
