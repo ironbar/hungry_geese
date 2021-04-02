@@ -860,6 +860,74 @@ bigger number of matches.
 
 ### Development
 
+#### Theoretical numbers
+
+On last iteration we saw that we were able to play around 5 matches per second when using all the
+cpus. Let's get a number for prediction speed.
+
+```
+20 cores/5 matches/4 players/150 steps *1000 miliseconds = 6.6 miliseconds
+```
+
+In that time it is included running the environment and preparing the input for the model, not
+just the model prediction.
+
+#### Experimental numbers
+
+| batch | cpu mean sample prediction time  | cpu speedup | gpu mean sampling time |       |
+|-------|----------------------------------|-------------|------------------------|-------|
+| 1     | 3537                             | 1.0         | 6849                   | 0.5   |
+| 2     | 2520                             | 1.4         | 3949                   | 0.9   |
+| 4     | 1232                             | 2.9         | 1653                   | 2.1   |
+| 8     | 474                              | 7.5         | 880                    | 4.0   |
+| 16    | 246                              | 14.4        | 339                    | 10.4  |
+| 32    | 160                              | 22.1        | 149                    | 23.7  |
+| 64    | 102                              | 34.7        | 115                    | 30.8  |
+| 128   | 56                               | 63.2        | 55                     | 64.3  |
+| 256   | 35                               | 101.1       | 25                     | 141.5 |
+| 512   | 21                               | 168.4       | 19                     | 186.2 |
+| 1024  | 14                               | 252.6       | 12                     | 294.8 |
+| 2048  | 10                               | 353.7       | 7                      | 505.3 |
+| 4096  | 7                                | 505.3       | 6                      | 589.5 |
+| 8192  | 10                               | 353.7       | 7                      | 505.3 |
+
+- For this model using gpu for prediction does not bring improvements, probably it does for training
+but not for prediction
+- We can get speedups up to 500 if we make predictions using big batch size such as 4096.
+- However in this table we are missing the paralelization of doing multiple predictions at the same time
+
+| batch | cpu mean sample prediction time  | cpu speedup | parallelization factor | Ideal matches/second | matches speedup |
+|-------|----------------------------------|-------------|------------------------|----------------------|-----------------|
+| 1     | 3537                             | 1.0         | 20.0                   | 9                    | 1               |
+| 2     | 2520                             | 1.4         | 20.0                   | 13                   | 1               |
+| 4     | 1232                             | 2.9         | 20.0                   | 27                   | 3               |
+| 8     | 474                              | 7.5         | 20.0                   | 70                   | 7               |
+| 16    | 246                              | 14.4        | 20.0                   | 136                  | 14              |
+| 32    | 160                              | 22.1        | 20.0                   | 208                  | 22              |
+| 64    | 102                              | 34.7        | 20.0                   | 327                  | 35              |
+| 128   | 56                               | 63.2        | 16.0                   | 476                  | 51              |
+| 256   | 35                               | 101.1       | 8.0                    | 381                  | 40              |
+| 512   | 21                               | 168.4       | 4.0                    | 317                  | 34              |
+| 1024  | 14                               | 252.6       | 2.0                    | 238                  | 25              |
+| 2048  | 10                               | 353.7       | 2.0                    | 333                  | 35              |
+| 4096  | 7                                | 505.3       | 2.0                    | 476                  | 51              |
+| 8192  | 10                               | 353.7       | 2.0                    | 333                  | 35              |
+
+If we take into account parallelization it seems we could get around 50x speedups.
+For example using a batch size of 128, which implies playing 32 matches at the same time would
+result on a speedup of around 50.
+
+However we are ignoring that current implementation is more eficient in the sense that when an agent
+has died it no longer wastes resources.
+
+#### Better comparison with HandyRL
+
+> P.S. It took 1 day with 1 GPU and 64 CPUs to train the shared model.
+> It took around 1,500 epochs with 800,000 games.
+> That gives a rough speed estimate of around 9 matches per second (excluding training)
+
+If we realize that I only have 20 cpus then my speed of 5 matches per second is not that bad.
+
 ### Results
 
 <!---
