@@ -928,6 +928,14 @@ has died it no longer wastes resources.
 
 If we realize that I only have 20 cpus then my speed of 5 matches per second is not that bad.
 
+So maybe instead of focusing on playing speed I should optimize train data generation, or run
+evaluations less frequently.
+
+#### Increase model capacity
+
+So I'm going to train on the best configuration so far increasing the model capacity and doing
+evaluation only each 20 epochs. This will make the learning faster.
+
 ### Results
 
 <!---

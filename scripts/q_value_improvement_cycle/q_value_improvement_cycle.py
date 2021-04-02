@@ -63,7 +63,10 @@ def train_q_value(args):
         train_model(training_model, train_data_path, conf, callbacks, epoch_idx, scores)
         model_path = os.path.join(model_dir, 'epoch_%04d.h5' % epoch_idx)
         training_model.save(model_path, include_optimizer=False)
-        scores = evaluate_model(model_path, conf['n_matches_eval'])
+        if epoch_idx % conf.get('evaluation_period', 1) == 0:
+            scores = evaluate_model(model_path, conf['n_matches_eval'])
+        else:
+            scores = dict()
 
 
 def train_model(model, train_data_path, conf, callbacks, epoch_idx, scores):
