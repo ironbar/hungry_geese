@@ -56,20 +56,21 @@ def train_q_value(args):
     log_ram_usage()
 
     train_data_path = os.path.join(model_dir, conf['train'])
-    scores = dict()
+    other_metrics = dict()
     for epoch_idx in range(conf['max_epochs']):
+        other_metrics['n_matches'] = (epoch_idx+1)*conf['n_matches_play']
         logger.info('Starting epoch %i' % epoch_idx)
         play_matches(model_path, conf['softmax_scale'], conf['reward'], train_data_path, conf['n_matches_play'])
-        train_model(training_model, train_data_path, conf, callbacks, epoch_idx, scores)
+        train_model(training_model, train_data_path, conf, callbacks, epoch_idx, other_metrics)
         model_path = os.path.join(model_dir, 'epoch_%04d.h5' % epoch_idx)
         training_model.save(model_path, include_optimizer=False)
         if epoch_idx % conf.get('evaluation_period', 1) == 0:
-            scores = evaluate_model(model_path, conf['n_matches_eval'])
+            other_metrics = evaluate_model(model_path, conf['n_matches_eval'])
         else:
-            scores = dict()
+            other_metrics = dict()
 
 
-def train_model(model, train_data_path, conf, callbacks, epoch_idx, scores):
+def train_model(model, train_data_path, conf, callbacks, epoch_idx, other_metrics):
     train_data = load_data(train_data_path)
     train_generator = generator(train_data, conf['train_batch_size'], data_augmentation=conf['data_augmentation'])
     train_generator = tf.keras.utils.GeneratorEnqueuer(train_generator, use_multiprocessing=False)
@@ -77,7 +78,8 @@ def train_model(model, train_data_path, conf, callbacks, epoch_idx, scores):
     log_ram_usage()
     conf['fit_params']['steps_per_epoch'] = len(train_data[0])//conf['train_batch_size']
     initial_epoch = int(epoch_idx*conf['fit_epochs'])
-    aditional_callbacks = [LogConstantValue(key, value) for key, value in scores.items()]
+    other_metrics['steps'] = len(train_data[0])
+    aditional_callbacks = [LogConstantValue(key, value) for key, value in other_metrics.items()]
     model.fit(x=train_generator.get(), callbacks=(aditional_callbacks + callbacks), initial_epoch=initial_epoch,
               epochs=(initial_epoch + conf['fit_epochs']),
               **conf['fit_params'])
