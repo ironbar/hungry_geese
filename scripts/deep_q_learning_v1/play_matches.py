@@ -96,7 +96,7 @@ def create_train_data(matches_results, reward_name, output_path, agent_idx_range
     env = make("hungry_geese")
     conf = env.configuration
 
-    state = GameState(reward_name=reward_name)
+    state = GameState(reward_name=reward_name, apply_reward_acumulation=False)
     train_data = []
     agent_idx_range = agent_idx_range or list(range(4))
 

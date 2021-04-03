@@ -12,7 +12,8 @@ class GameState():
     Class that stores all observations and creates a game state made of the board
     and some features that are useful for planning
     """
-    def __init__(self, egocentric_board=True, normalize_features=True, reward_name='sparse_reward'):
+    def __init__(self, egocentric_board=True, normalize_features=True, reward_name='sparse_reward',
+                 apply_reward_acumulation=True):
         self.history = []
         self.boards = []
         self.features = []
@@ -22,6 +23,7 @@ class GameState():
         self.egocentric_board = egocentric_board
         self.normalize_features = normalize_features
         self.reward_name = reward_name
+        self.apply_reward_acumulation = apply_reward_acumulation
 
     def update(self, observation, configuration):
         """
@@ -102,12 +104,15 @@ class GameState():
         rewards: np.array
             Cumulative reward received during the episode (steps,)
         """
-        cumulative_reward = get_cumulative_reward(self.rewards, self.reward_name)
-        actions = np.array(self.actions[:len(cumulative_reward)])
+        if self.apply_reward_acumulation:
+            reward = get_cumulative_reward(self.rewards, self.reward_name)
+        else:
+            reward = self.rewards
+        actions = np.array(self.actions[:len(reward)])
         for action, idx in ACTION_TO_IDX.items():
             actions[actions == action] = idx
         actions = keras.utils.to_categorical(actions, num_classes=4)
-        return [np.array(self.boards[:len(actions)], dtype=np.int8), np.array(self.features[:len(actions)]), actions, cumulative_reward]
+        return [np.array(self.boards[:len(actions)], dtype=np.int8), np.array(self.features[:len(actions)]), actions, reward]
 
     def _compute_features(self, observation):
         """
