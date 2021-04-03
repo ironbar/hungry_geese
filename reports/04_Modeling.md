@@ -1018,7 +1018,8 @@ comparison with monte carlo.
 I have identified the following changes that are needed:
 
 - is_terminal_state, I need to save this data in order to be able to compute the target reward
-- opposite_action_mask, This is needed to filter that action previously to applying max operator
+- opposite_action_mask, This is needed to filter that action previously to applying max operator.
+I think I can have this mask simply by rotation the action array by 2.
 - do not acumulate reward, I need the reward at each step
 
 When training I will load the data, that should be sorted, compute the target values and train.
