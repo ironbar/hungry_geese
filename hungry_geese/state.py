@@ -262,8 +262,4 @@ def apply_all_simetries(data):
     return combine_data(all_data)
 
 def combine_data(all_data):
-    boards = np.concatenate([_data[0] for _data in all_data])
-    features = np.concatenate([_data[1] for _data in all_data])
-    actions = np.concatenate([_data[2] for _data in all_data])
-    rewards = np.concatenate([_data[3] for _data in all_data])
-    return boards, features, actions, rewards
+    return [np.concatenate([_data[idx] for _data in all_data]) for idx in range(len(all_data[0]))]
