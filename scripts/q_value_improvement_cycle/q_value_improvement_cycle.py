@@ -9,6 +9,7 @@ from functools import partial
 import time
 import random
 import subprocess
+import gc
 
 from kaggle_environments import make
 import tensorflow as tf
@@ -83,7 +84,12 @@ def train_model(model, train_data_path, conf, callbacks, epoch_idx, other_metric
     model.fit(x=train_generator.get(), callbacks=(aditional_callbacks + callbacks), initial_epoch=initial_epoch,
               epochs=(initial_epoch + conf['fit_epochs']),
               **conf['fit_params'])
+
     train_generator.stop()
+    del aditional_callbacks
+    del train_generator
+    del train_data
+    gc.collect()
 
 
 def play_matches(model_path, softmax_scale, reward_name, train_data_path, n_matches):

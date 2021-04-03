@@ -948,7 +948,7 @@ I don't like the oscilatory behaviour that I see on the loss, some ideas to impr
 ##### Hyperparameters
 
 - Which agents to choose to play with
-- Reward
+- Reward (I have already designed 4 different rewards)
 - Model architecture
 - Exploration policy
 - Learning rate
@@ -965,6 +965,8 @@ It seems that the submission needs to be a single python file with all the code 
 - https://www.kaggle.com/nejumi/keras-model-trained-by-imitation-learning
 
 By looking at those example I have been able to create my first submission.
+
+After a day submissions have a score between 800-900, which sits in the middle of the leaderboard.
 
 ### Results
 
