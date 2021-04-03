@@ -20,7 +20,7 @@ from hungry_geese.callbacks import (
     LogEpochTime, LogLearningRate, LogRAM, LogCPU, LogGPU, LogETA, GarbageCollector, LogConstantValue
 )
 from hungry_geese.utils import log_ram_usage, configure_logging
-from hungry_geese.state import vertical_simmetry, horizontal_simmetry, player_simmetry
+from hungry_geese.state import apply_all_simetries
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +65,7 @@ def train_q_value(args):
         train_model(training_model, train_data_path, conf, callbacks, epoch_idx, other_metrics)
         model_path = os.path.join(model_dir, 'epoch_%04d.h5' % epoch_idx)
         training_model.save(model_path, include_optimizer=False)
-        if epoch_idx % conf.get('evaluation_period', 1) == 0:
+        if epoch_idx % conf.get('evaluation_period', 1) == 0 and epoch_idx:
             other_metrics = evaluate_model(model_path, conf['n_matches_eval'])
         else:
             other_metrics = dict()
@@ -73,21 +73,18 @@ def train_q_value(args):
 
 def train_model(model, train_data_path, conf, callbacks, epoch_idx, other_metrics):
     train_data = load_data(train_data_path)
-    train_generator = generator(train_data, conf['train_batch_size'], data_augmentation=conf['data_augmentation'])
-    train_generator = tf.keras.utils.GeneratorEnqueuer(train_generator, use_multiprocessing=False)
-    train_generator.start(workers=1, max_queue_size=10)
+    train_data = apply_all_simetries(train_data)
+
     log_ram_usage()
-    conf['fit_params']['steps_per_epoch'] = len(train_data[0])//conf['train_batch_size']
     initial_epoch = int(epoch_idx*conf['fit_epochs'])
     other_metrics['steps'] = len(train_data[0])
     aditional_callbacks = [LogConstantValue(key, value) for key, value in other_metrics.items()]
-    model.fit(x=train_generator.get(), callbacks=(aditional_callbacks + callbacks), initial_epoch=initial_epoch,
+    model.fit(x=train_data[:3], y=train_data[3], batch_size=conf['train_batch_size'],
+              callbacks=(aditional_callbacks + callbacks), initial_epoch=initial_epoch,
               epochs=(initial_epoch + conf['fit_epochs']),
               **conf['fit_params'])
 
-    train_generator.stop()
     del aditional_callbacks
-    del train_generator
     del train_data
     gc.collect()
 
@@ -108,34 +105,6 @@ def evaluate_model(model_path, n_matches):
     logger.info('Multi agent elo score: %i' % elo_multi)
     logger.info('Single agent elo score: %i' % elo_single)
     return dict(elo_multi=elo_multi, elo_single=elo_single)
-
-
-def generator(train_data, batch_size, data_augmentation=False):
-    idx_range = np.arange(len(train_data[0]))
-    num_splits = len(idx_range)//batch_size
-    logger.info('Looping over the dataset will take %i steps' % num_splits)
-    while 1:
-        np.random.shuffle(idx_range)
-        for idx in range(num_splits):
-            split_idx = idx_range[idx*batch_size:(idx+1)*batch_size]
-            batch_data = [data[split_idx] for data in train_data]
-            if data_augmentation:
-                batch_data = apply_data_augmentation(batch_data)
-            x = (batch_data[0].astype(np.float32), batch_data[1], batch_data[2])
-            y = batch_data[3]
-            yield (x, y)
-
-
-def apply_data_augmentation(batch_data):
-    if random.randint(0, 1):
-        batch_data = vertical_simmetry(batch_data)
-    if random.randint(0, 1):
-        batch_data = horizontal_simmetry(batch_data)
-    if random.uniform(0, 1) > 0.16:
-        all_permutations = [(0, 2, 1), (1, 0, 2), (1, 2, 0), (2, 0, 1), (2, 1, 0)]
-        new_positions = all_permutations[random.randint(0, 4)]
-        batch_data = player_simmetry(batch_data, new_positions)
-    return batch_data
 
 
 def load_data(filepath):
