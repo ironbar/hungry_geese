@@ -263,3 +263,13 @@ def apply_all_simetries(data):
 
 def combine_data(all_data):
     return [np.concatenate([_data[idx] for _data in all_data]) for idx in range(len(all_data[0]))]
+
+def get_ohe_opposite_actions(actions):
+    """
+    Returns the opposite action given the actions in ohe encoding
+    It simply rotates the matrix 2 positions to the right
+    """
+    opposite_actions = actions.copy()
+    opposite_actions[:, :2] = actions[:, 2:]
+    opposite_actions[:, 2:] = actions[:, :2]
+    return opposite_actions

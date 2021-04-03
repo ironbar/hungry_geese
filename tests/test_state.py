@@ -1,10 +1,11 @@
 import pytest
+import numpy as np
 from kaggle_environments import make
 
 from hungry_geese.state import (
     get_steps_to_shrink, get_steps_to_die, get_steps_to_end,
     GameState, horizontal_simmetry, vertical_simmetry, player_simmetry,
-    permutations, combine_data, apply_all_simetries
+    permutations, combine_data, apply_all_simetries, get_ohe_opposite_actions
 )
 
 @pytest.mark.parametrize('step, hunger_rate, steps_to_shrink',  [
@@ -75,3 +76,9 @@ def test_combine_data(train_data):
 def test_apply_all_simetries(train_data):
     new_data = apply_all_simetries(train_data)
     assert len(new_data[0]) == len(train_data[0])*24
+
+def test_get_ohe_opposite_actions():
+    actions = np.eye(4)
+    opposite_actions = get_ohe_opposite_actions(actions)
+    assert pytest.approx(actions[:2]) == opposite_actions[2:]
+    assert pytest.approx(actions) == get_ohe_opposite_actions(opposite_actions)
