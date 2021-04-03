@@ -995,14 +995,44 @@ impact on the learning of the model.
 
 So that leaves only the tool of learning rate. We have to experiment with smaller learning rates.
 
+It seems that decreasing the learning rate is having a clear effect on the loss, which is more
+stable. However we have to wait to see if that translates into a better elo score.
+
+## Iteration 6. Deep Q* Learning
+
+### Goal
+
+The goal of this iteration is to try to create an agent that is consistently better than quantum
+agent by applying Deep Q* Learning.
+
+We have seen that there is a wall around 1400 elo score that models trained with monte carlo
+returns cannot pass. Hopefully using temporal difference for learning will break that wall.
+
+### Development
+
+#### Implementation
+
+I would like to make the minimal changes to existing code on a first step to enable to most fair
+comparison with monte carlo.
+
+I have identified the following changes that are needed:
+
+- is_terminal_state, I need to save this data in order to be able to compute the target reward
+- opposite_action_mask, This is needed to filter that action previously to applying max operator
+- do not acumulate reward, I need the reward at each step
+
+When training I will load the data, that should be sorted, compute the target values and train.
+
+### Results
+
 ### Results
 
 <!---
 
+
+
 What are the advantages of Q* learning? Check paragraph from Atari paper.
 Also there is no proof of convergence.
-
-
 
 ## Iteration n. title
 
@@ -1011,6 +1041,8 @@ Also there is no proof of convergence.
 ### Development
 
 ### Results
+
+
 
 
 https://towardsdatascience.com/understanding-actor-critic-methods-931b97b6df3f
