@@ -73,11 +73,11 @@ def train_q_value(args):
 
 def train_model(model, train_data_path, conf, callbacks, epoch_idx, other_metrics):
     train_data = load_data(train_data_path)
+    other_metrics['mean_match_steps'] = len(train_data[0])/4/conf['n_matches_play']
     train_data = apply_all_simetries(train_data)
 
     log_ram_usage()
     initial_epoch = int(epoch_idx*conf['fit_epochs'])
-    other_metrics['steps'] = len(train_data[0])
     aditional_callbacks = [LogConstantValue(key, value) for key, value in other_metrics.items()]
     model.fit(x=train_data[:3], y=train_data[3], batch_size=conf['train_batch_size'],
               callbacks=(aditional_callbacks + callbacks), initial_epoch=initial_epoch,

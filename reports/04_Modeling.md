@@ -938,8 +938,10 @@ evaluation only each 20 epochs. This will make the learning faster.
 
 I don't like the oscilatory behaviour that I see on the loss, some ideas to improve it:
 
-- Increase the number of matches of play
-- Decrease the number of epochs that we train on the data
+- Increase the number of matches of play, does not seem to fix the issue.
+- Decrease the number of epochs that we train on the data. I have found that training for more epochs than 5
+is beneficial. This may have sense because our data augmentation multiplies the data by 24. Thus I
+have updated the script to use all data augmentations.
 - Decrease the learning rate (this did not seem to have effect on a previous experiment)
 - Maybe it is simply randomness or surprise on the metrics
 
@@ -967,6 +969,31 @@ It seems that the submission needs to be a single python file with all the code 
 By looking at those example I have been able to create my first submission.
 
 After a day submissions have a score between 800-900, which sits in the middle of the leaderboard.
+
+#### High variance on Monte Carlo methods
+
+Montecarlo estimates have high variance, whereas temporal difference methods do not.
+
+- https://stats.stackexchange.com/questions/336974/when-are-monte-carlo-methods-preferred-over-temporal-difference-ones
+- https://ai.stackexchange.com/questions/17810/how-does-monte-carlo-have-high-variance
+
+> In practice, TD learning appears to learn more efficiently if the problems with the deadly triad can be overcome. Recent results using experience replay and staged "frozen" copies of estimators provide work-arounds that address problems - e.g. that is how DQN learner for Atari games was built.
+
+> In terms of "practical advantage" for MC? Monte Carlo learning is conceptually simple, robust and easy to implement, albeit often slower than TD.
+
+So maybe that is what is blocking me on 1400 elo score.
+
+Without changing to temporal difference I only see two options to deal with the high variance:
+
+- Increase the number of matches
+- Reduce the learning rate
+
+However increasing the number of matches will only make that when we update the model we use more
+data. It won't have any impact on learning or in the variance. It may reduce the variance of the
+loss metrics, because we use a bigger dataset for creating that losses, but won't have too much
+impact on the learning of the model.
+
+So that leaves only the tool of learning rate. We have to experiment with smaller learning rates.
 
 ### Results
 
