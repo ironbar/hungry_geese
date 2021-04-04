@@ -1,4 +1,5 @@
 import os
+import glob
 import sys
 import argparse
 import numpy as np
@@ -20,7 +21,7 @@ from hungry_geese.callbacks import (
     LogEpochTime, LogLearningRate, LogRAM, LogCPU, LogGPU, LogETA, GarbageCollector, LogConstantValue
 )
 from hungry_geese.utils import log_ram_usage, configure_logging
-from hungry_geese.state import apply_all_simetries, get_ohe_opposite_actions
+from hungry_geese.state import apply_all_simetries, get_ohe_opposite_actions, combine_data
 
 logger = logging.getLogger(__name__)
 
@@ -59,13 +60,13 @@ def deep_q_learning(args):
     callbacks = create_callbacks(model_dir)
     log_ram_usage()
 
-    train_data_path = os.path.join(model_dir, conf['train'])
     other_metrics = dict()
     for epoch_idx in range(conf['max_epochs']):
         other_metrics['n_matches'] = (epoch_idx+1)*conf['n_matches_play']
         logger.info('Starting epoch %i' % epoch_idx)
+        train_data_path = os.path.join(model_dir, 'epoch_%04d.npz' % epoch_idx)
         play_matches(model_path, conf['softmax_scale'], conf['reward'], train_data_path, conf['n_matches_play'])
-        train_model(training_model, model, train_data_path, conf, callbacks, epoch_idx, other_metrics)
+        train_model(training_model, model, conf, callbacks, epoch_idx, other_metrics)
         model_path = os.path.join(model_dir, 'epoch_%04d.h5' % epoch_idx)
         training_model.save(model_path, include_optimizer=False)
         if epoch_idx % conf.get('evaluation_period', 1) == 0 and epoch_idx:
@@ -74,15 +75,16 @@ def deep_q_learning(args):
             other_metrics = dict()
 
 
-def train_model(training_model, model, train_data_path, conf, callbacks, epoch_idx, other_metrics):
-    train_data = load_data(train_data_path)
-    other_metrics['mean_match_steps'] = len(train_data[0])/4/conf['n_matches_play']
+def train_model(training_model, model, conf, callbacks, epoch_idx, other_metrics):
+    other_metrics['state_value'] = compute_state_value_evolution(
+        model, os.path.join(conf['model_dir'], conf['random_matches']), conf['pred_batch_size'])
+
+    train_data, steps_last_file = sample_train_data(
+        conf['model_dir'], conf['aditional_files_for_training'], conf['epochs_to_sample_files_for_training'])
+    other_metrics['mean_match_steps'] = steps_last_file/4/conf['n_matches_play']
     target = compute_q_learning_target(model, train_data, conf['discount_factor'], conf['pred_batch_size'])
     train_data = train_data[:3] + [target]
     train_data = apply_all_simetries(train_data)
-
-    other_metrics['state_value'] = compute_state_value_evolution(
-        model, os.path.join(conf['model_dir'], conf['random_matches']), conf['pred_batch_size'])
 
     log_ram_usage()
     initial_epoch = int(epoch_idx*conf['fit_epochs'])
@@ -118,13 +120,31 @@ def evaluate_model(model_path, n_matches):
     return dict(elo_multi=elo_multi, elo_single=elo_single)
 
 
-def load_data(filepath):
-    logger.info('loading %s' % filepath)
+def sample_train_data(model_dir, aditional_files, epochs_to_sample):
+    filepaths = sorted(glob.glob(os.path.join(model_dir, 'epoch*.npz')))
+    train_data = [load_data(filepaths[-1])]
+    steps_last_file = len(train_data[0][0])
+
+    candidates = filepaths[-epochs_to_sample-1:-1]
+    if candidates:
+        if len(candidates) > aditional_files:
+            samples = np.random.choice(candidates, aditional_files, replace=False)
+        else:
+            samples = candidates
+        for sample in samples:
+            logger.info('Loading aditional file for training: %s' % sample)
+            train_data = [load_data(sample, verbose=False)]
+    return combine_data(train_data), steps_last_file
+
+
+
+def load_data(filepath, verbose=True):
+    if verbose: logger.info('loading %s' % filepath)
     data = np.load(filepath)
     output = [data['boards'], data['features'], data['actions'], data['rewards'], data['is_not_terminal']]
     log_ram_usage()
-    logger.info('data types: %s' % str([array.dtype for array in output]))
-    logger.info('data shapes: %s' % str([array.shape for array in output]))
+    if verbose: logger.info('data types: %s' % str([array.dtype for array in output]))
+    if verbose: logger.info('data shapes: %s' % str([array.shape for array in output]))
     return output
 
 

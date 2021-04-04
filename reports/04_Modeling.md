@@ -1048,6 +1048,16 @@ plotting the same metrics on the other five games produces similarly smooth curv
 
 Thus it has sense to do the same because it may be useful to tune the hyperparameters.
 
+#### Experience replay
+
+> We trained for a total of 10 million frames and used a replay memory of one million most recent frames.
+
+I'm going to do something similar to this. I will save data from each epoch on a different file. When
+going to train I will load the last data and random n aditional files of the last m epochs. Thus I
+have two parameters to play with. I don't think I could use more than ~5 files for training due
+to RAM memory issues, but I don't expect that would be necessary.
+
+So I have to first implement that and then test if it improves learning.
 
 <!---
 I can identify 3 major factors that we have to study:
