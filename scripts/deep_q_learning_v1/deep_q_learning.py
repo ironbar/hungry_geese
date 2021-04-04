@@ -102,7 +102,9 @@ def play_matches(model_path, softmax_scale, reward_name, train_data_path, n_matc
 
 def evaluate_model(model_path, n_matches):
     logger.info('Evaluating model')
-    command = 'python evaluate_model.py %s --n_matches %i' % (model_path, n_matches)
+    command = 'python "%s" %s --n_matches %i' % (
+        '/mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/scripts/q_value_improvement_cycle/evaluate_model.py',
+        model_path, n_matches)
     output = subprocess.getoutput(command).split('\n')
     elo_multi = int(output[-2].split('score: ')[-1])
     elo_single = int(output[-1].split('score: ')[-1])
