@@ -124,16 +124,16 @@ def sample_train_data(model_dir, aditional_files, epochs_to_sample):
     filepaths = sorted(glob.glob(os.path.join(model_dir, 'epoch*.npz')))
     train_data = [load_data(filepaths[-1])]
     steps_last_file = len(train_data[0][0])
-
-    candidates = filepaths[-epochs_to_sample-1:-1]
-    if candidates:
-        if len(candidates) > aditional_files:
-            samples = np.random.choice(candidates, aditional_files, replace=False)
-        else:
-            samples = candidates
-        for sample in samples:
-            logger.info('Loading aditional file for training: %s' % sample)
-            train_data = [load_data(sample, verbose=False)]
+    if aditional_files:
+        candidates = filepaths[-epochs_to_sample-1:-1]
+        if candidates:
+            if len(candidates) > aditional_files:
+                samples = np.random.choice(candidates, aditional_files, replace=False)
+            else:
+                samples = candidates
+            for sample in samples:
+                logger.info('Loading aditional file for training: %s' % sample)
+                train_data += [load_data(sample, verbose=False)]
     return combine_data(train_data), steps_last_file
 
 
