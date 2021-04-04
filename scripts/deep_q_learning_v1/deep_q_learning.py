@@ -30,13 +30,15 @@ def main(args=None):
     if args is None:
         args = sys.argv[1:]
     args = parse_args(args)
-    train_q_value(args)
+    deep_q_learning(args)
 
-def train_q_value(args):
+
+def deep_q_learning(args):
     configure_logging()
     with open(args.config_path, 'r') as f:
         conf = yaml.safe_load(f)
     model_dir = os.path.dirname(os.path.realpath(args.config_path))
+    conf['model_dir'] = model_dir
 
     if 'pretrained_model' in conf:
         logger.info('loading pretrained model: %s' % conf['pretrained_model'])
@@ -78,6 +80,9 @@ def train_model(training_model, model, train_data_path, conf, callbacks, epoch_i
     target = compute_q_learning_target(model, train_data, conf['discount_factor'], conf['pred_batch_size'])
     train_data = train_data[:3] + [target]
     train_data = apply_all_simetries(train_data)
+
+    other_metrics['state_value'] = compute_state_value_evolution(
+        model, os.path.join(conf['model_dir'], conf['random_matches']), conf['pred_batch_size'])
 
     log_ram_usage()
     initial_epoch = int(epoch_idx*conf['fit_epochs'])
@@ -139,6 +144,11 @@ def compute_state_value(model, train_data, batch_size):
     state_value = np.max(pred_q_values - opposite_actions*1e3, axis=1)
     return state_value
 
+
+def compute_state_value_evolution(model, data_path, batch_size):
+    data = load_data(data_path)
+    state_value = compute_state_value(model, data, batch_size)
+    return np.mean(state_value)
 
 def create_callbacks(model_folder):
     """

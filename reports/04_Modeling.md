@@ -1036,6 +1036,18 @@ it has sense to add a new agent each 100 elo points. I will also make a submissi
 
 The name comes because there was a wall on 1400 elo score that was broken this night.
 
+#### Logging evolution of Q value
+
+In the Atari paper it is said that logging the evolution of Q value over random play episodes is a
+good indicator of the convergence of the algorithm.
+
+> We collect a fixed set of states by running a random policy before training starts and track the average
+of the maximum predicted Q for these states. The two rightmost plots in figure 2 show that average
+predicted Q increases much more smoothly than the average total reward obtained by the agent and
+plotting the same metrics on the other five games produces similarly smooth curves.
+
+Thus it has sense to do the same because it may be useful to tune the hyperparameters.
+
 
 <!---
 I can identify 3 major factors that we have to study:
