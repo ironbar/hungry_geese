@@ -126,13 +126,18 @@ def load_data(filepath):
 def compute_q_learning_target(model, train_data, discount_factor, batch_size):
     reward = train_data[3]
     is_not_terminal = train_data[4]
+    state_value = compute_state_value(model, train_data, batch_size)
+    target = reward + is_not_terminal*discount_factor*state_value
+    return target
+
+
+def compute_state_value(model, train_data, batch_size):
     actions = train_data[2]
     opposite_actions = get_ohe_opposite_actions(actions)
     pred_q_values = model.predict(train_data[:2], batch_size=batch_size, verbose=1)
     pred_q_values[:-1] = pred_q_values[1:] # we use the next state for the prediction
-    bootstrap = np.max(pred_q_values - opposite_actions*1e3, axis=1)
-    target = reward + is_not_terminal*discount_factor*bootstrap
-    return target
+    state_value = np.max(pred_q_values - opposite_actions*1e3, axis=1)
+    return state_value
 
 
 def create_callbacks(model_folder):

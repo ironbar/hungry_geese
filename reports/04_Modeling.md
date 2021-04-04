@@ -998,6 +998,8 @@ So that leaves only the tool of learning rate. We have to experiment with smalle
 It seems that decreasing the learning rate is having a clear effect on the loss, which is more
 stable. However we have to wait to see if that translates into a better elo score.
 
+### Results
+
 ## Iteration 6. Deep Q* Learning
 
 ### Goal
@@ -1024,7 +1026,24 @@ I think I can have this mask simply by rotation the action array by 2.
 
 When training I will load the data, that should be sorted, compute the target values and train.
 
-### Results
+First training yields a score above 1500, which  was the goal when I started training agents. So
+I'm very happy with it. Hopefully we can achieve even higher scores.
+
+#### WallBreaker: a new agent to the pool
+
+I'm going to add this new agent wallbreaker with a elo score of 1515 to the pool of agents. I think
+it has sense to add a new agent each 100 elo points. I will also make a submission with it.
+
+The name comes because there was a wall on 1400 elo score that was broken this night.
+
+
+<!---
+I can identify 3 major factors that we have to study:
+
+- Model capacity
+- Reward function
+- Experience replay
+--->
 
 ### Results
 
