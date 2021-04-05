@@ -61,9 +61,11 @@ def torus_model(torus_filters, summary_conv_filters, summary_conv_activations,
 
 
 def torus_conv_bn_relu_block(x, n_filters):
-    x = keras.layers.Lambda(
-        lambda x: keras.backend.tile(x, n=(1, 3, 3, 1))[:, x.shape[1]-1:2*x.shape[1]+1, x.shape[2]-1:2*x.shape[2]+1,:],
-        output_shape=lambda input_shape: (None, input_shape[1]+2, 3*input_shape[2]+2, input_shape[3]))(x)
+    # import tensorflow.keras as keras
+    # x = keras.layers.Lambda(
+    #     lambda x: keras.backend.tile(x, n=(1, 3, 3, 1))[:, x.shape[1]-1:2*x.shape[1]+1, x.shape[2]-1:2*x.shape[2]+1,:],
+    #     output_shape=lambda input_shape: (None, input_shape[1]+2, 3*input_shape[2]+2, input_shape[3]))(x)
+    x = keras.backend.tile(x, n=(1, 3, 3, 1))[:, x.shape[1]-1:2*x.shape[1]+1, x.shape[2]-1:2*x.shape[2]+1,:]
     x = keras.layers.Conv2D(n_filters, (3, 3), padding='valid')(x)
     x = keras.layers.BatchNormalization()(x)
     x = keras.layers.Activation("relu")(x)

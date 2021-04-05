@@ -16,7 +16,7 @@ from kaggle_environments import make
 import tensorflow as tf
 from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 
-from hungry_geese.model import simple_model, create_model_for_training
+from hungry_geese.model import simple_model, torus_model, create_model_for_training
 from hungry_geese.callbacks import (
     LogEpochTime, LogLearningRate, LogRAM, LogCPU, LogGPU, LogETA, GarbageCollector, LogConstantValue
 )
@@ -48,7 +48,7 @@ def deep_q_learning(args):
         model = tf.keras.models.Model(inputs=training_model.inputs[:2], outputs=training_model.get_layer('action').output)
     else:
         logger.info('creating model')
-        model = simple_model(**conf['model_params'])
+        model = globals()[conf['model']](**conf['model_params'])
         model.summary()
         training_model = create_model_for_training(model)
         model_path = os.path.join(model_dir, 'random.h5')
@@ -169,6 +169,7 @@ def compute_state_value_evolution(model, data_path, batch_size):
     data = load_data(data_path)
     state_value = compute_state_value(model, data, batch_size)
     return np.mean(state_value)
+
 
 def create_callbacks(model_folder):
     """
