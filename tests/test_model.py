@@ -19,3 +19,16 @@ def test_create_model_for_training():
         mlp_activations=['relu', 'tanh'])
     training_model = create_model_for_training(model)
     keras.backend.clear_session()
+
+def test_create_torus_model():
+    model = torus_model(
+        torus_filters=[1, 1],
+        summary_conv_filters=[1, 1, 1],
+        summary_conv_activations=['relu', 'relu', 'relu'],
+        feature_encoder_units=1,
+        feature_encoder_activation='relu',
+        mlp_units=[1, 1],
+        mlp_activations=['relu', 'tanh'],
+        )
+    model.summary()
+    keras.backend.clear_session()

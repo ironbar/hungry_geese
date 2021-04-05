@@ -1059,13 +1059,50 @@ to RAM memory issues, but I don't expect that would be necessary.
 
 So I have to first implement that and then test if it improves learning.
 
-<!---
+#### Hyperparemeter tuning
+
 I can identify 3 major factors that we have to study:
 
 - Model capacity
-- Reward function
+- Reward function and discount factor
 - Experience replay
---->
+
+I have been doing fast experiments of 80 epochs, where the model sees a total of 64k matches. I have the feeling
+that is not enough. So I'm going to run experiments 4 times longer to better measure the effect of the
+parameters.
+
+
+```python
+import glob
+import os
+import time
+
+while 1:
+    time.sleep(2)
+    filepaths = sorted(glob.glob('/mnt/hdd0/Kaggle/hungry_geese/models/35_deep_q_learning/*/train_conf.yml'))
+    print(filepaths)
+    for filepath in filepaths:
+        if os.path.exists(os.path.join(os.path.dirname(filepath), 'logs')):
+            continue
+        os.system('python deep_q_learning.py %s' % filepath)
+history
+```
+
+I'm going to first study the optimal learning rate for the current architecture, then I will start
+applying experience replay.
+
+#### Torus model
+
+I have seen in the forum that people are using a Torus convolution. Instead of adding black borders
+to keep the convolution size constant, they repeat the board. This has sense because the board has
+no end, it is a torus.
+
+Thus I would like to try that approach.
+
+- https://www.kaggle.com/nejumi/keras-model-trained-by-imitation-learning
+- https://www.kaggle.com/yuricat/smart-geese-trained-by-reinforcement-learning
+
+Moreover the proposed architecture is much more deep than mine, although less wide.
 
 ### Results
 
