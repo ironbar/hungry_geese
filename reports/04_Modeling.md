@@ -1104,6 +1104,15 @@ Thus I would like to try that approach.
 
 Moreover the proposed architecture is much more deep than mine, although less wide.
 
+#### Data augmentation at test
+
+I have experimented with data augmentation at prediction, and elo score improves slighlty.
+
+| model                         | elo single | elo multi |
+|-------------------------------|------------|-----------|
+| wallbreaker                   | 1513       | 1507      |
+| wallbreaker_data_augmentation | 1541       | 1529      |
+
 ### Results
 
 <!---
