@@ -1113,7 +1113,18 @@ I have experimented with data augmentation at prediction, and elo score improves
 | wallbreaker                   | 1513       | 1507      |
 | wallbreaker_data_augmentation | 1541       | 1529      |
 
+#### Training for longer
+
+Since I don't see improvements I'm going to train for longer. Instead of using 320 epochs I will use
+1500 epochs. That would take around a day for the baseline model and would be a total of 1.2 M of episodes
+(300k unique episodes).
+
 ### Results
+
+First experiments do not show clear changes between different architectures or when using experience
+replay. Batch normalization does not seem to bring improvements and makes the model much slower.
+I was training for 320k epochs, maybe longer trainings are needed. For example for wallbreaker
+model I trained for more than 600k epochs. Let's try witht longer trainings.
 
 <!---
 
