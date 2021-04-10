@@ -1,6 +1,24 @@
 import pytest
+import numpy as np
 
-from hungry_geese.heuristic import is_future_position_doomed, is_food_around_head
+from hungry_geese.heuristic import (
+    is_future_position_doomed, is_food_around_head,
+    get_certain_death_mask
+)
+
+
+@pytest.mark.parametrize('observation, mask', [
+    ({'index': 0, 'geese': [[1, 2]]}, np.zeros(4)),
+    ({'index': 0, 'geese': [[1, 2, 13, 12, 11]]}, np.array([0, 1, 1, 0])),
+    ({'index': 0, 'geese': [[1, 2, 13, 12]]}, np.array([0, 1, 0, 0])),
+    ({'index': 0, 'geese': [[1, 2, 13, 12], [55, 66, 0, 11]]}, np.array([0, 1, 0, 1])),
+    ({'index': 0, 'geese': [[1, 2, 13, 12], [66, 0, 11]]}, np.array([0.5, 1, 0, 1])),
+])
+def test_get_certain_death_mask(observation, mask):
+    configuration = dict(columns=11, rows=7)
+    certain_death_mask = get_certain_death_mask(observation, configuration)
+    assert pytest.approx(mask) == certain_death_mask
+
 
 @pytest.mark.parametrize('future_position, observation, is_doomed', [
     (1, {'index': 0, 'geese': [[1, 2]]}, 1),
