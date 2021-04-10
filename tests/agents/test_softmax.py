@@ -86,6 +86,10 @@ def test_agent_update_previous_action(train_info):
 def test_SoftmaxSafeAgent_play():
     agent = SoftmaxSafeAgent(FakeModelRandom(), scale=4)
     env = make("hungry_geese", debug=True)
-    ret = env.run([agent] + ['greedy']*3)
-    print(ret[-1])
-    assert False
+    agents = [
+        SoftmaxSafeAgent(FakeModelRandom(), scale=4),
+        SoftmaxSafeAgent(FakeModelRandom(), scale=4),
+        SoftmaxSafeAgent(FakeModelRandom(), scale=4),
+        SoftmaxSafeAgent(FakeModelRandom(), scale=4)]
+    match = env.run(agents)
+    assert all(None not in agent.state.actions for agent in agents)
