@@ -13,6 +13,7 @@ from hungry_geese.heuristic import (
     ({'index': 0, 'geese': [[1, 2, 13, 12]]}, np.array([0, 1, 0, 0])),
     ({'index': 0, 'geese': [[1, 2, 13, 12], [55, 66, 0, 11]]}, np.array([0, 1, 0, 1])),
     ({'index': 0, 'geese': [[1, 2, 13, 12], [66, 0, 11]]}, np.array([0.5, 1, 0, 1])),
+    ({'index': 0, 'geese': [[12, 1, 2, 13, 24, 23, 22, 11, 0]]}, np.array([1, 1, 1, 1])),
 ])
 def test_get_certain_death_mask(observation, mask):
     configuration = dict(columns=11, rows=7)
