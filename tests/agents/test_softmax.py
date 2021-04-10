@@ -99,5 +99,5 @@ def test_SoftmaxSafeAgent_makes_legal_action_on_certain_death_situation():
     agent.previous_action = 'NORTH'
     observation = {'index': 0, 'geese': [[12, 1, 2, 13, 24, 23, 22, 11, 0]]}
     configuration = dict(columns=11, rows=7)
-    actions = [agent.select_action(np.ones(4), observation, configuration)]
+    actions = [agent.select_action(np.ones(4), observation, configuration) for _ in range(100)]
     assert 2 not in actions

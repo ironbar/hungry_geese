@@ -55,17 +55,12 @@ class SoftmaxSafeAgent(SoftmaxAgent):
     def select_action(self, prediction, observation, configuration):
         certain_death_mask = get_certain_death_mask(observation, configuration)
         prediction -= certain_death_mask*1e3
-        probabilities = softmax(prediction*self.scale)
-
-        # if self.previous_action is not None:
-        #     probabilities[ACTION_TO_IDX[opposite_action(self.previous_action)]] = 0
-        #     probabilities /= np.sum(probabilities)
-
         if self.previous_action is not None:
             idx_to_avoid = ACTION_TO_IDX[opposite_action(self.previous_action)]
-            remaining_idx = [idx for idx in range(4) if idx != idx_to_avoid]
-            probabilities = probabilities[remaining_idx]
-            probabilities /= np.sum(probabilities)
-            return int(np.random.choice(remaining_idx, size=1, p=probabilities))
+            idx_choices = [idx for idx in range(4) if idx != idx_to_avoid]
+            prediction = prediction[idx_choices]
         else:
-            return int(np.random.choice(4, size=1, p=probabilities))
+            idx_choices = 4
+
+        probabilities = softmax(prediction*self.scale)
+        return int(np.random.choice(idx_choices, size=1, p=probabilities))
