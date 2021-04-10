@@ -3,6 +3,7 @@ import numpy as np
 from hungry_geese.state import GameState
 from hungry_geese.definitions import ACTIONS, ACTION_TO_IDX
 from hungry_geese.utils import opposite_action
+from hungry_geese.heuristic import get_certain_death_mask
 
 class QValueAgent():
     def __init__(self, model):
@@ -15,7 +16,7 @@ class QValueAgent():
         board, features = self.state.update(observation, configuration)
         q_value = np.array(self.model.predict_step([np.expand_dims(board, axis=0), np.expand_dims(features, axis=0)])[0])
         self.q_values.append(q_value.copy())
-        action = ACTIONS[self.select_action(q_value)]
+        action = ACTIONS[self.select_action(q_value, observation, configuration)]
         self.previous_action = action
         self.state.add_action(action)
         return action
@@ -30,8 +31,18 @@ class QValueAgent():
         self.previous_action = previous_action
         self.state.update_last_action(previous_action)
 
-    def select_action(self, q_value):
+    def select_action(self, q_value, observation, configuration):
         q_value += np.random.uniform(0, 1e-3, len(q_value))
+        if self.previous_action is not None:
+            q_value[ACTION_TO_IDX[opposite_action(self.previous_action)]] -= 1e6
+        return np.argmax(q_value)
+
+
+class QValueSafeAgent(QValueAgent):
+    def select_action(self, q_value, observation, configuration):
+        q_value += np.random.uniform(0, 1e-3, len(q_value))
+        certain_death_mask = get_certain_death_mask(observation, configuration)
+        q_value -= certain_death_mask*1e3
         if self.previous_action is not None:
             q_value[ACTION_TO_IDX[opposite_action(self.previous_action)]] -= 1e6
         return np.argmax(q_value)
