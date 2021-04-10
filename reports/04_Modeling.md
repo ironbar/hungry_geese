@@ -1119,6 +1119,31 @@ Since I don't see improvements I'm going to train for longer. Instead of using 3
 1500 epochs. That would take around a day for the baseline model and would be a total of 1.2 M of episodes
 (300k unique episodes).
 
+### Reflections
+
+It is surprising that an apparent simply game is so hard to learn, at least to play it at a good level
+(because the model is able to achieve good score quite fast).
+
+Why it takes so long to improve or learn? My first intuition is that typically on machine learning
+we learn from zero, whereas humans do have a lot of experience when they learn to play a game. This
+gives me two ideas:
+
+1. One way to speedup learning is to reduce the search space. One way would be to prevent trying
+movements that will lead to a certain death. Another option will be to have the geese always oriented
+in the same position and only 3 movements allowed.
+2. The second option is to use a model of the game for planning. We do not need to learn a model if
+it is already available. We could try a system such as alphazero where the predictions of the model
+are used to guide the planning search.
+
+As a more general reflection for the future this highlights the difficulties of reinforcement learning.
+I think it validates my intuition that imitation learning or pretraining should be the way to go.
+
+#### Reduce the search space by avoiding certain deaths
+
+The idea is to create a function that returns a binary mask for the movements that will have ones
+on those movements that lead to death. This way the agent will avoid stupid deaths and could focus
+its energy on learning a more advanced policy.
+
 ### Results
 
 First experiments do not show clear changes between different architectures or when using experience
@@ -1126,20 +1151,7 @@ replay. Batch normalization does not seem to bring improvements and makes the mo
 I was training for 320k epochs, maybe longer trainings are needed. For example for wallbreaker
 model I trained for more than 600k epochs. Let's try witht longer trainings.
 
-## Reflections
 
-It is surprising that an apparent simply game is so hard to learn, at least to play it at a good level
-(because the model is able to achieve good score quite fast). 
-
-Why it takes so long to improve or learn? My first intuition is that typically on machine learning
-we learn from zero, whereas humans do have a lot of experience when they learn to play a game. This 
-gives me two ideas:
-
-1. One way to speedup learning is to reduce the search space. One way would be to prevent trying movements that will lead to a certain death. Another option will be to have the geese always oriented in the same position and only 3 movements allowed. 
-2. The second option is to use a model of the game for planning. We do not need to learn a model if it is already available. We could try a system such as alphazero where the predictions of the model are used to guide the planning search.
-
-As a more general reflection for the future this highlights the difficulties of reinforcement learning.
-I think it validates my intuition that imitation learning or pretraining should be the way to go.
 
 <!---
 
