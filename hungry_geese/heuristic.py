@@ -18,7 +18,7 @@ def get_certain_death_mask(observation, configuration):
     geese = observation['geese']
     head_position = geese[observation['index']][0]
     future_positions = adjacent_positions(head_position, configuration['columns'], configuration['rows'])
-    certain_death_mask = np.array([is_future_position_doomed(future_position, observation, configuration) for future_position in future_positions])
+    certain_death_mask = np.array([is_future_position_doomed(future_position, observation, configuration) for future_position in future_positions], dtype=np.float32)
     return certain_death_mask
 
 def is_future_position_doomed(future_position, observation, configuration):

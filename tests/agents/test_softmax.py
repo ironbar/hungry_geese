@@ -2,8 +2,11 @@ import pytest
 import random
 import numpy as np
 
-from hungry_geese.agents import SoftmaxAgent
+from kaggle_environments import make
+
+from hungry_geese.agents import SoftmaxAgent, SoftmaxSafeAgent
 from hungry_geese.utils import ACTIONS, opposite_action
+
 
 random.seed(7)
 np.random.seed(7)
@@ -79,3 +82,10 @@ def test_agent_update_previous_action(train_info):
     assert agent.previous_action == 'SOUTH'
     assert agent.state.actions[-1] == 'SOUTH'
     assert len(agent.state.actions) == 1
+
+def test_SoftmaxSafeAgent_play():
+    agent = SoftmaxSafeAgent(FakeModelRandom(), scale=4)
+    env = make("hungry_geese", debug=True)
+    ret = env.run([agent] + ['greedy']*3)
+    print(ret[-1])
+    assert False

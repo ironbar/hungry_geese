@@ -76,8 +76,9 @@ def deep_q_learning(args):
 
 
 def train_model(training_model, model, conf, callbacks, epoch_idx, other_metrics):
-    other_metrics['state_value'] = compute_state_value_evolution(
-        model, os.path.join(conf['model_dir'], conf['random_matches']), conf['pred_batch_size'])
+    if 'random_matches' in conf:
+        other_metrics['state_value'] = compute_state_value_evolution(
+            model, os.path.join(conf['model_dir'], conf['random_matches']), conf['pred_batch_size'])
 
     train_data, steps_last_file = sample_train_data(
         conf['model_dir'], conf['aditional_files_for_training'], conf['epochs_to_sample_files_for_training'])
