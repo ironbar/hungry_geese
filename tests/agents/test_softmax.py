@@ -84,7 +84,6 @@ def test_agent_update_previous_action(train_info):
     assert len(agent.state.actions) == 1
 
 def test_SoftmaxSafeAgent_play():
-    agent = SoftmaxSafeAgent(FakeModelRandom(), scale=4)
     env = make("hungry_geese", debug=True)
     agents = [
         SoftmaxSafeAgent(FakeModelRandom(), scale=4),

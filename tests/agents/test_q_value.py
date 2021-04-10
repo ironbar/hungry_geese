@@ -1,8 +1,9 @@
 import pytest
 import random
 import numpy as np
+from kaggle_environments import make
 
-from hungry_geese.agents import QValueAgent
+from hungry_geese.agents import QValueAgent, QValueSafeAgent
 from hungry_geese.utils import ACTIONS, opposite_action
 
 random.seed(7)
@@ -71,3 +72,13 @@ def test_agent_update_previous_action(train_info):
     assert agent.previous_action == 'SOUTH'
     assert agent.state.actions[-1] == 'SOUTH'
     assert len(agent.state.actions) == 1
+
+def test_QValueSafeAgent_play():
+    env = make("hungry_geese", debug=True)
+    agents = [
+        QValueSafeAgent(FakeModelRandom()),
+        QValueSafeAgent(FakeModelRandom()),
+        QValueSafeAgent(FakeModelRandom()),
+        QValueSafeAgent(FakeModelRandom())]
+    match = env.run(agents)
+    assert all(None not in agent.state.actions for agent in agents)
