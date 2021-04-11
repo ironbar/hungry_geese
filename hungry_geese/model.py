@@ -11,7 +11,7 @@ def simple_model(conv_filters, conv_activations, mlp_units, mlp_activations):
     output = keras.layers.concatenate([board_encoder, features_input])
     for units, activation in zip(mlp_units, mlp_activations):
         output = keras.layers.Dense(units, activation=activation)(output)
-    output = keras.layers.Dense(4, activation='linear', name='action')(output)
+    output = keras.layers.Dense(4, activation='linear', name='action', use_bias=False)(output)
 
     model = keras.models.Model(inputs=[board_input, features_input], outputs=output)
     return model
@@ -54,7 +54,7 @@ def torus_model(torus_filters, summary_conv_filters, summary_conv_activations,
     for units, activation in zip(mlp_units, mlp_activations):
         output = dense_bn_activation_block(output, units, activation)
 
-    output = keras.layers.Dense(4, activation='linear', name='action')(output)
+    output = keras.layers.Dense(4, activation='linear', name='action', use_bias=False)(output)
 
     model = keras.models.Model(inputs=[board_input, features_input], outputs=output)
     return model
