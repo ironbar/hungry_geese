@@ -1144,6 +1144,26 @@ The idea is to create a function that returns a binary mask for the movements th
 on those movements that lead to death. This way the agent will avoid stupid deaths and could focus
 its energy on learning a more advanced policy.
 
+#### Discount factor and Q* learning
+
+When I started the challenge I tried with Q learning and I remembering having to decrease the discount
+factor or the window size because the function was undetermined. When the game started it was very
+difficult to predict the final position of the player, furthermore if playing against the same
+agents where we always have the same distribution of final positions.
+
+However in Q* learning that is not the case because we are predicting what the final position will
+be if the player acts optimal on following steps. So we can increase the discount factor and see
+that it has a desirable effect on some of the metrics, althought not in the most important one which
+is elo score.
+
+TODO: add plots showing the effect of modifying the discount factor
+
+This may be an explanation for the wall we were seeing when doing Q learning. We were limited by the
+small window size and also for learning with self-play.
+
+This is clearly game-changing. On all previous experiments I was reaching a mean number of game steps
+around 130 and now I'm reaching 180+ simply by changing the discount factor and playing safe.
+
 ### Results
 
 First experiments do not show clear changes between different architectures or when using experience
@@ -1159,6 +1179,8 @@ model I trained for more than 600k epochs. Let's try witht longer trainings.
 
 What are the advantages of Q* learning? Check paragraph from Atari paper.
 Also there is no proof of convergence.
+
+Next iteration should be about using a model for planning
 
 ## Iteration n. title
 
