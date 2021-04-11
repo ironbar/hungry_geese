@@ -1156,13 +1156,16 @@ be if the player acts optimal on following steps. So we can increase the discoun
 that it has a desirable effect on some of the metrics, althought not in the most important one which
 is elo score.
 
-TODO: add plots showing the effect of modifying the discount factor
+![the bigger the discount factor the bigger the mean match steps](res/2021-04-11-18-13-09.png)
 
 This may be an explanation for the wall we were seeing when doing Q learning. We were limited by the
 small window size and also for learning with self-play.
 
 This is clearly game-changing. On all previous experiments I was reaching a mean number of game steps
 around 130 and now I'm reaching 180+ simply by changing the discount factor and playing safe.
+
+However when visualiziang games we have seen that the model has not learned a good enough reward function,
+sometimes ignores food and sometimes does not know that death is ahead.
 
 ### Results
 
