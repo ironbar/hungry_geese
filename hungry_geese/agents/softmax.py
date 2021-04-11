@@ -53,11 +53,12 @@ class SoftmaxAgent():
         else:
             idx_choices = 4
 
-        probabilities = softmax(prediction*self.scale)
+        prediction -= np.mean(prediction) # to stabilize softmax
+        probabilities = softmax(np.clip(prediction*self.scale, -100, 80)) # clip to avoid overflow and underflow
         return int(np.random.choice(idx_choices, size=1, p=probabilities))
 
 def softmax(x):
-    output = np.exp(x) + 1e-4
+    output = np.exp(x)
     return output / np.sum(output)
 
 class SoftmaxSafeAgent(SoftmaxAgent):
