@@ -22,11 +22,11 @@ def main(args=None):
     if args is None:
         args = sys.argv[1:]
     args = parse_args(args)
-    simple_model_evaluation(args.model_path, n_matches=args.n_matches)
+    simple_model_evaluation(args.model_path, args.template_path, n_matches=args.n_matches)
 
 
-def simple_model_evaluation(model_path, n_matches=500):
-    template_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'evaluation_template.py')
+def simple_model_evaluation(model_path, template_path, n_matches=500):
+    # template_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'evaluation_template.py')
     with open(template_path, 'r') as f:
         text = f.read()
     text = text.replace('model_path', os.path.realpath(model_path))
@@ -107,6 +107,7 @@ def parse_args(args):
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         epilog=epilog)
     parser.add_argument('model_path', help='Path to the keras model')
+    parser.add_argument('template_path', help='Path to the python file with template for playing')
     parser.add_argument('--n_matches', help='Number of matches that we want to run', type=int, default=500)
     return parser.parse_args(args)
 

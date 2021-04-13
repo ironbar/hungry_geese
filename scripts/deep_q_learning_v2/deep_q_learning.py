@@ -70,7 +70,7 @@ def deep_q_learning(args):
         model_path = os.path.join(model_dir, 'epoch_%04d.h5' % epoch_idx)
         training_model.save(model_path, include_optimizer=False)
         if epoch_idx % conf.get('evaluation_period', 1) == 0 and epoch_idx:
-            other_metrics = evaluate_model(model_path, conf['n_matches_eval'])
+            other_metrics = evaluate_model(model_path, conf['evaluate_template'], conf['n_matches_eval'])
         else:
             other_metrics = dict()
 
@@ -108,11 +108,11 @@ def play_matches(model_path, softmax_scale, reward_name, train_data_path, n_matc
     os.system(command)
 
 
-def evaluate_model(model_path, n_matches):
+def evaluate_model(model_path, template_path, n_matches):
     logger.info('Evaluating model')
-    command = 'python "%s" %s --n_matches %i' % (
+    command = 'python "%s" "%s" "%s" --n_matches %i' % (
         'evaluate_model.py',
-        model_path, n_matches)
+        model_path, template_path, n_matches)
     output = subprocess.getoutput(command).split('\n')
     elo_multi = int(output[-2].split('score: ')[-1])
     elo_single = int(output[-1].split('score: ')[-1])
