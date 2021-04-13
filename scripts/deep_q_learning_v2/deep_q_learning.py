@@ -41,10 +41,16 @@ def deep_q_learning(args):
     model_dir = os.path.dirname(os.path.realpath(args.config_path))
     conf['model_dir'] = model_dir
 
-    if 'pretrained_model' in conf:
-        logger.info('loading pretrained model: %s' % conf['pretrained_model'])
-        training_model = tf.keras.models.load_model(os.path.join(model_dir, conf['pretrained_model']))
-        model_path = os.path.join(model_dir, conf['pretrained_model'])
+    if 'pretrained_model' in conf or get_last_saved_model(model_dir):
+        if 'pretrained_model' in conf:
+            start_epoch = 0
+            model_path = os.path.join(model_dir, conf['pretrained_model'])
+            logger.info('loading pretrained model: %s' % conf['pretrained_model'])
+        else:
+            model_path = get_last_saved_model(model_dir)
+            logger.info('continuing training from: %s' % os.path.basename(model_path))
+            start_epoch = int(model_path.split('epoch_')[-1].split('.h5')[0])
+        training_model = tf.keras.models.load_model(model_path)
         model = tf.keras.models.Model(inputs=training_model.inputs[:2], outputs=training_model.get_layer('action').output)
     else:
         logger.info('creating model')
@@ -53,6 +59,7 @@ def deep_q_learning(args):
         training_model = create_model_for_training(model)
         model_path = os.path.join(model_dir, 'random.h5')
         training_model.save(model_path, include_optimizer=False)
+        start_epoch = 0
 
     optimizer = tf.keras.optimizers.get(conf.get('optimizer', 'Adam'))
     optimizer.learning_rate = conf.get('learning_rate', 1e-3)
@@ -61,7 +68,7 @@ def deep_q_learning(args):
     log_ram_usage()
 
     other_metrics = dict()
-    for epoch_idx in range(conf['max_epochs']):
+    for epoch_idx in range(start_epoch, conf['max_epochs']):
         other_metrics['n_matches'] = (epoch_idx+1)*conf['n_matches_play']
         logger.info('Starting epoch %i' % epoch_idx)
         train_data_path = os.path.join(model_dir, 'epoch_%04d.npz' % epoch_idx)
@@ -171,6 +178,13 @@ def compute_state_value_evolution(model, data_path, batch_size):
     data = load_data(data_path)
     state_value = compute_state_value(model, data, batch_size)
     return np.mean(state_value)
+
+
+def get_last_saved_model(model_dir):
+    models = sorted(glob.glob(os.path.join(model_dir, 'epoch*.h5')))
+    if models:
+        return models[-1]
+    return False
 
 
 def create_callbacks(model_folder):
