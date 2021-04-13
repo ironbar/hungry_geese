@@ -8,6 +8,8 @@ import logging
 from functools import partial
 import time
 import random
+import yaml
+import pandas as pd
 from concurrent.futures import ProcessPoolExecutor
 from kaggle_environments import make
 
@@ -29,11 +31,12 @@ def main(args=None):
     args = parse_args(args)
     simple_model_softmax_policy_data_generation(
         args.model_path, args.softmax_scale, args.output, args.n_matches, args.reward_name,
-        template_path=args.template_path)
+        template_path=args.template_path, play_against_top_n=args.play_against_top_n)
 
 
 def simple_model_softmax_policy_data_generation(model_path, softmax_scale, output_path,
-                                                n_matches, reward_name, template_path):
+                                                n_matches, reward_name, template_path,
+                                                play_against_top_n):
     # template_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'play_template.py')
     with open(template_path, 'r') as f:
         text = f.read()
@@ -43,9 +46,22 @@ def simple_model_softmax_policy_data_generation(model_path, softmax_scale, outpu
         agent_filepath = os.path.join(tempdir, 'agent.py')
         with open(agent_filepath, 'w') as f:
             f.write(text)
-
-        matches = play_matches_in_parallel(agents=[agent_filepath]*4, n_matches=n_matches)
-        create_train_data(matches, reward_name, output_path)
+        if not play_against_top_n:
+            matches = play_matches_in_parallel(agents=[agent_filepath]*4, n_matches=n_matches)
+            create_train_data(matches, reward_name, output_path)
+        else:
+            script_path = os.path.realpath(__file__)
+            repo_path = os.path.dirname(os.path.dirname(os.path.dirname(script_path)))
+            current_elo_ranking = pd.read_csv(os.path.join(repo_path, 'data/elo_ranking.csv'), index_col='model')
+            with open(os.path.join(repo_path, 'data/agents.yml'), 'r') as f:
+                agents = yaml.safe_load(f)
+            adversary_names = current_elo_ranking.index.values[:play_against_top_n].tolist()
+            # logger.info('Playing against: %s' % str(adversary_names))
+            # print('Playing against: %s' % str(adversary_names))
+            adversaries = [agents[name] for name in adversary_names]
+            sample_func = lambda: [agent_filepath] + np.random.choice(adversaries, size=3).tolist()
+            matches = play_matches_in_parallel(agents=[agent_filepath]*4, n_matches=n_matches)
+            create_train_data(matches, reward_name, output_path, agent_idx_range=[0])
 
 
 def play_matches_in_parallel(agents, max_workers=20, n_matches=1000, running_on_notebook=False):
@@ -141,7 +157,7 @@ def create_train_data(matches_results, reward_name, output_path, agent_idx_range
 
 def parse_args(args):
     epilog = """
-    python scripts/q_value_improvement_cycle/play_matches.py /mnt/hdd0/Kaggle/hungry_geese/models/31_iterating_over_softmax_policy/01_it1_2000_lr4e4/pretrained_model.h5 8 ranking_reward_-4_4 delete.npz "/mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/scripts/deep_q_learning_v2/softmax_safe_agent_template.py" --n_matches 50
+    python scripts/deep_q_learning_v2/play_matches.py /mnt/hdd0/Kaggle/hungry_geese/models/31_iterating_over_softmax_policy/01_it1_2000_lr4e4/pretrained_model.h5 8 ranking_reward_-4_4 delete.npz "/mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/scripts/deep_q_learning_v2/softmax_safe_agent_template.py" --n_matches 50
     """
     parser = argparse.ArgumentParser(
         description='Play matches in parallel using a model',
@@ -153,6 +169,9 @@ def parse_args(args):
     parser.add_argument('output', help='Path to the npz file that will be created with the matches', type=str)
     parser.add_argument('template_path', help='Path to the python file with template for playing')
     parser.add_argument('--n_matches', help='Number of matches that we want to run', type=int, default=500)
+    parser.add_argument('--play_against_top_n',
+                        help='If given it will play against top n agents, otherwise it will do self-play',
+                        type=int, default=0)
     return parser.parse_args(args)
 
 
