@@ -66,7 +66,7 @@ def deep_q_learning(args):
         logger.info('Starting epoch %i' % epoch_idx)
         train_data_path = os.path.join(model_dir, 'epoch_%04d.npz' % epoch_idx)
         play_matches(model_path, conf['softmax_scale'], conf['reward'], train_data_path, conf['n_matches_play'],
-                     template_path=conf['template_path'])
+                     template_path=conf['play_template'])
         train_model(training_model, model, conf, callbacks, epoch_idx, other_metrics)
         model_path = os.path.join(model_dir, 'epoch_%04d.h5' % epoch_idx)
         training_model.save(model_path, include_optimizer=False)
