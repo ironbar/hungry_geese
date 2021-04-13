@@ -100,7 +100,7 @@ def compute_elo_ranking(matches_agents, matches_results, reduced_agents_set):
 
 def parse_args(args):
     epilog = """
-    python scripts/q_value_improvement_cycle/evaluate_model.py /mnt/hdd0/Kaggle/hungry_geese/models/31_iterating_over_softmax_policy/01_it1_2000_lr4e4/pretrained_model.h5 --n_matches 50
+    python scripts/q_value_improvement_cycle/evaluate_model.py "/mnt/hdd0/Kaggle/hungry_geese/models/31_iterating_over_softmax_policy/01_it1_2000_lr4e4/pretrained_model.h5" "/mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/scripts/deep_q_learning_v2/q_value_agent_template.py" --n_matches 50
     """
     parser = argparse.ArgumentParser(
         description='Evaluate a model',

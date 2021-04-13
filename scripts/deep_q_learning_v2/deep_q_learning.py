@@ -65,7 +65,8 @@ def deep_q_learning(args):
         other_metrics['n_matches'] = (epoch_idx+1)*conf['n_matches_play']
         logger.info('Starting epoch %i' % epoch_idx)
         train_data_path = os.path.join(model_dir, 'epoch_%04d.npz' % epoch_idx)
-        play_matches(model_path, conf['softmax_scale'], conf['reward'], train_data_path, conf['n_matches_play'])
+        play_matches(model_path, conf['softmax_scale'], conf['reward'], train_data_path, conf['n_matches_play'],
+                     template_path=conf['template_path'])
         train_model(training_model, model, conf, callbacks, epoch_idx, other_metrics)
         model_path = os.path.join(model_dir, 'epoch_%04d.h5' % epoch_idx)
         training_model.save(model_path, include_optimizer=False)
@@ -101,10 +102,10 @@ def train_model(training_model, model, conf, callbacks, epoch_idx, other_metrics
     gc.collect()
 
 
-def play_matches(model_path, softmax_scale, reward_name, train_data_path, n_matches):
+def play_matches(model_path, softmax_scale, reward_name, train_data_path, n_matches, template_path):
     logger.info('Playing matches in parallel')
-    command = 'python play_matches.py %s %.1f %s %s --n_matches %i' % (
-        model_path, softmax_scale, reward_name, train_data_path, n_matches)
+    command = 'python play_matches.py "%s" %.1f %s "%s" "%s" --n_matches %i' % (
+        model_path, softmax_scale, reward_name, train_data_path, template_path, n_matches)
     os.system(command)
 
 

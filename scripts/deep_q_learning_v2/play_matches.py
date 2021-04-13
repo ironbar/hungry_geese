@@ -27,11 +27,14 @@ def main(args=None):
     if args is None:
         args = sys.argv[1:]
     args = parse_args(args)
-    simple_model_softmax_policy_data_generation(args.model_path, args.softmax_scale, args.output, args.n_matches, args.reward_name)
+    simple_model_softmax_policy_data_generation(
+        args.model_path, args.softmax_scale, args.output, args.n_matches, args.reward_name,
+        template_path=args.template_path)
 
 
-def simple_model_softmax_policy_data_generation(model_path, softmax_scale, output_path, n_matches, reward_name):
-    template_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'play_template.py')
+def simple_model_softmax_policy_data_generation(model_path, softmax_scale, output_path,
+                                                n_matches, reward_name, template_path):
+    # template_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'play_template.py')
     with open(template_path, 'r') as f:
         text = f.read()
     text = text.replace('model_path', os.path.realpath(model_path))
@@ -138,7 +141,7 @@ def create_train_data(matches_results, reward_name, output_path, agent_idx_range
 
 def parse_args(args):
     epilog = """
-    python scripts/q_value_improvement_cycle/play_matches.py /mnt/hdd0/Kaggle/hungry_geese/models/31_iterating_over_softmax_policy/01_it1_2000_lr4e4/pretrained_model.h5 8 ranking_reward_-4_4 delete.npz --n_matches 50
+    python scripts/q_value_improvement_cycle/play_matches.py /mnt/hdd0/Kaggle/hungry_geese/models/31_iterating_over_softmax_policy/01_it1_2000_lr4e4/pretrained_model.h5 8 ranking_reward_-4_4 delete.npz "/mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/scripts/deep_q_learning_v2/softmax_safe_agent_template.py" --n_matches 50
     """
     parser = argparse.ArgumentParser(
         description='Play matches in parallel using a model',
@@ -148,6 +151,7 @@ def parse_args(args):
     parser.add_argument('softmax_scale', help='Scale of the softmax policy', type=float)
     parser.add_argument('reward_name', help='Name of the reward we want to use', type=str)
     parser.add_argument('output', help='Path to the npz file that will be created with the matches', type=str)
+    parser.add_argument('template_path', help='Path to the python file with template for playing')
     parser.add_argument('--n_matches', help='Number of matches that we want to run', type=int, default=500)
     return parser.parse_args(args)
 
