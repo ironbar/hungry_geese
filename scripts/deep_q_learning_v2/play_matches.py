@@ -60,7 +60,7 @@ def simple_model_softmax_policy_data_generation(model_path, softmax_scale, outpu
             # print('Playing against: %s' % str(adversary_names))
             adversaries = [agents[name] for name in adversary_names]
             sample_func = lambda: [agent_filepath] + np.random.choice(adversaries, size=3).tolist()
-            matches = play_matches_in_parallel(agents=[agent_filepath]*4, n_matches=n_matches)
+            matches = play_matches_in_parallel(agents=sample_func, n_matches=n_matches)
             create_train_data(matches, reward_name, output_path, agent_idx_range=[0])
 
 
