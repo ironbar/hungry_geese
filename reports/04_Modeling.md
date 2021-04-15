@@ -1164,8 +1164,28 @@ small window size and also for learning with self-play.
 This is clearly game-changing. On all previous experiments I was reaching a mean number of game steps
 around 130 and now I'm reaching 180+ simply by changing the discount factor and playing safe.
 
-However when visualiziang games we have seen that the model has not learned a good enough reward function,
+However when visualizing games we have seen that the model has not learned a good enough reward function,
 sometimes ignores food and sometimes does not know that death is ahead.
+
+#### Playing against top n agents
+
+As it seems that when learning by self-playing the train metrics and elo score are disconected I have
+decided to play agains the top n frozen agents. This should give a much more direct relation between
+train metrics and elo score.
+
+I'm going to run some initial experiments and after that I will try using 2 learning agents and 2 frozen
+agents. This will prevent the learning agent from developing some greedy behaviours and at the same
+time it will be playing against the top agents. I would also like to try using frozen agents experience
+for learning.
+
+TODO:
+
+#### Safe agents
+
+As a closing point I will like to dig deeper into safe agents because they should perform better
+than free agents. Maybe I should simply apply death penalty and forget near-death situations.
+
+TODO:
 
 ### Results
 
