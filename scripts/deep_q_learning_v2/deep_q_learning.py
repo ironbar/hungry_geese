@@ -73,8 +73,9 @@ def deep_q_learning(args):
         logger.info('Starting epoch %i' % epoch_idx)
         train_data_path = os.path.join(model_dir, 'epoch_%04d.npz' % epoch_idx)
         play_matches(model_path, conf['softmax_scale'], conf['reward'], train_data_path, conf['n_matches_play'],
-                     template_path=conf['play_template'], play_against_top_n=conf.get('play_against_top_n', 0))
-        train_model(training_model, model, conf, callbacks, epoch_idx, other_metrics, play_against_top_n=conf.get('play_against_top_n', 0))
+                     template_path=conf['play_template'], play_against_top_n=conf.get('play_against_top_n', 0),
+                     n_learning_agents=conf.get('n_learning_agents', 1), n_agents_for_experience=conf['n_agents_for_experience'])
+        train_model(training_model, model, conf, callbacks, epoch_idx, other_metrics, n_agents_for_experience=conf['n_agents_for_experience'])
         model_path = os.path.join(model_dir, 'epoch_%04d.h5' % epoch_idx)
         training_model.save(model_path, include_optimizer=False)
         if epoch_idx % conf.get('evaluation_period', 1) == 0 and epoch_idx:
@@ -83,17 +84,14 @@ def deep_q_learning(args):
             other_metrics = dict()
 
 
-def train_model(training_model, model, conf, callbacks, epoch_idx, other_metrics, play_against_top_n):
+def train_model(training_model, model, conf, callbacks, epoch_idx, other_metrics, n_agents_for_experience):
     if 'random_matches' in conf:
         other_metrics['state_value'] = compute_state_value_evolution(
             model, os.path.join(conf['model_dir'], conf['random_matches']), conf['pred_batch_size'])
 
     train_data, steps_last_file = sample_train_data(
         conf['model_dir'], conf['aditional_files_for_training'], conf['epochs_to_sample_files_for_training'])
-    if play_against_top_n:
-        other_metrics['mean_match_steps'] = steps_last_file/conf['n_matches_play']
-    else:
-        other_metrics['mean_match_steps'] = steps_last_file/4/conf['n_matches_play']
+    other_metrics['mean_match_steps'] = steps_last_file/n_agents_for_experience/conf['n_matches_play']
     target = compute_q_learning_target(model, train_data, conf['discount_factor'], conf['pred_batch_size'])
     train_data = train_data[:3] + [target]
     train_data = apply_all_simetries(train_data)
@@ -112,10 +110,12 @@ def train_model(training_model, model, conf, callbacks, epoch_idx, other_metrics
     gc.collect()
 
 
-def play_matches(model_path, softmax_scale, reward_name, train_data_path, n_matches, template_path, play_against_top_n):
+def play_matches(model_path, softmax_scale, reward_name, train_data_path, n_matches,
+                 template_path, play_against_top_n, n_learning_agents, n_agents_for_experience):
     logger.info('Playing matches in parallel')
     command = 'python play_matches.py "%s" %.1f %s "%s" "%s" --n_matches %i --play_against_top_n %i' % (
         model_path, softmax_scale, reward_name, train_data_path, template_path, n_matches, play_against_top_n)
+    command += ' --n_learning_agents %i --n_agents_for_experience %i' % (n_learning_agents, n_agents_for_experience)
     os.system(command)
 
 
@@ -147,7 +147,6 @@ def sample_train_data(model_dir, aditional_files, epochs_to_sample):
                 logger.info('Loading aditional file for training: %s' % sample)
                 train_data += [load_data(sample, verbose=False)]
     return combine_data(train_data), steps_last_file
-
 
 
 def load_data(filepath, verbose=True):
