@@ -31,12 +31,14 @@ def main(args=None):
     args = parse_args(args)
     simple_model_softmax_policy_data_generation(
         args.model_path, args.softmax_scale, args.output, args.n_matches, args.reward_name,
-        template_path=args.template_path, play_against_top_n=args.play_against_top_n)
+        template_path=args.template_path, play_against_top_n=args.play_against_top_n,
+        n_learning_agents=args.n_learning_agents, n_agents_for_experience=args.n_agents_for_experience)
 
 
 def simple_model_softmax_policy_data_generation(model_path, softmax_scale, output_path,
                                                 n_matches, reward_name, template_path,
-                                                play_against_top_n):
+                                                play_against_top_n, n_learning_agents,
+                                                n_agents_for_experience):
     # template_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'play_template.py')
     with open(template_path, 'r') as f:
         text = f.read()
@@ -59,9 +61,10 @@ def simple_model_softmax_policy_data_generation(model_path, softmax_scale, outpu
             # logger.info('Playing against: %s' % str(adversary_names))
             # print('Playing against: %s' % str(adversary_names))
             adversaries = [agents[name] for name in adversary_names]
-            sample_func = lambda: [agent_filepath] + np.random.choice(adversaries, size=3).tolist()
+            sample_func = lambda: [agent_filepath]*n_learning_agents \
+                + np.random.choice(adversaries, size=(4 - n_learning_agents)).tolist()
             matches = play_matches_in_parallel(agents=sample_func, n_matches=n_matches)
-            create_train_data(matches, reward_name, output_path, agent_idx_range=[0])
+            create_train_data(matches, reward_name, output_path, agent_idx_range=list(range(n_agents_for_experience)))
 
 
 def play_matches_in_parallel(agents, max_workers=20, n_matches=1000, running_on_notebook=False):
@@ -172,6 +175,12 @@ def parse_args(args):
     parser.add_argument('--play_against_top_n',
                         help='If given it will play against top n agents, otherwise it will do self-play',
                         type=int, default=0)
+    parser.add_argument('--n_learning_agents',
+                        help='How many learning agents to use, only when playing against top n agents',
+                        type=int, default=1)
+    parser.add_argument('--n_agents_for_experience',
+                        help='How many agents to use for collecting experience, only when playing against top n agents',
+                        type=int, default=1)
     return parser.parse_args(args)
 
 
