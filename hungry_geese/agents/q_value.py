@@ -40,9 +40,9 @@ class QValueAgent():
 
 class QValueSafeAgent(QValueAgent):
     def select_action(self, q_value, observation, configuration):
-        q_value += np.random.uniform(0, 1e-3, len(q_value))
+        q_value += np.random.uniform(0, 1e-5, len(q_value))
         certain_death_mask = get_certain_death_mask(observation, configuration)
-        q_value -= certain_death_mask*1e3
+        q_value -= np.floor(certain_death_mask)*1e2
         if self.previous_action is not None:
             q_value[ACTION_TO_IDX[opposite_action(self.previous_action)]] -= 1e6
         return np.argmax(q_value)
