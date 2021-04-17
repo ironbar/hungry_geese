@@ -938,8 +938,8 @@ evaluation only each 20 epochs. This will make the learning faster.
 
 I don't like the oscilatory behaviour that I see on the loss, some ideas to improve it:
 
-- Increase the number of matches of play, does not seem to fix the issue.
-- Decrease the number of epochs that we train on the data. I have found that training for more epochs than 5
+- Increase the number of matches of play: Does not seem to fix the issue.
+- Decrease the number of epochs that we train on the data: I have found that training for more epochs than 5
 is beneficial. This may have sense because our data augmentation multiplies the data by 24. Thus I
 have updated the script to use all data augmentations.
 - Decrease the learning rate (this did not seem to have effect on a previous experiment)
@@ -999,6 +999,9 @@ It seems that decreasing the learning rate is having a clear effect on the loss,
 stable. However we have to wait to see if that translates into a better elo score.
 
 ### Results
+
+Although I have been able to speed up training I have been unable to train a better model than Quantum.
+Thus instead of using Monte carlo to estimate the reward I'm going to switch to Q* learning on the next iteration.
 
 ## Iteration 6. Deep Q* Learning
 
