@@ -1178,21 +1178,28 @@ agents. This will prevent the learning agent from developing some greedy behavio
 time it will be playing against the top agents. I would also like to try using frozen agents experience
 for learning.
 
-TODO:
+First experiment from zero training with two agents vs the two top agents is very succesfull and it's
+the first since a long time that is consistently improving over the best agent. I'm going to run another
+one only against the top agent to see if that is enough.
 
 #### Safe agents
 
 As a closing point I will like to dig deeper into safe agents because they should perform better
 than free agents. Maybe I should simply apply death penalty and forget near-death situations.
 
-TODO:
+After some thoughts I believe **safe agents have sense on evaluation**, they could be helpful when the agent
+has not learned correctly. I should only apply certain death penalty. However when learning (when playing
+to gather experience) probably is not a good idea because the model needs to learn when there is a
+certain death. If I apply those penalties it will be more difficult to learn.
+
+TODO: evaluate best agents from previous experiment with and without safe agents
 
 ### Results
 
 First experiments do not show clear changes between different architectures or when using experience
 replay. Batch normalization does not seem to bring improvements and makes the model much slower.
 I was training for 320k epochs, maybe longer trainings are needed. For example for wallbreaker
-model I trained for more than 600k epochs. Let's try witht longer trainings.
+model I trained for more than 600k epochs. Let's try with longer trainings.
 
 
 
