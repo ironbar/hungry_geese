@@ -1107,6 +1107,9 @@ Thus I would like to try that approach.
 
 Moreover the proposed architecture is much more deep than mine, although less wide.
 
+First experiments do not yield improvements, and the model is slower, so I'm keeping to the initial
+simpler model by now.
+
 #### Data augmentation at test
 
 I have experimented with data augmentation at prediction, and elo score improves slighlty.
@@ -1124,7 +1127,7 @@ Since I don't see improvements I'm going to train for longer. Instead of using 3
 
 ### Reflections
 
-It is surprising that an apparent simply game is so hard to learn, at least to play it at a good level
+It is surprising that an apparent simply game is so hard to learn, at least to play it at a high level
 (because the model is able to achieve good score quite fast).
 
 Why it takes so long to improve or learn? My first intuition is that typically on machine learning
@@ -1182,7 +1185,8 @@ time it will be playing against the top agents. I would also like to try using f
 for learning.
 
 First experiment from zero training with two agents vs the two top agents is very succesfull and it's
-the first since a long time that is consistently improving over the best agent. I'm going to run another
+the first since a long time that is consistently improving over the best agent. **Thus it seems that
+playing against a frozen agent is better than playing against a learning agent** I'm going to run another
 one only against the top agent to see if that is enough.
 
 #### Safe agents
@@ -1199,12 +1203,68 @@ TODO: evaluate best agents from previous experiment with and without safe agents
 
 ### Results
 
+I have been able to train an agent WallBreaker over 1500 at the first experiment, a clear sign that
+temporal difference learning is better than monte carlo returns on this setup,  however it's
+being quite difficult to improve from there.
+
 First experiments do not show clear changes between different architectures or when using experience
 replay. Batch normalization does not seem to bring improvements and makes the model much slower.
 I was training for 320k epochs, maybe longer trainings are needed. For example for wallbreaker
 model I trained for more than 600k epochs. Let's try with longer trainings.
 
+## Iteration 7. Monte Carlo Tree Search
 
+### Goal
+
+The goal of this iteration is to try using Monte Carlo simulations to play. This is an intermediate
+step to applying an alpha zero algorithm.
+
+### Motivation
+
+One of the reasons for reinforcement learning being so slow and resource intensive is that each agent
+has to learn everything from zero. However that is not mandatory, we already have a model of the game
+that could be used for playing.
+
+So in this iteration I will explore how far can we go without training an agent, just using the
+game engine to simulate monte carlo rollouts.
+
+### Theory
+
+The RL book by Sutton and Barto does not talk about Monte Carlo simulation for playing, because it focus
+on learning and that method does not learn.
+
+- https://en.wikipedia.org/wiki/Monte_Carlo_tree_search
+- https://towardsdatascience.com/monte-carlo-tree-search-in-reinforcement-learning-b97d3e743d0f
+
+The Hungry Geese game is different to chess in that all the players move at the same time and that
+there is randomness of where the food appears.
+
+#### Game complexity
+
+https://en.wikipedia.org/wiki/Game_complexity
+
+| Game                              | Board size (positions) | State-space complexity (as log to base 10) | Game-tree complexity (as log to base 10) | Average game length (plies) | Branching factor |
+|-----------------------------------|------------------------|--------------------------------------------|------------------------------------------|-----------------------------|------------------|
+| Tic-tac-toe                       | 9                      | 3                                          | 5                                        | 9                           | 4                |
+| Backgammon                        | 28                     | 20                                         | 144                                      | 55                          | 250              |
+| English draughts (8x8) (checkers) | 32                     | 20 or 18                                   | 31                                       | 70                          | 2.8              |
+| Connect Four                      | 42                     | 13                                         | 21                                       | 36                          | 4                |
+| Chess                             | 64                     | 47                                         | 123                                      | 70                          | 35               |
+| Go (19x19)                        | 361                    | 170                                        | 360                                      | 150                         | 250              |
+| Hungry Geese                      | 77                     | 63                                         | 382                                      | 200                         | 81               |
+
+Those estimations do not take into account the random nature of the game, which will increase the game-tree
+complexity by a very big factor. This highlights that even when the rules are very simple the size
+of the game is huge.
+
+### Development
+
+Before reading or implementing anything I already identify that one relevant aspect of MC is speed
+of simulation and also pruning of the search space. For example avoiding actions that lead to the
+death of the agent. The more the simulations we can run the better the estimate of the value of
+each action will be.
+
+### Results
 
 <!---
 
