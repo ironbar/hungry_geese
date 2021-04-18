@@ -1201,6 +1201,16 @@ certain death. If I apply those penalties it will be more difficult to learn.
 
 TODO: evaluate best agents from previous experiment with and without safe agents
 
+#### Populating the agent pool
+
+> Elo only really works when you’re playing others of similar skill levels
+
+That sentence is taken from this [post](https://medium.com/acolytefight/elo-sucks-better-multiplayer-rating-systems-for-smaller-games-8ca588ee652f)
+If that is true as I think it is, playing against agents with a score lower than 400 will lead to
+volatility in scores and bad estimations.
+
+The solution is to add new agents more frequently, for example each 50 elo points.
+
 ### Results
 
 I have been able to train an agent WallBreaker over 1500 at the first experiment, a clear sign that
@@ -1263,6 +1273,17 @@ Before reading or implementing anything I already identify that one relevant asp
 of simulation and also pruning of the search space. For example avoiding actions that lead to the
 death of the agent. The more the simulations we can run the better the estimate of the value of
 each action will be.
+
+The goal is to estimate the value for the three available actions of the agent. I don't have to train
+anything but I do have to evaluate the agent. Evaluations will likely be more slow because I will have
+to use as much time as possible computing the rollouts.
+
+#### Start point from the forum
+
+https://www.kaggle.com/johntermaat/hungry-geese-simple-monte-carlo-baseline?scriptVersionId=54912468
+
+- Builds its own simulation
+- Does not take into account elapsed time
 
 ### Results
 

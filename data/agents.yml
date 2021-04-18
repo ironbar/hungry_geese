@@ -10,3 +10,8 @@ besthoarder: /mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/forum/agents/besthoarder.p
 greedyhoarder: /mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/forum/agents/greedyhoarder.py
 quantum: /mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/data/agents/quantum/quantum.py
 wallbreaker: /mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/data/agents/wallbreaker.py
+clasic: /mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/data/agents/clasic.py
+ram: /mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/data/agents/ram.py
+iceberg: /mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/data/agents/iceberg.py
+icedragon: /mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/data/agents/icedragon.py
+balerion: /mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/data/agents/balerion.py
