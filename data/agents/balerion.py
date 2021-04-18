@@ -395,6 +395,8 @@ def get_weights():
 
 """
 /mnt/hdd0/Kaggle/hungry_geese/models/37_playing_against_frozen_agents/03_continue_after_adding_new_agents/epoch_1500.h5
+Multi agent elo score: 1638
+Single agent elo score: 1616
 """
 weights_b64 = get_weights()
 model.set_weights(pickle.loads(bz2.decompress(base64.b64decode(weights_b64))))
