@@ -3,7 +3,7 @@ import random
 import numpy as np
 from kaggle_environments import make
 
-from hungry_geese.agents import QValueAgent, QValueSafeAgent
+from hungry_geese.agents import QValueAgent, QValueSafeAgent, QValueSafeMultiAgent
 from hungry_geese.utils import ACTIONS, opposite_action
 
 random.seed(7)
@@ -82,3 +82,9 @@ def test_QValueSafeAgent_play():
         QValueSafeAgent(FakeModelRandom())]
     match = env.run(agents)
     assert all(None not in agent.state.actions for agent in agents)
+
+def test_QValueSafeMultiAgent_play():
+    env = make("hungry_geese", debug=True)
+    agents = [QValueSafeMultiAgent([FakeModelRandom(), FakeModelOhe(), FakeModelUniform()])] + ['greedy']*3
+    match = env.run(agents)
+    assert None not in agents[0].state.actions

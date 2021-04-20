@@ -1211,6 +1211,20 @@ volatility in scores and bad estimations.
 
 The solution is to add new agents more frequently, for example each 50 elo points.
 
+#### Using all the available time
+
+In the rules it is said that we have 1 second per movement and also aditional 60 seconds.
+
+I have made a test on a notebook on Kaggle and the current agents (for example rhaegar) use less
+than 4 ms to take a decision. Thus there is a lot of spare time to improve the decision.
+
+On the past I have tried using data augmentation, but the improvement is not very big. I think it is
+much more interesting to use an ensemble of agents to predict the value of each action. I'm currently
+using around 2 MB of size, so I could add up to 50 models.
+
+I should automate the process of creating this ensemble agent because otherwise it will be very
+cumbersome to copy the weights of all the models by hand.
+
 ### Results
 
 I have been able to train an agent WallBreaker over 1500 at the first experiment, a clear sign that
