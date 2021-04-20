@@ -1222,6 +1222,12 @@ replay. Batch normalization does not seem to bring improvements and makes the mo
 I was training for 320k epochs, maybe longer trainings are needed. For example for wallbreaker
 model I trained for more than 600k epochs. Let's try with longer trainings.
 
+After started playing against frozen agents I have been able to improve over WallBreaker. With agent
+icedragon I have been able to reach position 16 on leaderboard with 1088 points, although it's probably
+just luck and I will go down in the next days.
+
+I should be aiming at 2000 elo score to be close to the first positions on leaderboard.
+
 ## Iteration 7. Monte Carlo Tree Search
 
 ### Goal
