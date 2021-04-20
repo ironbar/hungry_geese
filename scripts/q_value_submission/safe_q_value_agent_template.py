@@ -388,13 +388,13 @@ model = simple_model(
     mlp_activations=['relu', 'tanh'])
 
 def get_weights():
-    weights_b64 = 
-
+    weights_b64 = paste_weights_here
 
     return weights_b64
 
 """
-Put here path to model and elo score
+paste_model_path_here
+paste_model_score_here
 """
 weights_b64 = get_weights()
 model.set_weights(pickle.loads(bz2.decompress(base64.b64decode(weights_b64))))
