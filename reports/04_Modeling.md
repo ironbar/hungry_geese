@@ -1225,6 +1225,17 @@ using around 2 MB of size, so I could add up to 50 models.
 I should automate the process of creating this ensemble agent because otherwise it will be very
 cumbersome to copy the weights of all the models by hand.
 
+I have made submissions with 45 models and they do not get better results than simply rhaegar agent.
+
+#### Score a basket
+
+I have seen two times (with rhaegar and icedragon) that for 3 submissions one gets very lucky and reaches
+around 1075 elo score while the others remain around 1000.
+
+This is probably due to small number of evaluations. Once now I simply have to make multiple submissions
+for each agent to see where the lucky one can get. It is very likely that the other people in the challenge
+is already seeing the same behaviour.
+
 ### Results
 
 I have been able to train an agent WallBreaker over 1500 at the first experiment, a clear sign that
