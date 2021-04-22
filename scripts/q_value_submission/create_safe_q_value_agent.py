@@ -14,7 +14,11 @@ def main(args=None):
     model = tf.keras.models.Model(inputs=model.inputs[:2], outputs=model.layers[-3].output)
     weight_base64 = base64.b64encode(bz2.compress(pickle.dumps(model.get_weights())))
 
-    template_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'safe_q_value_agent_template.py')
+    if args.data_augmentation:
+        print('Creating agent with data augmentation')
+        template_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'safe_q_value_agent_data_augmentation_template.py')
+    else:
+        template_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'safe_q_value_agent_template.py')
     with open(template_path, 'r') as f:
         template_text = f.read()
 
@@ -33,6 +37,7 @@ def parse_args(args):
         epilog=epilog)
     parser.add_argument('model_path', help='Path to model')
     parser.add_argument('agent_path', help='Path to the python file that will be created')
+    parser.add_argument('--data_augmentation', action='store_true', help='Create agent with data augmentation')
     return parser.parse_args(args)
 
 if __name__ == '__main__':
