@@ -32,6 +32,8 @@ def get_reward(current_observation, previous_observation, configuration, reward_
         return get_clipped_len_reward(current_observation, reward_name)
     elif reward_name.startswith('grow_and_kill_reward'):
         return get_grow_and_kill_reward(current_observation, previous_observation, reward_name)
+    elif reward_name.startswith('just_survive'):
+        get_just_survive_reward(current_observation, reward_name)
     else:
         raise KeyError(reward_name)
 
@@ -146,3 +148,12 @@ def _get_grow_and_kill_reward_params_from_name(reward_name):
     """ grow_and_kill_reward_-1_8_3_1 """
     death_reward, window, max_reward, kill_reward = reward_name.split('_')[4:]
     return float(death_reward), int(window), float(max_reward), float(kill_reward)
+
+
+def get_just_survive_reward(current_observation, reward_name):
+    goose_len = len(current_observation['geese'][current_observation['index']])
+    if goose_len: # then it is alive
+        return 0
+    else: # the agent has died
+        death_reward = float(reward_name.split('_')[-1])
+        return death_reward
