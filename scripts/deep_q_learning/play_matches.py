@@ -23,12 +23,14 @@ from hungry_geese.elo import EloRanking
 from hungry_geese.definitions import INITIAL_ELO_RANKING, AGENT_TO_SCRIPT
 from hungry_geese.utils import log_ram_usage
 from hungry_geese.state import GameState, combine_data
+from hungry_geese.utils import configure_logging
 
 
 def main(args=None):
     if args is None:
         args = sys.argv[1:]
     args = parse_args(args)
+    # configure_logging()
     simple_model_softmax_policy_data_generation(
         args.model_path, args.softmax_scale, args.output, args.n_matches, args.reward_name,
         template_path=args.template_path, play_against_top_n=args.play_against_top_n,
@@ -149,6 +151,7 @@ def create_train_data(matches_results, reward_name, output_path, agent_idx_range
         train_data[0].nbytes/1e9,
         str([round(data.nbytes/1e9, 1) for data in train_data]),
         np.sum([data.nbytes/1e9 for data in train_data])))
+    logger.info('Data shapes %s' % str([data.shape for data in train_data]))
     output_path = os.path.realpath(output_path)
     logger.info('Saving data on: %s' % output_path)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
