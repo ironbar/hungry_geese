@@ -1241,6 +1241,9 @@ is already seeing the same behaviour.
 
 #### Just survive reward
 
+I'm struggling to improve over rhaegar agent, so I want to explore if modifying the reward I can improve
+the agents.
+
 There are two competing goals in the game:
 
 1. Survive until epoch 200
@@ -1312,7 +1315,7 @@ move to Monte Carlo Tree Search and Alpha Zero like agent.
 
 - No need to apply vertical simmetry because the agent is always looking upwards. This
 simplifies the game
-- Search space is reduced because there are only 3 actions
+- Search space is reduced because there are only 3 actions, and they always mean the same
 - Don't need to care about ilegal actions, all 3 actions will always be legal
 - Lower computational cost due to removing simmetries from training -> 1/2
 - Exploration will be improved because certain deaths will be avoided
@@ -1326,6 +1329,18 @@ learn the q* value function
 two different previous actions
 - Changes won't be retrocompatible, only self-contained agents will still work
 - Higher computational cost due to increased board size
+
+#### Uncertainties
+
+- How to deal with breaking changes? I would like to be able to keep training models and at the
+same time develop and test the redesign. If I want to use both implementations at the same time I
+need to have two copies of the repository and also two conda environments, that's the only way. A
+simpler option is to use a different branch for working and to stop training when developing. I prefer
+this one for simplicity. Most of the time I won't be developing.
+- How to deal with uncertain death actions? Those are the actions that depending on the actions of
+the other goose may lead to death. One argument is that the model should learn to deal with those
+actions, sometimes it will pay to take the risk and sometimes it won't. Other argument is that first
+priority is survival so we have to avoid taking those actions. Maybe I should leave this for later.
 
 
 <!---
