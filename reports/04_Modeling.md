@@ -1227,6 +1227,9 @@ cumbersome to copy the weights of all the models by hand.
 
 I have made submissions with 45 models and they do not get better results than simply rhaegar agent.
 
+Contrary to the intuition data augmentation works better than using multiple agents (at least when
+all the agents come from the same training)
+
 #### Score a basket
 
 I have seen two times (with rhaegar and icedragon) that for 3 submissions one gets very lucky and reaches
@@ -1235,6 +1238,41 @@ around 1075 elo score while the others remain around 1000.
 This is probably due to small number of evaluations. Once now I simply have to make multiple submissions
 for each agent to see where the lucky one can get. It is very likely that the other people in the challenge
 is already seeing the same behaviour.
+
+#### Just survive reward
+
+There are two competing goals in the game:
+
+1. Survive until epoch 200
+2. Be the biggest goose at epoch 200. This could be done by eating more or killing other geese
+
+I think they are competing because a smaller goose can move in circles and thus survive in a small
+area whereas a big goose cannot. To verify this hypothesis I'm going to train an agent that receives
+a negative reward when it dies an zero reward otherwise.
+
+Althougth simple this experiment reveals interesting facts:
+
+- Gets similar elo scores to the previous reward
+- Predicts a state value higher than zero, even when it receives just zero or negative reward
+- Mean match steps grows faster than previous reward but soon they are equal
+
+If I run a match with only just survive agents they all survive until epoch 200. And the estimation
+of the Q value decreases along the match but starts close to 2. This may be caused by usign a discount
+factor of 1. If there is a bias of 0.01 in the estimation of value state then acumulated over 200
+steps it will grow to 2.
+
+![acumulation of dicount factor](res/2021-04-24-09-35-04.png)
+
+![how bias affects q value](res/2021-04-24-09-58-26.png)
+
+It seems that simply using a discount factor of 0.95 is enough to stabilize growing bias. So let's
+try that on a training and compare to discount factor 1. This will probably help to better estimate
+q value, but I have better ideas.
+
+Currently I'm only using for training the action that the agent took. However I could also use
+the information of certain deaths and thus provide more information to the agent to learn even if it
+did not took those actions. Furthermore if I do that it makes sense to play using safe agent. However
+this implies some changes on architecture, on how data augmentation is applied...
 
 ### Results
 
