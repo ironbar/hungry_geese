@@ -1291,7 +1291,46 @@ just luck and I will go down in the next days.
 
 I should be aiming at 2000 elo score to be close to the first positions on leaderboard.
 
-## Iteration 7. Monte Carlo Tree Search
+## Iteration 7. The great redesign
+
+### Goal
+
+After achieving some impressive but temporal results on leaderboard (position 11 and gold medal) I think
+we can improve over current Deep Q* Learning implementation and maybe secure a gold medal. Then we could
+move to Monte Carlo Tree Search and Alpha Zero like agent.
+
+### The great redesign
+
+#### Changes
+
+- The agent is always centered and looking upwards
+- Only 3 actions: forward, left and right
+- Always play safe, never moving to certain death positions (unless all moves lead to death)
+- Use certain death actions to train the model, as well as the true action
+
+#### Advantages
+
+- No need to apply vertical simmetry because the agent is always looking upwards. This
+simplifies the game
+- Search space is reduced because there are only 3 actions
+- Don't need to care about ilegal actions, all 3 actions will always be legal
+- Lower computational cost due to removing simmetries from training -> 1/2
+- Exploration will be improved because certain deaths will be avoided
+- Learning will be improved because not just the action but certain death actions will be used to
+learn the q* value function
+
+#### Disadvantages
+
+- To enable the agent always looking upwards I have to increase the size of the board to be squared
+- On the first move of each match there is an extra complexity because I need to try at least with
+two different previous actions
+- Changes won't be retrocompatible, only self-contained agents will still work
+- Higher computational cost due to increased board size
+
+
+<!---
+
+## Iteration 8. Monte Carlo Tree Search
 
 ### Goal
 
@@ -1356,7 +1395,7 @@ https://www.kaggle.com/johntermaat/hungry-geese-simple-monte-carlo-baseline?scri
 
 ### Results
 
-<!---
+
 
 
 
