@@ -1,5 +1,7 @@
 import tensorflow.keras as keras
 
+N_ACTIONS = 3
+
 def simple_model(conv_filters, conv_activations, mlp_units, mlp_activations):
     board_input, features_input = _create_model_input()
 
@@ -11,7 +13,7 @@ def simple_model(conv_filters, conv_activations, mlp_units, mlp_activations):
     output = keras.layers.concatenate([board_encoder, features_input])
     for units, activation in zip(mlp_units, mlp_activations):
         output = keras.layers.Dense(units, activation=activation)(output)
-    output = keras.layers.Dense(4, activation='linear', name='action', use_bias=False)(output)
+    output = keras.layers.Dense(N_ACTIONS, activation='linear', name='action', use_bias=False)(output)
 
     model = keras.models.Model(inputs=[board_input, features_input], outputs=output)
     return model
@@ -24,7 +26,7 @@ def _create_model_input():
 
 
 def create_model_for_training(model):
-    input_mask = keras.layers.Input((4,), name='input_mask')
+    input_mask = keras.layers.Input((N_ACTIONS,), name='input_mask')
     output = keras.backend.sum(input_mask*model.output, axis=-1)
     new_model = keras.models.Model(inputs=(model.inputs + [input_mask]), outputs=output)
     return new_model
@@ -54,7 +56,7 @@ def torus_model(torus_filters, summary_conv_filters, summary_conv_activations,
     for units, activation in zip(mlp_units, mlp_activations):
         output = dense_bn_activation_block(output, units, activation)
 
-    output = keras.layers.Dense(4, activation='linear', name='action', use_bias=False)(output)
+    output = keras.layers.Dense(N_ACTIONS, activation='linear', name='action', use_bias=False)(output)
 
     model = keras.models.Model(inputs=[board_input, features_input], outputs=output)
     return model
