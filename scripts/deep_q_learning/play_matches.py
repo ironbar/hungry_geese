@@ -127,15 +127,15 @@ def create_train_data(matches_results, reward_name, output_path, agent_idx_range
 
     for _ in tqdm(range(len(matches_results)), desc='Creating game data'):
         match = matches_results[0]
-        for idx in agent_idx_range:
+        for agent_idx in agent_idx_range:
             state.reset()
             for step_idx, step in enumerate(match):
                 observation = step[0]['observation'].copy()
-                observation['index'] = idx
+                observation['index'] = agent_idx
                 state.update(observation, conf)
                 if step_idx:
-                    state.add_action(step[idx]['action'])
-                if not observation['geese'][idx]:
+                    state.add_action(step[agent_idx]['action'])
+                if not observation['geese'][agent_idx]:
                     break
             data = state.prepare_data_for_training()
             is_not_terminal = np.ones_like(data[3])

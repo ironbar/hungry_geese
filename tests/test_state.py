@@ -5,7 +5,8 @@ from kaggle_environments import make
 from hungry_geese.state import (
     get_steps_to_shrink, get_steps_to_die, get_steps_to_end,
     GameState, horizontal_simmetry, vertical_simmetry, player_simmetry,
-    permutations, combine_data, apply_all_simetries, get_ohe_opposite_actions
+    permutations, combine_data, apply_all_simetries, get_ohe_opposite_actions,
+    make_board_squared
 )
 
 @pytest.mark.parametrize('step, hunger_rate, steps_to_shrink',  [
@@ -82,3 +83,9 @@ def test_get_ohe_opposite_actions():
     opposite_actions = get_ohe_opposite_actions(actions)
     assert pytest.approx(actions[:2]) == opposite_actions[2:]
     assert pytest.approx(actions) == get_ohe_opposite_actions(opposite_actions)
+
+@pytest.mark.parametrize('input_shape, output_shape', [
+    ((7, 11, 17), (11, 11, 17)),
+])
+def test_make_board_squared_returns_correct_shape(input_shape, output_shape):
+    assert output_shape == make_board_squared(np.zeros(input_shape)).shape

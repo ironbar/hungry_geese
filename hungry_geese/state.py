@@ -175,6 +175,7 @@ class GameState():
             if goose:
                 head_position = get_head_position(goose[0], self.configuration['columns'])
                 board = make_board_egocentric(board, head_position)
+        board = make_board_squared(board)
         return board
 
 def get_steps_to_shrink(step, hunger_rate):
@@ -221,6 +222,22 @@ def _center_board_cols(col, board):
         new_board[:, :-offset] = board[:, offset:]
         new_board[:, -offset:] = board[:, :offset]
     return new_board
+
+def make_board_squared(board):
+    """
+    Creates a squared board by repeating the shortest dimension
+
+    Typical board size is  (7, 11, 17), we want it to be (11, 11, 17)
+    """
+    if board.shape[0] > board.shape[1]:
+        raise NotImplementedError('Currently is not supported bigger rows than cols: %s' % str(board.shape))
+    side = np.max(board.shape[:2])
+    squared_board = np.zeros((side, side, board.shape[2]), dtype=board.dtype)
+    row_offset = (squared_board.shape[0] - board.shape[0])//2
+    squared_board[row_offset:-row_offset] = board
+    squared_board[:row_offset] = board[-row_offset:]
+    squared_board[-row_offset:] = board[:row_offset]
+    return squared_board
 
 def get_head_position(head, columns):
     row = head//columns
