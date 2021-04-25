@@ -1272,6 +1272,10 @@ It seems that simply using a discount factor of 0.95 is enough to stabilize grow
 try that on a training and compare to discount factor 1. This will probably help to better estimate
 q value, but I have better ideas.
 
+![comparison of discount factor](res/2021-04-25-09-22-24.png)
+
+The discount factor of 0.95 seems to lead to a more real q value, but other metrics are no better.
+
 Currently I'm only using for training the action that the agent took. However I could also use
 the information of certain deaths and thus provide more information to the agent to learn even if it
 did not took those actions. Furthermore if I do that it makes sense to play using safe agent. However
