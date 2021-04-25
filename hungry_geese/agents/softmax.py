@@ -3,7 +3,7 @@ import numpy as np
 from hungry_geese.state import GameState
 from hungry_geese.definitions import ACTIONS, ACTION_TO_IDX
 from hungry_geese.utils import opposite_action
-from hungry_geese.heuristic import get_certain_death_mask
+from hungry_geese.heuristic import get_certain_death_mask, adapt_mask_to_3d_action
 from hungry_geese.agents import QValueAgent
 
 
@@ -41,7 +41,6 @@ def softmax(x):
 class SoftmaxSafeAgent(SoftmaxAgent):
     def select_action(self, q_value, observation, configuration):
         certain_death_mask = get_certain_death_mask(observation, configuration)
-        # TODO: the mask needs to be adapted to 3d
-        raise NotImplementedError()
+        certain_death_mask = adapt_mask_to_3d_action(certain_death_mask, self.previous_action)
         q_value -= certain_death_mask*1e3
         return self._sample_action_with_softmax(q_value)

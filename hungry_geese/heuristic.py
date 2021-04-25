@@ -49,3 +49,16 @@ def is_future_position_doomed(future_position, observation, configuration):
 def is_food_around_head(goose, food, configuration):
     future_positions = adjacent_positions(goose[0], configuration['columns'], configuration['rows'])
     return any(food_position in future_positions for food_position in food)
+
+def adapt_mask_to_3d_action(mask, previous_action):
+    """
+    Transforms the mask to fit the convention of: 0 turn left, 1 move forward and 2 turn right
+    the input mask means: north, east, south, west
+    """
+    previous_action_to_indices = {
+        'NORTH': [-1, 0, 1],
+        'EAST': [0, 1, 2],
+        'SOUTH': [1, 2, 3],
+        'WEST': [2, 3, 0],
+    }
+    return mask[previous_action_to_indices[previous_action]]
