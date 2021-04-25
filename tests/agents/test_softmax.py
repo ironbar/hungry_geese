@@ -76,12 +76,12 @@ def test_agent_update_previous_action(train_info):
 
     assert agent.previous_action == 'NORTH'
     assert agent.state.actions[-1] == 'NORTH'
-    assert len(agent.state.actions) == 1
+    assert len(agent.state.actions) == 2
 
     agent.update_previous_action('SOUTH')
     assert agent.previous_action == 'SOUTH'
     assert agent.state.actions[-1] == 'SOUTH'
-    assert len(agent.state.actions) == 1
+    assert len(agent.state.actions) == 2
 
 def test_SoftmaxSafeAgent_play():
     env = make("hungry_geese", debug=True)

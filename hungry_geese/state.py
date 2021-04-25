@@ -13,7 +13,7 @@ class GameState():
     and some features that are useful for planning
     """
     def __init__(self, egocentric_board=True, normalize_features=True, reward_name='sparse_reward',
-                 apply_reward_acumulation=True, forward_north_oriented=True):
+                 apply_reward_acumulation=True, forward_north_oriented=True, previous_action='NORTH'):
         """
         Parameters
         -----------
@@ -27,12 +27,15 @@ class GameState():
             If true reward will be acumulated when returning train data
         forward_north_oriented : bool
             If true the board will be oriented so forward movement points north
+        previous_action : str
+            Name of the previous action, it will be used to orient the board forward north on first
+            movement
         """
         self.history = []
         self.boards = []
         self.features = []
         self.rewards = []
-        self.actions = []
+        self.actions = [previous_action]
         self.configuration = None
         self.egocentric_board = egocentric_board
         self.normalize_features = normalize_features
@@ -98,15 +101,21 @@ class GameState():
             render += np.expand_dims(board[:, :, idx*4+3], axis=2).astype(np.uint8)*idx_to_color[idx]
         return render
 
-    def reset(self):
+    def reset(self, previous_action='NORTH'):
         """
         Deletes all data to be able to store a new episode
+
+        Parameters
+        ----------
+        previous_action : str
+            Name of the previous action, it will be used to orient the board forward north on first
+            movement
         """
         self.history = []
         self.boards = []
         self.features = []
         self.rewards = []
-        self.actions = []
+        self.actions = [previous_action]
         self.configuration = None
 
     def prepare_data_for_training(self):
@@ -126,9 +135,10 @@ class GameState():
             reward = get_cumulative_reward(self.rewards, self.reward_name)
         else:
             reward = self.rewards
+        # TODO: update actions to be only of size 3 and take into account that an initial previous agent was added
         actions = np.array(self.actions[:len(reward)])
-        for action, idx in ACTION_TO_IDX.items():
-            actions[actions == action] = idx
+        for action, action_idx in ACTION_TO_IDX.items():
+            actions[actions == action] = action_idx
         actions = keras.utils.to_categorical(actions, num_classes=4)
         return [np.array(self.boards[:len(actions)], dtype=np.int8), np.array(self.features[:len(actions)]), actions, reward]
 
