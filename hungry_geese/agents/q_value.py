@@ -6,6 +6,9 @@ from hungry_geese.utils import opposite_action
 from hungry_geese.heuristic import get_certain_death_mask
 
 class QValueAgent():
+    """
+    Agent that makes the action that maximizes the Q value
+    """
     def __init__(self, model):
         self.model = model
         self.state = GameState()
@@ -76,6 +79,8 @@ class QValueSafeAgent(QValueAgent):
     def select_action(self, q_value, observation, configuration):
         q_value += np.random.uniform(0, 1e-5, len(q_value))
         certain_death_mask = get_certain_death_mask(observation, configuration)
+        # TODO: the mask needs to be adapted to 3d
+        raise NotImplementedError()
         q_value -= np.floor(certain_death_mask)*1e2
         action_idx = np.argmax(q_value)
         action = ACTIONS[(action_idx - 1 + ACTION_TO_IDX[self.previous_action])%len(ACTIONS)]

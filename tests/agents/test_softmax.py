@@ -6,23 +6,23 @@ from kaggle_environments import make
 
 from hungry_geese.agents import SoftmaxAgent, SoftmaxSafeAgent
 from hungry_geese.utils import ACTIONS, opposite_action
-
+from hungry_geese.model import N_ACTIONS
 
 random.seed(7)
 np.random.seed(7)
 
 class FakeModelUniform():
     def predict_step(self, *args, **kwargs):
-        return np.ones((1, 4))
+        return np.ones((1, N_ACTIONS))
 
 class FakeModelRandom():
     def predict_step(self, *args, **kwargs):
-        return np.random.uniform(size=(1, 4))
+        return np.random.uniform(size=(1, N_ACTIONS))
 
 class FakeModelOhe():
     def predict_step(self, *args, **kwargs):
-        ohe = np.zeros((1, 4))
-        ohe[0, 0] = 1
+        ohe = np.zeros((1, N_ACTIONS))
+        ohe[0, 1] = 1
         return ohe
 
 
