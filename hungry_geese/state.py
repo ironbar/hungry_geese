@@ -127,7 +127,8 @@ class GameState():
         features: np.array
             Features of the episode with shape (steps, 9) when 4 players
         actions: np.array
-            Actions took during the episode with one hot encoding (steps, 4)
+            Actions took during the episode with one hot encoding (steps, 4) or steps(, 3) if
+            forward_north_oriented is True
         rewards: np.array
             Cumulative reward received during the episode (steps,)
         """
@@ -135,15 +136,19 @@ class GameState():
             reward = get_cumulative_reward(self.rewards, self.reward_name)
         else:
             reward = self.rewards
+
+        actions = np.array(self.actions[:len(reward) + 1])
+        action_indices = np.zeros_like(actions, dtype=np.float32)
+        for action, action_idx in ACTION_TO_IDX.items():
+            action_indices[actions == action] = action_idx
         if self.forward_north_oriented:
-            # TODO: update actions to be only of size 3 and take into account that an initial previous agent was added
-            raise NotImplementedError()
+            relative_movements = get_relative_movement_from_action_indices(action_indices)
+            ohe_actions = keras.utils.to_categorical(relative_movements, num_classes=3)
         else: # then simply the action is the ohe of all the actions
-            actions = np.array(self.actions[1:][:len(reward)]) # remove initial previous action
-            for action, action_idx in ACTION_TO_IDX.items():
-                actions[actions == action] = action_idx
-            actions = keras.utils.to_categorical(actions, num_classes=4)
-        return [np.array(self.boards[:len(actions)], dtype=np.int8), np.array(self.features[:len(actions)]), actions, reward]
+            action_indices = action_indices[1:] # remove initial previous action
+            ohe_actions = keras.utils.to_categorical(action_indices, num_classes=4)
+
+        return [np.array(self.boards[:len(reward)], dtype=np.int8), np.array(self.features[:len(reward)]), ohe_actions, reward]
 
     def _compute_features(self, observation):
         """
@@ -295,9 +300,16 @@ def vertical_simmetry(data):
 def horizontal_simmetry(data):
     boards = data[0][:, :, ::-1].copy()
     actions = data[2].copy()
-    # change west by east and viceversa
-    actions[:, 1] = data[2][:, 3]
-    actions[:, 3] = data[2][:, 1]
+    if actions.shape[1] == 4:
+        # change west by east and viceversa
+        actions[:, 1] = data[2][:, 3]
+        actions[:, 3] = data[2][:, 1]
+    elif actions.shape[1] == 3:
+        # change turn left for turn right and viceversa
+        actions[:, 0] = data[2][:, 2]
+        actions[:, 2] = data[2][:, 0]
+    else:
+        raise NotImplementedError(actions.shape)
     return boards, data[1], actions, data[-1]
 
 def player_simmetry(data, new_positions):
@@ -335,3 +347,15 @@ def get_ohe_opposite_actions(actions):
     opposite_actions[:, :2] = actions[:, 2:]
     opposite_actions[:, 2:] = actions[:, :2]
     return opposite_actions
+
+def get_relative_movement_from_action_indices(action_indices):
+    """
+    Transforms the indices of the actions to relative movements being:
+
+    - 0 turn left (NORTH -> WEST)
+    - 1 forward (NORTH -> NORTH)
+    - 2 turn right (NORTH -> EAST)
+    """
+    diff = action_indices[1:] - action_indices[:-1]
+    movements = (diff + 1)%4
+    return movements
