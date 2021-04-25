@@ -239,6 +239,13 @@ def make_board_squared(board):
     squared_board[-row_offset:] = board[:row_offset]
     return squared_board
 
+def make_board_forward_north_oriented(board, previous_action):
+    """ Rotates the board so forward direction points north """
+    action_idx = ACTION_TO_IDX[previous_action]
+    if action_idx:
+        board = np.rot90(board, k=action_idx)
+    return board
+
 def get_head_position(head, columns):
     row = head//columns
     col = head - row*columns
