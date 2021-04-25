@@ -18,7 +18,7 @@ def simple_model(conv_filters, conv_activations, mlp_units, mlp_activations):
 
 
 def _create_model_input():
-    board_input = keras.layers.Input((7, 11, 17), name='board_input')
+    board_input = keras.layers.Input((11, 11, 17), name='board_input')
     features_input = keras.layers.Input((9,), name='features_input')
     return board_input, features_input
 
