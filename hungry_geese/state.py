@@ -135,11 +135,14 @@ class GameState():
             reward = get_cumulative_reward(self.rewards, self.reward_name)
         else:
             reward = self.rewards
-        # TODO: update actions to be only of size 3 and take into account that an initial previous agent was added
-        actions = np.array(self.actions[:len(reward)])
-        for action, action_idx in ACTION_TO_IDX.items():
-            actions[actions == action] = action_idx
-        actions = keras.utils.to_categorical(actions, num_classes=4)
+        if self.forward_north_oriented:
+            # TODO: update actions to be only of size 3 and take into account that an initial previous agent was added
+            raise NotImplementedError()
+        else: # then simply the action is the ohe of all the actions
+            actions = np.array(self.actions[1:][:len(reward)]) # remove initial previous action
+            for action, action_idx in ACTION_TO_IDX.items():
+                actions[actions == action] = action_idx
+            actions = keras.utils.to_categorical(actions, num_classes=4)
         return [np.array(self.boards[:len(actions)], dtype=np.int8), np.array(self.features[:len(actions)]), actions, reward]
 
     def _compute_features(self, observation):
