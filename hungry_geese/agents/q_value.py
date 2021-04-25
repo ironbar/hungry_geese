@@ -11,11 +11,15 @@ class QValueAgent():
         self.state = GameState()
         self.previous_action = 'NORTH'
         self.q_values = []
+        self.is_first_action = True
 
     def __call__(self, observation, configuration):
-        # TODO: how to deal with the first action
-        board, features = self.state.update(observation, configuration)
-        q_value = np.array(self.model.predict_step([np.expand_dims(board, axis=0), np.expand_dims(features, axis=0)])[0])
+        if self.is_first_action:
+            q_value = self.first_action_q_value_estimation(observation, configuration)
+            self.is_first_action = False
+        else:
+            board, features = self.state.update(observation, configuration)
+            q_value = self._predict_q_value(board, features)
         self.q_values.append(q_value.copy())
         action = self.select_action(q_value, observation, configuration)
         self.previous_action = action
@@ -26,6 +30,7 @@ class QValueAgent():
         self.state.reset()
         self.previous_action = 'NORTH'
         self.q_values = []
+        self.is_first_action = True
 
     def update_previous_action(self, previous_action):
         """ Allows to change previous action if an agent such as epsilon-greedy agent is playing"""
@@ -37,6 +42,31 @@ class QValueAgent():
         action_idx = np.argmax(q_value)
         action = ACTIONS[(action_idx - 1 + ACTION_TO_IDX[self.previous_action])%len(ACTIONS)]
         return action
+
+    def first_action_q_value_estimation(self, observation, configuration):
+        """
+        On first action we have to try both facing north and south
+        """
+        board, features = self.state.update(observation, configuration)
+        q_value_north = self._predict_q_value(board, features)
+
+        self.state.reset(previous_action='SOUTH')
+        board, features = self.state.update(observation, configuration)
+        q_value_south = self._predict_q_value(board, features)
+
+        if np.max(q_value_south) > np.max(q_value_north):
+            self.previous_action = 'SOUTH'
+            q_value = q_value_south
+        else:
+            self.state.reset()
+            self.state.update(observation, configuration)
+            q_value = q_value_north
+        return q_value
+
+    def _predict_q_value(self, board, features):
+        q_value = np.array(self.model.predict_step([np.expand_dims(board, axis=0),
+                                                    np.expand_dims(features, axis=0)])[0])
+        return q_value
 
 
 class QValueSafeAgent(QValueAgent):
@@ -63,6 +93,7 @@ class QValueSafeMultiAgent(QValueSafeAgent):
         self.q_values = []
 
     def __call__(self, observation, configuration):
+        raise NotImplementedError()
         board, features = self.state.update(observation, configuration)
         model_input = [np.expand_dims(board, axis=0), np.expand_dims(features, axis=0)]
         q_value = np.mean([model.predict_step(model_input)[0] for model in self.models], axis=0)
