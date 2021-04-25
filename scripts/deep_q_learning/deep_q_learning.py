@@ -169,11 +169,9 @@ def compute_q_learning_target(model, train_data, discount_factor, batch_size):
 
 
 def compute_state_value(model, train_data, batch_size):
-    actions = train_data[2]
-    opposite_actions = get_ohe_opposite_actions(actions)
     pred_q_values = model.predict(train_data[:2], batch_size=batch_size, verbose=1)
     pred_q_values[:-1] = pred_q_values[1:] # we use the next state for the prediction
-    state_value = np.max(pred_q_values - opposite_actions*1e3, axis=1)
+    state_value = np.max(pred_q_values, axis=1)
     return state_value
 
 
