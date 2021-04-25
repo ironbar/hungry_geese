@@ -76,6 +76,11 @@ def test_combine_data(train_data):
 
 def test_apply_all_simetries(train_data):
     new_data = apply_all_simetries(train_data)
+    assert len(new_data[0]) == len(train_data[0])*12
+
+def test_apply_all_simetries_when_vertical_simmetry_is_aplicable(train_data):
+    train_data = [train_data[0], train_data[1], np.zeros((len(train_data[0]), 4)), train_data[3]]
+    new_data = apply_all_simetries(train_data)
     assert len(new_data[0]) == len(train_data[0])*24
 
 def test_get_ohe_opposite_actions():

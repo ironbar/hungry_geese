@@ -323,17 +323,21 @@ def player_simmetry(data, new_positions):
 
 def apply_all_simetries(data):
     all_data = []
-
-    data_vertical = vertical_simmetry(data)
-    data_horizontal = horizontal_simmetry(data)
-    data_both = vertical_simmetry(horizontal_simmetry(data))
     all_permutations = list(permutations([0, 1, 2]))
+    data_horizontal = horizontal_simmetry(data)
+    if _is_vertical_simmetry_aplicable(data):
+        data_vertical = vertical_simmetry(data)
+        data_both = vertical_simmetry(horizontal_simmetry(data))
     for new_positions in all_permutations:
         all_data.append(player_simmetry(data, new_positions))
-        all_data.append(player_simmetry(data_vertical, new_positions))
         all_data.append(player_simmetry(data_horizontal, new_positions))
-        all_data.append(player_simmetry(data_both, new_positions))
+        if _is_vertical_simmetry_aplicable(data):
+            all_data.append(player_simmetry(data_vertical, new_positions))
+            all_data.append(player_simmetry(data_both, new_positions))
     return combine_data(all_data)
+
+def _is_vertical_simmetry_aplicable(data):
+    return data[2].shape[1] == 4
 
 def combine_data(all_data):
     return [np.concatenate([_data[idx] for _data in all_data]) for idx in range(len(all_data[0]))]
