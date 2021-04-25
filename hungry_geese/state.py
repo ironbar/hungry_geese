@@ -13,7 +13,21 @@ class GameState():
     and some features that are useful for planning
     """
     def __init__(self, egocentric_board=True, normalize_features=True, reward_name='sparse_reward',
-                 apply_reward_acumulation=True):
+                 apply_reward_acumulation=True, forward_north_oriented=True):
+        """
+        Parameters
+        -----------
+        egocentric_board : bool
+            If true the head of the goose will be at the center of the board
+        normalize_features : bool
+            If true features will be normalized
+        reward_name : str
+            Name of the reward that we want to use
+        apply_reward_acumulation : bool
+            If true reward will be acumulated when returning train data
+        forward_north_oriented : bool
+            If true the board will be oriented so forward movement points north
+        """
         self.history = []
         self.boards = []
         self.features = []
@@ -24,6 +38,7 @@ class GameState():
         self.normalize_features = normalize_features
         self.reward_name = reward_name
         self.apply_reward_acumulation = apply_reward_acumulation
+        self.forward_north_oriented = forward_north_oriented
 
     def update(self, observation, configuration):
         """
@@ -44,6 +59,9 @@ class GameState():
 
     def update_last_action(self, action):
         self.actions[-1] = action
+
+    def get_last_action(self):
+        return self.actions[-1]
 
     def render_board(self, board):
         """
@@ -176,6 +194,8 @@ class GameState():
                 head_position = get_head_position(goose[0], self.configuration['columns'])
                 board = make_board_egocentric(board, head_position)
         board = make_board_squared(board)
+        if self.forward_north_oriented:
+            board = make_board_forward_north_oriented(board, self.get_last_action())
         return board
 
 def get_steps_to_shrink(step, hunger_rate):
