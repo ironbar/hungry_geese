@@ -93,11 +93,11 @@ class QValueSafeMultiAgent(QValueSafeAgent):
     def __init__(self, models):
         self.models = models
         self.state = GameState()
-        self.previous_action = None
+        self.previous_action = 'NORTH'
         self.q_values = []
 
     def __call__(self, observation, configuration):
-        raise NotImplementedError()
+        # TODO: need to add function to handle first action
         board, features = self.state.update(observation, configuration)
         model_input = [np.expand_dims(board, axis=0), np.expand_dims(features, axis=0)]
         q_value = np.mean([model.predict_step(model_input)[0] for model in self.models], axis=0)

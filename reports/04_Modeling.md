@@ -524,8 +524,8 @@ With a single agent we are approaching the baseline score, but still not reach i
 data augmentation has a big effect on the loss function and so it seems on the single agent elo
 score. This allows to use more complex models for training.
 
-I can see that it does not model the danger correctly. For example when there is a goose head in the 
-upper right corner then the other goose can move to two locations, so I should see danger in both locations, 
+I can see that it does not model the danger correctly. For example when there is a goose head in the
+upper right corner then the other goose can move to two locations, so I should see danger in both locations,
 but I only see danger in one. This may mean that I need more exploration and/or maybe more variability on the other agents.
 
 ![danger at the corners](res/2021-03-26-19-39-57.png)
@@ -1345,6 +1345,76 @@ this one for simplicity. Most of the time I won't be developing.
 the other goose may lead to death. One argument is that the model should learn to deal with those
 actions, sometimes it will pay to take the risk and sometimes it won't. Other argument is that first
 priority is survival so we have to avoid taking those actions. Maybe I should leave this for later.
+
+### Development
+
+#### The model grows because of bigger input size
+
+I have added an aditional convolutional layer to reduce board encoder output size. Otherwise the dense layer was too big.
+This increases model capacity from 415k to 628k parameters.
+
+```bash
+__________________________________________________________________________________________________
+Layer (type)                    Output Shape         Param #     Connected to
+==================================================================================================
+board_input (InputLayer)        [(None, 7, 11, 17)]  0
+__________________________________________________________________________________________________
+conv2d (Conv2D)                 (None, 5, 9, 128)    19712       board_input[0][0]
+__________________________________________________________________________________________________
+conv2d_1 (Conv2D)               (None, 3, 7, 128)    147584      conv2d[0][0]
+__________________________________________________________________________________________________
+conv2d_2 (Conv2D)               (None, 1, 5, 128)    147584      conv2d_1[0][0]
+__________________________________________________________________________________________________
+flatten (Flatten)               (None, 640)          0           conv2d_2[0][0]
+__________________________________________________________________________________________________
+features_input (InputLayer)     [(None, 9)]          0
+__________________________________________________________________________________________________
+concatenate (Concatenate)       (None, 649)          0           flatten[0][0]
+                                                                 features_input[0][0]
+__________________________________________________________________________________________________
+dense (Dense)                   (None, 128)          83200       concatenate[0][0]
+__________________________________________________________________________________________________
+dense_1 (Dense)                 (None, 128)          16512       dense[0][0]
+__________________________________________________________________________________________________
+action (Dense)                  (None, 4)            512         dense_1[0][0]
+==================================================================================================
+Total params: 415,104
+Trainable params: 415,104
+Non-trainable params: 0
+__________________________________________________________________________________________________
+
+
+Layer (type)                    Output Shape         Param #     Connected to
+==================================================================================================
+board_input (InputLayer)        [(None, 11, 11, 17)] 0
+__________________________________________________________________________________________________
+conv2d (Conv2D)                 (None, 9, 9, 128)    19712       board_input[0][0]
+__________________________________________________________________________________________________
+conv2d_1 (Conv2D)               (None, 7, 7, 128)    147584      conv2d[0][0]
+__________________________________________________________________________________________________
+conv2d_2 (Conv2D)               (None, 5, 5, 128)    147584      conv2d_1[0][0]
+__________________________________________________________________________________________________
+conv2d_3 (Conv2D)               (None, 3, 3, 128)    147584      conv2d_2[0][0]
+__________________________________________________________________________________________________
+flatten (Flatten)               (None, 1152)         0           conv2d_3[0][0]
+__________________________________________________________________________________________________
+features_input (InputLayer)     [(None, 9)]          0
+__________________________________________________________________________________________________
+concatenate (Concatenate)       (None, 1161)         0           flatten[0][0]
+                                                                 features_input[0][0]
+__________________________________________________________________________________________________
+dense (Dense)                   (None, 128)          148736      concatenate[0][0]
+__________________________________________________________________________________________________
+dense_1 (Dense)                 (None, 128)          16512       dense[0][0]
+__________________________________________________________________________________________________
+action (Dense)                  (None, 3)            384         dense_1[0][0]
+==================================================================================================
+Total params: 628,096
+Trainable params: 628,096
+Non-trainable params: 0
+__________________________________________________________________________________________________
+
+```
 
 
 <!---

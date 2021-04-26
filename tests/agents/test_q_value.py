@@ -82,10 +82,12 @@ def test_QValueSafeAgent_play():
         QValueSafeAgent(FakeModelRandom()),
         QValueSafeAgent(FakeModelRandom())]
     match = env.run(agents)
-    assert all(None not in agent.state.actions for agent in agents)
+    final_status = [agent_info['status'] for agent_info in match[-1]]
+    assert 'ERROR' not in final_status
 
 def test_QValueSafeMultiAgent_play():
     env = make("hungry_geese", debug=True)
     agents = [QValueSafeMultiAgent([FakeModelRandom(), FakeModelOhe(), FakeModelUniform()])] + ['greedy']*3
     match = env.run(agents)
-    assert None not in agents[0].state.actions
+    final_status = [agent_info['status'] for agent_info in match[-1]]
+    assert 'ERROR' not in final_status
