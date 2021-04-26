@@ -105,6 +105,9 @@ def test_make_board_squared_returns_correct_shape(input_shape, output_shape):
     ((3, 3), 1),
     ((3, 2), 0),
     ((3, 0), 2),
+    ((2, 2), 1),
+    ((2, 1), 0),
+    ((2, 3), 2),
 ])
 def test_action_indices_to_relative_movement(action_indices, movement):
     assert get_relative_movement_from_action_indices(np.array(action_indices))[0] == movement
