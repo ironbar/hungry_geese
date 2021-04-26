@@ -91,7 +91,7 @@ def train_model(training_model, model, conf, callbacks, epoch_idx, other_metrics
 
     train_data, steps_last_file = sample_train_data(
         conf['model_dir'], conf['aditional_files_for_training'], conf['epochs_to_sample_files_for_training'])
-    other_metrics['mean_goose_size'] = np.mean(np.sum(train_data[0][:, :, :, 2], axis=(1, 2)))
+    other_metrics['mean_goose_size'] = np.mean(np.sum(train_data[0][:, 2:-2, :, 2], axis=(1, 2)))
     other_metrics['mean_match_steps'] = steps_last_file/n_agents_for_experience/conf['n_matches_play']
     target = compute_q_learning_target(model, train_data, conf['discount_factor'], conf['pred_batch_size'])
     train_data = train_data[:3] + [target]
