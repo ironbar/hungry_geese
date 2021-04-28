@@ -1,11 +1,8 @@
 import numpy as np
 
-from hungry_geese.state import GameState
-from hungry_geese.definitions import ACTIONS, ACTION_TO_IDX
-from hungry_geese.utils import opposite_action
 from hungry_geese.heuristic import get_certain_death_mask, adapt_mask_to_3d_action
 from hungry_geese.agents import QValueAgent
-
+from hungry_geese.actions import get_action_from_relative_movement
 
 class SoftmaxAgent(QValueAgent):
     """
@@ -29,7 +26,7 @@ class SoftmaxAgent(QValueAgent):
         prediction -= np.mean(prediction) # to stabilize softmax
         probabilities = softmax(np.clip(prediction*self.scale, -100, 80)) # clip to avoid overflow and underflow
         action_idx = int(np.random.choice(3, size=1, p=probabilities))
-        action = ACTIONS[(action_idx - 1 + ACTION_TO_IDX[self.previous_action])%len(ACTIONS)]
+        action = get_action_from_relative_movement(action_idx, self.previous_action)
         return action
 
 
