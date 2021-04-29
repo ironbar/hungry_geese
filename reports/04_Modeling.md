@@ -1416,6 +1416,36 @@ ________________________________________________________________________________
 
 ```
 
+#### Why reducing the number of actions to 3 did not improve model?
+
+Unfortunately we have not been able to improve over previous 4 action model.
+
+Let's enumerate all the changes:
+
+- Actions reduced from 4 to 3
+- Model size increased from 400k to 600k
+- Board size increased from 7x11 to 11x11
+- Training samples reduced to half due to removing vertical simmetry
+
+Maybe there is another limitting factor that is hiding a possible improvement, such as the reward or
+the fact of using two learning agents for playing.
+
+#### Using experience replay
+
+I have done a experiment using experience replay and again does not seem to bring improvements to the
+agent.
+
+#### Risk averse agent
+
+I'm going to modify safe agents so they do not take risks except when there is not other option.
+
+- This will ease the task of survival, which we have seen in the leaderboard that sometimes an agent
+dies early playing against weak agents
+- It will allow to train using a single learning agent, because it will not learn greedy behaviours.
+This may help to allow developing strategies to beat the top agents
+
+In the other hand it is possible that taking risks when the other agents do not take them (at the top
+of the leaderboard) may be giving an advantage to my current agents against the others.
 
 <!---
 
