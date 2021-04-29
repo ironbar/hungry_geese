@@ -91,3 +91,33 @@ def test_QValueSafeMultiAgent_play():
     match = env.run(agents)
     final_status = [agent_info['status'] for agent_info in match[-1]]
     assert 'ERROR' not in final_status
+
+@pytest.mark.parametrize('n_runs', [100])
+@pytest.mark.parametrize('observation, risky_actions', [
+    ({'index': 0, 'geese': [[36, 47], [26, 27]]}, ['NORTH', 'EAST']),
+    ({'index': 0, 'geese': [[36, 47], [14, 3]]}, ['NORTH']),
+    ({'index': 0, 'geese': [[36, 47], [24, 23]]}, ['NORTH', 'WEST']),
+])
+def test_QValueSafeAgent_does_not_take_risky_actions_if_possible(observation, risky_actions, n_runs):
+    agent = QValueSafeAgent(None)
+    configuration = dict(columns=11, rows=7)
+    q_value = np.ones(3)
+    actions = []
+    for _ in range(n_runs):
+        actions.append(agent.select_action(q_value.copy(), observation, configuration))
+    assert all(risky_action not in actions for risky_action in risky_actions)
+
+@pytest.mark.parametrize('n_runs', [100])
+@pytest.mark.parametrize('observation, risky_actions', [
+    ({'index': 0, 'geese': [[36, 47], [26, 27], [24, 35, 46]]}, ['NORTH', 'EAST']),
+    ({'index': 0, 'geese': [[36, 47], [14, 3], [24, 35, 46], [26, 37, 48]]}, ['NORTH']),
+    ({'index': 0, 'geese': [[36, 47], [24, 23], [26, 37, 48]]}, ['NORTH', 'WEST']),
+])
+def test_QValueSafeAgent_does_take_risky_actions_if_necessary(observation, risky_actions, n_runs):
+    agent = QValueSafeAgent(None)
+    configuration = dict(columns=11, rows=7)
+    q_value = np.ones(3)
+    actions = []
+    for _ in range(n_runs):
+        actions.append(agent.select_action(q_value.copy(), observation, configuration))
+    assert all(risky_action in actions for risky_action in risky_actions)
