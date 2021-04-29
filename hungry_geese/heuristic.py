@@ -4,8 +4,8 @@ from kaggle_environments.envs.hungry_geese.hungry_geese import adjacent_position
 
 def get_certain_death_mask(observation, configuration):
     """
-    Returns a binary mask for the actions that has ones on those actions that lead to a certain
-    death
+    Returns a mask for the actions that has ones on those actions that lead to a certain
+    death, 0.5 on actions that may lead to death and 0 in the other cases
 
     array([ [ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10],
             [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21],
