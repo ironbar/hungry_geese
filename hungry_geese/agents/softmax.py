@@ -20,12 +20,12 @@ class SoftmaxAgent(QValueAgent):
         self.scale = scale
 
     def select_action(self, q_value, observation, configuration):
-        return self._sample_action_with_softmax(q_value)
+        return self._sample_action_with_softmax(q_value, np.arange(len(q_value)))
 
-    def _sample_action_with_softmax(self, prediction):
+    def _sample_action_with_softmax(self, prediction, choices):
         prediction -= np.mean(prediction) # to stabilize softmax
         probabilities = softmax(np.clip(prediction*self.scale, -100, 80)) # clip to avoid overflow and underflow
-        action_idx = int(np.random.choice(3, size=1, p=probabilities))
+        action_idx = int(np.random.choice(choices, size=1, p=probabilities))
         action = get_action_from_relative_movement(action_idx, self.previous_action)
         return action
 
@@ -39,5 +39,13 @@ class SoftmaxSafeAgent(SoftmaxAgent):
     def select_action(self, q_value, observation, configuration):
         certain_death_mask = get_certain_death_mask(observation, configuration)
         certain_death_mask = adapt_mask_to_3d_action(certain_death_mask, self.previous_action)
-        q_value -= certain_death_mask*1e3
-        return self._sample_action_with_softmax(q_value)
+
+        safe_movements = np.arange(len(certain_death_mask))[certain_death_mask == 0]
+        if safe_movements.size:
+            return self._sample_action_with_softmax(q_value[safe_movements], safe_movements)
+
+        risky_movements = np.arange(len(certain_death_mask))[certain_death_mask < 1]
+        if risky_movements.size:
+            return self._sample_action_with_softmax(q_value[risky_movements], risky_movements)
+
+        return self._sample_action_with_softmax(q_value, np.arange(len(certain_death_mask)))
