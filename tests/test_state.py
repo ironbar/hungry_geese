@@ -5,7 +5,8 @@ from kaggle_environments import make
 from hungry_geese.state import (
     get_steps_to_shrink, get_steps_to_die, get_steps_to_end,
     GameState, horizontal_simmetry, vertical_simmetry, player_simmetry,
-    permutations, combine_data, apply_all_simetries, get_ohe_opposite_actions
+    permutations, combine_data, apply_all_simetries, get_ohe_opposite_actions,
+    make_board_squared, get_relative_movement_from_action_indices
 )
 
 @pytest.mark.parametrize('step, hunger_rate, steps_to_shrink',  [
@@ -75,6 +76,11 @@ def test_combine_data(train_data):
 
 def test_apply_all_simetries(train_data):
     new_data = apply_all_simetries(train_data)
+    assert len(new_data[0]) == len(train_data[0])*12
+
+def test_apply_all_simetries_when_vertical_simmetry_is_aplicable(train_data):
+    train_data = [train_data[0], train_data[1], np.zeros((len(train_data[0]), 4)), train_data[3]]
+    new_data = apply_all_simetries(train_data)
     assert len(new_data[0]) == len(train_data[0])*24
 
 def test_get_ohe_opposite_actions():
@@ -82,3 +88,26 @@ def test_get_ohe_opposite_actions():
     opposite_actions = get_ohe_opposite_actions(actions)
     assert pytest.approx(actions[:2]) == opposite_actions[2:]
     assert pytest.approx(actions) == get_ohe_opposite_actions(opposite_actions)
+
+@pytest.mark.parametrize('input_shape, output_shape', [
+    ((7, 11, 17), (11, 11, 17)),
+])
+def test_make_board_squared_returns_correct_shape(input_shape, output_shape):
+    assert output_shape == make_board_squared(np.zeros(input_shape)).shape
+
+@pytest.mark.parametrize('action_indices, movement', [
+    ((1, 0), 0),
+    ((1, 1), 1),
+    ((1, 2), 2),
+    ((0, 0), 1),
+    ((0, 1), 2),
+    ((0, 3), 0),
+    ((3, 3), 1),
+    ((3, 2), 0),
+    ((3, 0), 2),
+    ((2, 2), 1),
+    ((2, 1), 0),
+    ((2, 3), 2),
+])
+def test_action_indices_to_relative_movement(action_indices, movement):
+    assert get_relative_movement_from_action_indices(np.array(action_indices))[0] == movement

@@ -30,7 +30,7 @@ def main(args=None):
     if args is None:
         args = sys.argv[1:]
     args = parse_args(args)
-    # configure_logging()
+    configure_logging()
     simple_model_softmax_policy_data_generation(
         args.model_path, args.softmax_scale, args.output, args.n_matches, args.reward_name,
         template_path=args.template_path, play_against_top_n=args.play_against_top_n,
@@ -127,15 +127,20 @@ def create_train_data(matches_results, reward_name, output_path, agent_idx_range
 
     for _ in tqdm(range(len(matches_results)), desc='Creating game data'):
         match = matches_results[0]
-        for idx in agent_idx_range:
-            state.reset()
+        for agent_idx in agent_idx_range:
+            first_action = match[1][agent_idx]['action']
+            if first_action == 'SOUTH':
+                state.reset(previous_action='SOUTH')
+            else:
+                state.reset()
             for step_idx, step in enumerate(match):
                 observation = step[0]['observation'].copy()
-                observation['index'] = idx
+                observation['index'] = agent_idx
                 state.update(observation, conf)
                 if step_idx:
-                    state.add_action(step[idx]['action'])
-                if not observation['geese'][idx]:
+                    action = step[agent_idx]['action']
+                    state.add_action(action)
+                if not observation['geese'][agent_idx]:
                     break
             data = state.prepare_data_for_training()
             is_not_terminal = np.ones_like(data[3])

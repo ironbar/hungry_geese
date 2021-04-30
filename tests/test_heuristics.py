@@ -3,7 +3,7 @@ import numpy as np
 
 from hungry_geese.heuristic import (
     is_future_position_doomed, is_food_around_head,
-    get_certain_death_mask
+    get_certain_death_mask, adapt_mask_to_3d_action
 )
 
 
@@ -46,3 +46,12 @@ def test_is_future_position_doomed(future_position, observation, is_doomed):
 def test_is_food_around_head(goose, food, is_food):
     configuration = dict(columns=11, rows=7)
     assert is_food == is_food_around_head(goose, food, configuration)
+
+@pytest.mark.parametrize('mask_4d, previous_action, mask_3d', [
+    ([1, 2, 3, 4], 'NORTH', [4, 1, 2]),
+    ([1, 2, 3, 4], 'EAST', [1, 2, 3]),
+    ([1, 2, 3, 4], 'SOUTH', [2, 3, 4]),
+    ([1, 2, 3, 4], 'WEST', [3, 4, 1]),
+])
+def test_adapt_mask_to_3d_action(mask_4d, previous_action, mask_3d):
+    assert mask_3d == adapt_mask_to_3d_action(np.array(mask_4d), previous_action).tolist()

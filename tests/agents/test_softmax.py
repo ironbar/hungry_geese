@@ -6,23 +6,23 @@ from kaggle_environments import make
 
 from hungry_geese.agents import SoftmaxAgent, SoftmaxSafeAgent
 from hungry_geese.utils import ACTIONS, opposite_action
-
+from hungry_geese.model import N_ACTIONS
 
 random.seed(7)
 np.random.seed(7)
 
 class FakeModelUniform():
     def predict_step(self, *args, **kwargs):
-        return np.ones((1, 4))
+        return np.ones((1, N_ACTIONS))
 
 class FakeModelRandom():
     def predict_step(self, *args, **kwargs):
-        return np.random.uniform(size=(1, 4))
+        return np.random.uniform(size=(1, N_ACTIONS))
 
 class FakeModelOhe():
     def predict_step(self, *args, **kwargs):
-        ohe = np.zeros((1, 4))
-        ohe[0, 0] = 1
+        ohe = np.zeros((1, N_ACTIONS))
+        ohe[0, 1] = 1
         return ohe
 
 
@@ -76,12 +76,12 @@ def test_agent_update_previous_action(train_info):
 
     assert agent.previous_action == 'NORTH'
     assert agent.state.actions[-1] == 'NORTH'
-    assert len(agent.state.actions) == 1
+    assert len(agent.state.actions) == 2
 
     agent.update_previous_action('SOUTH')
     assert agent.previous_action == 'SOUTH'
     assert agent.state.actions[-1] == 'SOUTH'
-    assert len(agent.state.actions) == 1
+    assert len(agent.state.actions) == 2
 
 def test_SoftmaxSafeAgent_play():
     env = make("hungry_geese", debug=True)
@@ -98,5 +98,35 @@ def test_SoftmaxSafeAgent_makes_legal_action_on_certain_death_situation():
     agent.previous_action = 'NORTH'
     observation = {'index': 0, 'geese': [[12, 1, 2, 13, 24, 23, 22, 11, 0]]}
     configuration = dict(columns=11, rows=7)
-    actions = [agent.select_action(np.ones(4), observation, configuration) for _ in range(100)]
+    actions = [agent.select_action(np.ones(3), observation, configuration) for _ in range(100)]
     assert 2 not in actions
+
+@pytest.mark.parametrize('n_runs', [100])
+@pytest.mark.parametrize('observation, risky_actions', [
+    ({'index': 0, 'geese': [[36, 47], [26, 27]]}, ['NORTH', 'EAST']),
+    ({'index': 0, 'geese': [[36, 47], [14, 3]]}, ['NORTH']),
+    ({'index': 0, 'geese': [[36, 47], [24, 23]]}, ['NORTH', 'WEST']),
+])
+def test_SoftmaxSafeAgent_does_not_take_risky_actions_if_possible(observation, risky_actions, n_runs):
+    agent = SoftmaxSafeAgent(None)
+    configuration = dict(columns=11, rows=7)
+    q_value = np.ones(3)
+    actions = []
+    for _ in range(n_runs):
+        actions.append(agent.select_action(q_value.copy(), observation, configuration))
+    assert all(risky_action not in actions for risky_action in risky_actions)
+
+@pytest.mark.parametrize('n_runs', [100])
+@pytest.mark.parametrize('observation, risky_actions', [
+    ({'index': 0, 'geese': [[36, 47], [26, 27], [24, 35, 46]]}, ['NORTH', 'EAST']),
+    ({'index': 0, 'geese': [[36, 47], [14, 3], [24, 35, 46], [26, 37, 48]]}, ['NORTH']),
+    ({'index': 0, 'geese': [[36, 47], [24, 23], [26, 37, 48]]}, ['NORTH', 'WEST']),
+])
+def test_SoftmaxSafeAgent_does_take_risky_actions_if_necessary(observation, risky_actions, n_runs):
+    agent = SoftmaxSafeAgent(None)
+    configuration = dict(columns=11, rows=7)
+    q_value = np.ones(3)
+    actions = []
+    for _ in range(n_runs):
+        actions.append(agent.select_action(q_value.copy(), observation, configuration))
+    assert all(risky_action in actions for risky_action in risky_actions)

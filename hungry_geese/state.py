@@ -13,17 +13,35 @@ class GameState():
     and some features that are useful for planning
     """
     def __init__(self, egocentric_board=True, normalize_features=True, reward_name='sparse_reward',
-                 apply_reward_acumulation=True):
+                 apply_reward_acumulation=True, forward_north_oriented=True, previous_action='NORTH'):
+        """
+        Parameters
+        -----------
+        egocentric_board : bool
+            If true the head of the goose will be at the center of the board
+        normalize_features : bool
+            If true features will be normalized
+        reward_name : str
+            Name of the reward that we want to use
+        apply_reward_acumulation : bool
+            If true reward will be acumulated when returning train data
+        forward_north_oriented : bool
+            If true the board will be oriented so forward movement points north
+        previous_action : str
+            Name of the previous action, it will be used to orient the board forward north on first
+            movement
+        """
         self.history = []
         self.boards = []
         self.features = []
         self.rewards = []
-        self.actions = []
+        self.actions = [previous_action]
         self.configuration = None
         self.egocentric_board = egocentric_board
         self.normalize_features = normalize_features
         self.reward_name = reward_name
         self.apply_reward_acumulation = apply_reward_acumulation
+        self.forward_north_oriented = forward_north_oriented
 
     def update(self, observation, configuration):
         """
@@ -44,6 +62,9 @@ class GameState():
 
     def update_last_action(self, action):
         self.actions[-1] = action
+
+    def get_last_action(self):
+        return self.actions[-1]
 
     def render_board(self, board):
         """
@@ -80,15 +101,21 @@ class GameState():
             render += np.expand_dims(board[:, :, idx*4+3], axis=2).astype(np.uint8)*idx_to_color[idx]
         return render
 
-    def reset(self):
+    def reset(self, previous_action='NORTH'):
         """
         Deletes all data to be able to store a new episode
+
+        Parameters
+        ----------
+        previous_action : str
+            Name of the previous action, it will be used to orient the board forward north on first
+            movement
         """
         self.history = []
         self.boards = []
         self.features = []
         self.rewards = []
-        self.actions = []
+        self.actions = [previous_action]
         self.configuration = None
 
     def prepare_data_for_training(self):
@@ -100,7 +127,8 @@ class GameState():
         features: np.array
             Features of the episode with shape (steps, 9) when 4 players
         actions: np.array
-            Actions took during the episode with one hot encoding (steps, 4)
+            Actions took during the episode with one hot encoding (steps, 4) or steps(, 3) if
+            forward_north_oriented is True
         rewards: np.array
             Cumulative reward received during the episode (steps,)
         """
@@ -108,11 +136,19 @@ class GameState():
             reward = get_cumulative_reward(self.rewards, self.reward_name)
         else:
             reward = self.rewards
-        actions = np.array(self.actions[:len(reward)])
-        for action, idx in ACTION_TO_IDX.items():
-            actions[actions == action] = idx
-        actions = keras.utils.to_categorical(actions, num_classes=4)
-        return [np.array(self.boards[:len(actions)], dtype=np.int8), np.array(self.features[:len(actions)]), actions, reward]
+
+        actions = np.array(self.actions[:len(reward) + 1])
+        action_indices = np.zeros_like(actions, dtype=np.float32)
+        for action, action_idx in ACTION_TO_IDX.items():
+            action_indices[actions == action] = action_idx
+        if self.forward_north_oriented:
+            relative_movements = get_relative_movement_from_action_indices(action_indices)
+            ohe_actions = keras.utils.to_categorical(relative_movements, num_classes=3)
+        else: # then simply the action is the ohe of all the actions
+            action_indices = action_indices[1:] # remove initial previous action
+            ohe_actions = keras.utils.to_categorical(action_indices, num_classes=4)
+
+        return [np.array(self.boards[:len(reward)], dtype=np.int8), np.array(self.features[:len(reward)]), ohe_actions, reward]
 
     def _compute_features(self, observation):
         """
@@ -175,6 +211,9 @@ class GameState():
             if goose:
                 head_position = get_head_position(goose[0], self.configuration['columns'])
                 board = make_board_egocentric(board, head_position)
+        board = make_board_squared(board)
+        if self.forward_north_oriented:
+            board = make_board_forward_north_oriented(board, self.get_last_action())
         return board
 
 def get_steps_to_shrink(step, hunger_rate):
@@ -222,6 +261,29 @@ def _center_board_cols(col, board):
         new_board[:, -offset:] = board[:, :offset]
     return new_board
 
+def make_board_squared(board):
+    """
+    Creates a squared board by repeating the shortest dimension
+
+    Typical board size is  (7, 11, 17), we want it to be (11, 11, 17)
+    """
+    if board.shape[0] > board.shape[1]:
+        raise NotImplementedError('Currently is not supported bigger rows than cols: %s' % str(board.shape))
+    side = np.max(board.shape[:2])
+    squared_board = np.zeros((side, side, board.shape[2]), dtype=board.dtype)
+    row_offset = (squared_board.shape[0] - board.shape[0])//2
+    squared_board[row_offset:-row_offset] = board
+    squared_board[:row_offset] = board[-row_offset:]
+    squared_board[-row_offset:] = board[:row_offset]
+    return squared_board
+
+def make_board_forward_north_oriented(board, previous_action):
+    """ Rotates the board so forward direction points north """
+    action_idx = ACTION_TO_IDX[previous_action]
+    if action_idx:
+        board = np.rot90(board, k=action_idx)
+    return board
+
 def get_head_position(head, columns):
     row = head//columns
     col = head - row*columns
@@ -238,9 +300,16 @@ def vertical_simmetry(data):
 def horizontal_simmetry(data):
     boards = data[0][:, :, ::-1].copy()
     actions = data[2].copy()
-    # change west by east and viceversa
-    actions[:, 1] = data[2][:, 3]
-    actions[:, 3] = data[2][:, 1]
+    if actions.shape[1] == 4:
+        # change west by east and viceversa
+        actions[:, 1] = data[2][:, 3]
+        actions[:, 3] = data[2][:, 1]
+    elif actions.shape[1] == 3:
+        # change turn left for turn right and viceversa
+        actions[:, 0] = data[2][:, 2]
+        actions[:, 2] = data[2][:, 0]
+    else:
+        raise NotImplementedError(actions.shape)
     return boards, data[1], actions, data[-1]
 
 def player_simmetry(data, new_positions):
@@ -254,17 +323,21 @@ def player_simmetry(data, new_positions):
 
 def apply_all_simetries(data):
     all_data = []
-
-    data_vertical = vertical_simmetry(data)
-    data_horizontal = horizontal_simmetry(data)
-    data_both = vertical_simmetry(horizontal_simmetry(data))
     all_permutations = list(permutations([0, 1, 2]))
+    data_horizontal = horizontal_simmetry(data)
+    if _is_vertical_simmetry_aplicable(data):
+        data_vertical = vertical_simmetry(data)
+        data_both = vertical_simmetry(horizontal_simmetry(data))
     for new_positions in all_permutations:
         all_data.append(player_simmetry(data, new_positions))
-        all_data.append(player_simmetry(data_vertical, new_positions))
         all_data.append(player_simmetry(data_horizontal, new_positions))
-        all_data.append(player_simmetry(data_both, new_positions))
+        if _is_vertical_simmetry_aplicable(data):
+            all_data.append(player_simmetry(data_vertical, new_positions))
+            all_data.append(player_simmetry(data_both, new_positions))
     return combine_data(all_data)
+
+def _is_vertical_simmetry_aplicable(data):
+    return data[2].shape[1] == 4
 
 def combine_data(all_data):
     return [np.concatenate([_data[idx] for _data in all_data]) for idx in range(len(all_data[0]))]
@@ -278,3 +351,15 @@ def get_ohe_opposite_actions(actions):
     opposite_actions[:, :2] = actions[:, 2:]
     opposite_actions[:, 2:] = actions[:, :2]
     return opposite_actions
+
+def get_relative_movement_from_action_indices(action_indices):
+    """
+    Transforms the indices of the actions to relative movements being:
+
+    - 0 turn left (NORTH -> WEST)
+    - 1 forward (NORTH -> NORTH)
+    - 2 turn right (NORTH -> EAST)
+    """
+    diff = action_indices[1:] - action_indices[:-1]
+    movements = (diff + 1)%4
+    return movements

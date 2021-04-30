@@ -4,8 +4,8 @@ from kaggle_environments.envs.hungry_geese.hungry_geese import adjacent_position
 
 def get_certain_death_mask(observation, configuration):
     """
-    Returns a binary mask for the actions that has ones on those actions that lead to a certain
-    death
+    Returns a mask for the actions that has ones on those actions that lead to a certain
+    death, 0.5 on actions that may lead to death and 0 in the other cases
 
     array([ [ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10],
             [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21],
@@ -49,3 +49,16 @@ def is_future_position_doomed(future_position, observation, configuration):
 def is_food_around_head(goose, food, configuration):
     future_positions = adjacent_positions(goose[0], configuration['columns'], configuration['rows'])
     return any(food_position in future_positions for food_position in food)
+
+def adapt_mask_to_3d_action(mask, previous_action):
+    """
+    Transforms the mask to fit the convention of: 0 turn left, 1 move forward and 2 turn right
+    the input mask means: north, east, south, west
+    """
+    previous_action_to_indices = {
+        'NORTH': [-1, 0, 1],
+        'EAST': [0, 1, 2],
+        'SOUTH': [1, 2, 3],
+        'WEST': [2, 3, 0],
+    }
+    return mask[previous_action_to_indices[previous_action]]

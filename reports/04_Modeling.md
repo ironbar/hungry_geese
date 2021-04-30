@@ -524,8 +524,8 @@ With a single agent we are approaching the baseline score, but still not reach i
 data augmentation has a big effect on the loss function and so it seems on the single agent elo
 score. This allows to use more complex models for training.
 
-I can see that it does not model the danger correctly. For example when there is a goose head in the 
-upper right corner then the other goose can move to two locations, so I should see danger in both locations, 
+I can see that it does not model the danger correctly. For example when there is a goose head in the
+upper right corner then the other goose can move to two locations, so I should see danger in both locations,
 but I only see danger in one. This may mean that I need more exploration and/or maybe more variability on the other agents.
 
 ![danger at the corners](res/2021-03-26-19-39-57.png)
@@ -1241,6 +1241,9 @@ is already seeing the same behaviour.
 
 #### Just survive reward
 
+I'm struggling to improve over rhaegar agent, so I want to explore if modifying the reward I can improve
+the agents.
+
 There are two competing goals in the game:
 
 1. Survive until epoch 200
@@ -1268,6 +1271,10 @@ steps it will grow to 2.
 It seems that simply using a discount factor of 0.95 is enough to stabilize growing bias. So let's
 try that on a training and compare to discount factor 1. This will probably help to better estimate
 q value, but I have better ideas.
+
+![comparison of discount factor](res/2021-04-25-09-22-24.png)
+
+The discount factor of 0.95 seems to lead to a more real q value, but other metrics are no better.
 
 Currently I'm only using for training the action that the agent took. However I could also use
 the information of certain deaths and thus provide more information to the agent to learn even if it
@@ -1312,7 +1319,7 @@ move to Monte Carlo Tree Search and Alpha Zero like agent.
 
 - No need to apply vertical simmetry because the agent is always looking upwards. This
 simplifies the game
-- Search space is reduced because there are only 3 actions
+- Search space is reduced because there are only 3 actions, and they always mean the same
 - Don't need to care about ilegal actions, all 3 actions will always be legal
 - Lower computational cost due to removing simmetries from training -> 1/2
 - Exploration will be improved because certain deaths will be avoided
@@ -1327,6 +1334,131 @@ two different previous actions
 - Changes won't be retrocompatible, only self-contained agents will still work
 - Higher computational cost due to increased board size
 
+#### Uncertainties
+
+- How to deal with breaking changes? I would like to be able to keep training models and at the
+same time develop and test the redesign. If I want to use both implementations at the same time I
+need to have two copies of the repository and also two conda environments, that's the only way. A
+simpler option is to use a different branch for working and to stop training when developing. I prefer
+this one for simplicity. Most of the time I won't be developing.
+- How to deal with uncertain death actions? Those are the actions that depending on the actions of
+the other goose may lead to death. One argument is that the model should learn to deal with those
+actions, sometimes it will pay to take the risk and sometimes it won't. Other argument is that first
+priority is survival so we have to avoid taking those actions. Maybe I should leave this for later.
+
+### Development
+
+#### The model grows because of bigger input size
+
+I have added an aditional convolutional layer to reduce board encoder output size. Otherwise the dense layer was too big.
+This increases model capacity from 415k to 628k parameters.
+
+```bash
+__________________________________________________________________________________________________
+Layer (type)                    Output Shape         Param #     Connected to
+==================================================================================================
+board_input (InputLayer)        [(None, 7, 11, 17)]  0
+__________________________________________________________________________________________________
+conv2d (Conv2D)                 (None, 5, 9, 128)    19712       board_input[0][0]
+__________________________________________________________________________________________________
+conv2d_1 (Conv2D)               (None, 3, 7, 128)    147584      conv2d[0][0]
+__________________________________________________________________________________________________
+conv2d_2 (Conv2D)               (None, 1, 5, 128)    147584      conv2d_1[0][0]
+__________________________________________________________________________________________________
+flatten (Flatten)               (None, 640)          0           conv2d_2[0][0]
+__________________________________________________________________________________________________
+features_input (InputLayer)     [(None, 9)]          0
+__________________________________________________________________________________________________
+concatenate (Concatenate)       (None, 649)          0           flatten[0][0]
+                                                                 features_input[0][0]
+__________________________________________________________________________________________________
+dense (Dense)                   (None, 128)          83200       concatenate[0][0]
+__________________________________________________________________________________________________
+dense_1 (Dense)                 (None, 128)          16512       dense[0][0]
+__________________________________________________________________________________________________
+action (Dense)                  (None, 4)            512         dense_1[0][0]
+==================================================================================================
+Total params: 415,104
+Trainable params: 415,104
+Non-trainable params: 0
+__________________________________________________________________________________________________
+
+
+Layer (type)                    Output Shape         Param #     Connected to
+==================================================================================================
+board_input (InputLayer)        [(None, 11, 11, 17)] 0
+__________________________________________________________________________________________________
+conv2d (Conv2D)                 (None, 9, 9, 128)    19712       board_input[0][0]
+__________________________________________________________________________________________________
+conv2d_1 (Conv2D)               (None, 7, 7, 128)    147584      conv2d[0][0]
+__________________________________________________________________________________________________
+conv2d_2 (Conv2D)               (None, 5, 5, 128)    147584      conv2d_1[0][0]
+__________________________________________________________________________________________________
+conv2d_3 (Conv2D)               (None, 3, 3, 128)    147584      conv2d_2[0][0]
+__________________________________________________________________________________________________
+flatten (Flatten)               (None, 1152)         0           conv2d_3[0][0]
+__________________________________________________________________________________________________
+features_input (InputLayer)     [(None, 9)]          0
+__________________________________________________________________________________________________
+concatenate (Concatenate)       (None, 1161)         0           flatten[0][0]
+                                                                 features_input[0][0]
+__________________________________________________________________________________________________
+dense (Dense)                   (None, 128)          148736      concatenate[0][0]
+__________________________________________________________________________________________________
+dense_1 (Dense)                 (None, 128)          16512       dense[0][0]
+__________________________________________________________________________________________________
+action (Dense)                  (None, 3)            384         dense_1[0][0]
+==================================================================================================
+Total params: 628,096
+Trainable params: 628,096
+Non-trainable params: 0
+__________________________________________________________________________________________________
+
+```
+
+#### Why reducing the number of actions to 3 did not improve model?
+
+Unfortunately we have not been able to improve over previous 4 action model.
+
+Let's enumerate all the changes:
+
+- Actions reduced from 4 to 3
+- Model size increased from 400k to 600k
+- Board size increased from 7x11 to 11x11
+- Training samples reduced to half due to removing vertical simmetry
+
+Maybe there is another limitting factor that is hiding a possible improvement, such as the reward or
+the fact of using two learning agents for playing.
+
+#### Using experience replay
+
+I have done a experiment using experience replay and again does not seem to bring improvements to the
+agent.
+
+#### Risk averse agent
+
+I'm going to modify safe agents so they do not take risks except when there is not other option.
+
+- This will ease the task of survival, which we have seen in the leaderboard that sometimes an agent
+dies early playing against weak agents
+- It will allow to train using a single learning agent, because it will not learn greedy behaviours.
+This may help to allow developing strategies to beat the top agents
+
+In the other hand it is possible that taking risks when the other agents do not take them (at the top
+of the leaderboard) may be giving an advantage to my current agents against the others.
+
+#### Using certain deaths for training
+
+To be able to use certain deaths for training I will need to create this data:
+
+- reward for each action
+- is_terminal for each action
+- mask for training
+
+The model will receive as input the board and the features, and as output will receive the q value
+and the mask. I will have to create a custom loss function to make it work.
+
+I think the best way to do this is to create a new branch.
 
 <!---
 
