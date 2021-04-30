@@ -187,7 +187,14 @@ def create_train_data(matches_results, reward_name, output_path, agent_idx_range
     output_path = os.path.realpath(output_path)
     logger.info('Saving data on: %s' % output_path)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    np.savez_compressed(output_path, boards=train_data[0], features=train_data[1], actions=train_data[2], rewards=train_data[3], is_not_terminal=train_data[4])
+    np.savez_compressed(
+        output_path,
+        boards=train_data[0],
+        features=train_data[1],
+        rewards=train_data[2],
+        is_not_terminal=train_data[3],
+        training_mask=train_data[4],
+    )
     del state
     del train_data
     log_ram_usage()
