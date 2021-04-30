@@ -3,7 +3,8 @@ import numpy as np
 
 from hungry_geese.reward import (
     get_n_geese_alive, get_sparse_reward, get_ranking_reward, get_cumulative_reward,
-    get_clipped_len_reward, get_grow_and_kill_reward, get_just_survive_reward
+    get_clipped_len_reward, get_grow_and_kill_reward, get_just_survive_reward,
+    get_death_reward_from_name
 )
 
 @pytest.mark.parametrize('geese, n',  [
@@ -100,3 +101,11 @@ def test_grow_and_kill_reward(current_observation, previous_observation, reward_
 ])
 def test_just_survive_reward(current_observation, reward_name, reward):
     assert reward == get_just_survive_reward(current_observation, reward_name)
+
+
+@pytest.mark.parametrize('reward_name, death_reward', [
+    ('just_survive_-5', -5),
+    ('grow_and_kill_reward_-1_8_3_2', -1),
+])
+def test_get_death_reward_from_name(reward_name, death_reward):
+    assert death_reward == get_death_reward_from_name(reward_name)
