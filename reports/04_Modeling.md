@@ -1447,6 +1447,19 @@ This may help to allow developing strategies to beat the top agents
 In the other hand it is possible that taking risks when the other agents do not take them (at the top
 of the leaderboard) may be giving an advantage to my current agents against the others.
 
+#### Using certain deaths for training
+
+To be able to use certain deaths for training I will need to create this data:
+
+- reward for each action
+- is_terminal for each action
+- mask for training
+
+The model will receive as input the board and the features, and as output will receive the q value
+and the mask. I will have to create a custom loss function to make it work.
+
+I think the best way to do this is to create a new branch.
+
 <!---
 
 ## Iteration 8. Monte Carlo Tree Search
