@@ -120,7 +120,8 @@ class QValueSafeMultiAgent(QValueSafeAgent):
 
 class QValueSafeAgentDataAugmentation(QValueSafeAgent):
     def _predict_q_value(self, board, features):
-        data_augmented = apply_all_simetries([np.expand_dims(board, axis=0), np.expand_dims(features, axis=0)])
+        data_augmented = apply_all_simetries(
+            [np.expand_dims(board, axis=0), np.expand_dims(features, axis=0), np.zeros((1, 3)), np.zeros((1, 3))])[:2]
         preds = self.model.predict_on_batch(data_augmented)
         fixed_preds = preds.copy()
         # horizontal simmetry
