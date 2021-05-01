@@ -139,12 +139,13 @@ def create_train_data(matches_results, reward_name, output_path, agent_idx_range
             certain_death_masks = []
 
             for step_idx, step in enumerate(match):
-                observation = step[0]['observation'].copy()
-                observation['index'] = agent_idx
-                state.update(observation, conf)
                 if step_idx:
                     action = step[agent_idx]['action']
                     state.add_action(action)
+                observation = step[0]['observation'].copy()
+                observation['index'] = agent_idx
+                state.update(observation, conf)
+
                 if not observation['geese'][agent_idx]:
                     break
                 certain_death_mask = get_certain_death_mask(observation, conf)
@@ -168,7 +169,7 @@ def create_train_data(matches_results, reward_name, output_path, agent_idx_range
             # mask for training
             training_mask = np.zeros_like(rewards)
             training_mask += ohe_actions
-            training_mask += certain_death_mask
+            training_mask += certain_death_masks
             training_mask = np.clip(training_mask, 0, 1)
 
             train_data.append(data[:2] + [rewards, is_not_terminal, training_mask])
