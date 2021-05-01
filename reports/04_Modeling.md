@@ -1430,6 +1430,9 @@ Let's enumerate all the changes:
 Maybe there is another limitting factor that is hiding a possible improvement, such as the reward or
 the fact of using two learning agents for playing.
 
+**WARNING** I have found a bug days later that was creating incorrectly train data, the board
+was not north oriented. So this could explain the bad results.
+
 #### Using experience replay
 
 I have done a experiment using experience replay and again does not seem to bring improvements to the
