@@ -11,7 +11,6 @@ def main(args=None):
         args = sys.argv[1:]
     args = parse_args(args)
     model = tf.keras.models.load_model(args.model_path, compile=False)
-    model = tf.keras.models.Model(inputs=model.inputs[:2], outputs=model.layers[-3].output)
     weight_base64 = base64.b64encode(bz2.compress(pickle.dumps(model.get_weights())))
 
     if args.data_augmentation:
