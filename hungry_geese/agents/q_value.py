@@ -96,6 +96,22 @@ class QValueSafeAgent(QValueAgent):
         return get_action_from_relative_movement(action_idx, self.previous_action)
 
 
+class QValueSemiSafeAgent(QValueSafeAgent):
+    """
+    This version does not take risks if possible
+    """
+    def select_action(self, q_value, observation, configuration):
+        q_value += np.random.uniform(0, 1e-5, len(q_value))
+        certain_death_mask = get_certain_death_mask(observation, configuration)
+        certain_death_mask = adapt_mask_to_3d_action(certain_death_mask, self.previous_action)
+
+        risky_movements = np.arange(len(certain_death_mask))[certain_death_mask < 1]
+        if risky_movements.size:
+            return self._select_between_available_actions(risky_movements, q_value)
+
+        return self._select_between_available_actions(np.arange(len(certain_death_mask)), q_value)
+
+
 class QValueSafeMultiAgent(QValueSafeAgent):
     """
     Uses multiple models to create an stronger prediction
