@@ -1463,6 +1463,15 @@ and the mask. I will have to create a custom loss function to make it work.
 
 I think the best way to do this is to create a new branch.
 
+#### Semi safe agents
+
+I have been training a safe agent on `07_learn_from_certain_deaths_fixed_bug` but it gets stuck below
+a score of 1500. So instead I have decided to train a semisafe agent `08_learn_from_certain_deaths_fixed_bug_semi_safe`.
+This experiment will show if only taking safe movements is limitting the growth of the agent.
+
+After one day results are not very different, so I cannot draw conclusions.
+
+
 <!---
 
 ## Iteration 8. Monte Carlo Tree Search
