@@ -3,8 +3,9 @@ import random
 import numpy as np
 from kaggle_environments import make
 
-from hungry_geese.agents import ConstantAgent, EpsilonAgent, QValueAgent
+from hungry_geese.agents import ConstantAgent, EpsilonAgent, QValueAgent, EpsilonSemiSafeAgent
 from hungry_geese.utils import ACTIONS, opposite_action
+from hungry_geese.model import N_ACTIONS
 
 random.seed(7)
 
@@ -42,3 +43,29 @@ def test_agent_reset(train_info):
     assert base_agent.state.history
     agent.reset()
     assert not base_agent.state.history
+
+class FakeModelOhe():
+    def predict_step(self, *args, **kwargs):
+        ohe = np.zeros((1, N_ACTIONS))
+        ohe[0, 1] = 1
+        return ohe
+
+def test_EpsilonSemiSafeAgent_returns_random_actions_if_epsilon_1():
+    agent = EpsilonSemiSafeAgent(FakeModelOhe(), epsilon=1)
+    configuration = dict(columns=11, rows=7, episodeSteps=200, hunger_rate=40)
+    observation = {'index': 0, 'geese': [[36], [0], [1], [2]], 'step': 1, 'food': []}
+    actions = []
+    for _ in range(20):
+        agent.reset()
+        actions.append(agent(observation, configuration))
+    assert len(np.unique(actions)) == 3
+
+def test_EpsilonSemiSafeAgent_returns_always_north_if_epsilon_0():
+    agent = EpsilonSemiSafeAgent(FakeModelOhe(), epsilon=0)
+    configuration = dict(columns=11, rows=7, episodeSteps=200, hunger_rate=40)
+    observation = {'index': 0, 'geese': [[36], [0], [1], [2]], 'step': 1, 'food': []}
+    actions = []
+    for _ in range(20):
+        agent.reset()
+        actions.append(agent(observation, configuration))
+    assert np.unique(actions) == 'NORTH'
