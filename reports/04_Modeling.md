@@ -1471,6 +1471,26 @@ This experiment will show if only taking safe movements is limitting the growth 
 
 After one day results are not very different, so I cannot draw conclusions.
 
+#### Speedup training
+
+I have tried decreasing the number of matches played on each iteration from 1000 to 100, and to compensate
+the smaller diversity of matches when training use a experience replay of size 10.
+
+![comparison](res/2021-05-04-19-05-41.png)
+
+- blue 10_same_but_discount_factor_1
+- orange 09_try_to_speedup_learning
+- grey 08_learn_from_certain_deaths_fixed_bug_semi_safe
+- green 07_learn_from_certain_deaths_fixed_bug
+
+If we look at elo single score we can see that these models learn much faster (blue and orange) and achieve
+higher scores.
+
+#### Epsilon greedy again
+
+After implementing the semi safe agent I have decided to try again with epsilon greedy agents again
+because if we avoid simple deaths that agent has a closer policy to production. So it may learn better.
+
 
 <!---
 
