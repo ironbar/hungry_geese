@@ -203,7 +203,7 @@ class GameState():
                 next_movements = adjacent_positions(goose[0], rows=self.configuration['rows'], columns=self.configuration['columns'])
                 flat_board[next_movements, idx*4+3] = 1 # next movements
                 if self.history:
-                    flat_board[self.history[-1]['geese'][idx][0], idx*4+3] = 0 # previous head position
+                    flat_board[self.history[-1]['geese'][goose_idx][0], idx*4+3] = 0 # previous head position
         flat_board[observation['food'], -1] = 1
         board = np.reshape(flat_board, (self.configuration['rows'], self.configuration['columns'], len(observation['geese'])*4+1))
         if self.egocentric_board:
