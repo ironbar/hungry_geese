@@ -194,8 +194,8 @@ class GameState():
         flat_board = np.zeros((self.configuration['rows']*self.configuration['columns'], n_geese*4+1),
                               dtype=np.float32)
         goose_order = [observation['index']] + [idx for idx in range(n_geese) if idx != observation['index']]
-        for idx in goose_order:
-            goose = observation['geese'][idx]
+        for idx, goose_idx in enumerate(goose_order):
+            goose = observation['geese'][goose_idx]
             if goose:
                 flat_board[goose[0], idx*4] = 1 # head
                 flat_board[goose[-1], idx*4+1] = 1 # tail
