@@ -49,3 +49,15 @@ class SoftmaxSafeAgent(SoftmaxAgent):
             return self._sample_action_with_softmax(q_value[risky_movements], risky_movements)
 
         return self._sample_action_with_softmax(q_value, np.arange(len(certain_death_mask)))
+
+
+class SoftmaxSemiSafeAgent(SoftmaxAgent):
+    def select_action(self, q_value, observation, configuration):
+        certain_death_mask = get_certain_death_mask(observation, configuration)
+        certain_death_mask = adapt_mask_to_3d_action(certain_death_mask, self.previous_action)
+
+        risky_movements = np.arange(len(certain_death_mask))[certain_death_mask < 1]
+        if risky_movements.size:
+            return self._sample_action_with_softmax(q_value[risky_movements], risky_movements)
+
+        return self._sample_action_with_softmax(q_value, np.arange(len(certain_death_mask)))

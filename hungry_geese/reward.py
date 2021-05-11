@@ -157,3 +157,17 @@ def get_just_survive_reward(current_observation, reward_name):
     else: # the agent has died
         death_reward = float(reward_name.split('_')[-1])
         return death_reward
+
+def get_death_reward_from_name(reward_name):
+    if reward_name == 'sparse_reward':
+        raise NotImplementedError()
+    elif reward_name.startswith('ranking_reward'):
+        raise NotImplementedError()
+    elif reward_name.startswith('clipped_len_reward'):
+        return _get_clipped_len_reward_params_from_name(reward_name)[0]
+    elif reward_name.startswith('grow_and_kill_reward'):
+        return _get_grow_and_kill_reward_params_from_name(reward_name)[0]
+    elif reward_name.startswith('just_survive'):
+        return float(reward_name.split('_')[-1])
+    else:
+        raise KeyError(reward_name)

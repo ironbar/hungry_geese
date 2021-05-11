@@ -24,6 +24,8 @@ from hungry_geese.definitions import INITIAL_ELO_RANKING, AGENT_TO_SCRIPT
 from hungry_geese.utils import log_ram_usage
 from hungry_geese.state import GameState, combine_data
 from hungry_geese.utils import configure_logging
+from hungry_geese.heuristic import get_certain_death_mask, adapt_mask_to_3d_action
+from hungry_geese.reward import get_death_reward_from_name
 
 
 def main(args=None):
@@ -127,25 +129,51 @@ def create_train_data(matches_results, reward_name, output_path, agent_idx_range
 
     for _ in tqdm(range(len(matches_results)), desc='Creating game data'):
         match = matches_results[0]
+        # logger.debug('Match steps: %i' % len(match))
         for agent_idx in agent_idx_range:
             first_action = match[1][agent_idx]['action']
             if first_action == 'SOUTH':
                 state.reset(previous_action='SOUTH')
             else:
                 state.reset()
+            certain_death_masks = []
+
             for step_idx, step in enumerate(match):
-                observation = step[0]['observation'].copy()
-                observation['index'] = agent_idx
-                state.update(observation, conf)
                 if step_idx:
                     action = step[agent_idx]['action']
                     state.add_action(action)
+                observation = step[0]['observation'].copy()
+                observation['index'] = agent_idx
+                state.update(observation, conf)
+
                 if not observation['geese'][agent_idx]:
                     break
+                certain_death_mask = get_certain_death_mask(observation, conf)
+                certain_death_mask = adapt_mask_to_3d_action(certain_death_mask, state.get_last_action())
+                certain_death_mask = np.floor(certain_death_mask)
+                certain_death_masks.append(certain_death_mask)
+
             data = state.prepare_data_for_training()
-            is_not_terminal = np.ones_like(data[3])
+            # create rewards for taken actions
+            rewards = np.expand_dims(data[-1], axis=1)
+            ohe_actions = data[-2]
+            rewards = rewards*ohe_actions
+            # add certain death reward
+            certain_death_masks = np.array(certain_death_masks)[:len(rewards)]
+            death_reward = get_death_reward_from_name(reward_name)
+            rewards += np.clip(certain_death_masks - ohe_actions, 0, 1)*death_reward
+            # is_not_terminal
+            is_not_terminal = np.ones_like(rewards)
+            is_not_terminal -= certain_death_masks
             is_not_terminal[-1] = 0
-            train_data.append(data + [is_not_terminal])
+            # mask for training
+            training_mask = np.zeros_like(rewards)
+            training_mask += ohe_actions
+            training_mask += certain_death_masks
+            training_mask = np.clip(training_mask, 0, 1)
+
+            train_data.append(data[:2] + [rewards, is_not_terminal, training_mask])
+            # logger.debug('Data shapes %s' % str([data.shape for data in train_data[-1]]))
         del matches_results[0]
 
     log_ram_usage()
@@ -160,7 +188,14 @@ def create_train_data(matches_results, reward_name, output_path, agent_idx_range
     output_path = os.path.realpath(output_path)
     logger.info('Saving data on: %s' % output_path)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    np.savez_compressed(output_path, boards=train_data[0], features=train_data[1], actions=train_data[2], rewards=train_data[3], is_not_terminal=train_data[4])
+    np.savez_compressed(
+        output_path,
+        boards=train_data[0],
+        features=train_data[1],
+        rewards=train_data[2],
+        is_not_terminal=train_data[3],
+        training_mask=train_data[4],
+    )
     del state
     del train_data
     log_ram_usage()

@@ -22,6 +22,8 @@ from hungry_geese.callbacks import (
 )
 from hungry_geese.utils import log_ram_usage, configure_logging
 from hungry_geese.state import apply_all_simetries, get_ohe_opposite_actions, combine_data
+from hungry_geese.loss import masked_mean_squared_error
+
 
 logger = logging.getLogger(__name__)
 
@@ -50,20 +52,18 @@ def deep_q_learning(args):
             model_path = get_last_saved_model(model_dir)
             logger.info('continuing training from: %s' % os.path.basename(model_path))
             start_epoch = int(model_path.split('epoch_')[-1].split('.h5')[0]) + 1
-        training_model = tf.keras.models.load_model(model_path)
-        model = tf.keras.models.Model(inputs=training_model.inputs[:2], outputs=training_model.get_layer('action').output)
+        model = tf.keras.models.load_model(model_path)
     else:
         logger.info('creating model')
         model = globals()[conf['model']](**conf['model_params'])
         model.summary()
-        training_model = create_model_for_training(model)
         model_path = os.path.join(model_dir, 'random.h5')
-        training_model.save(model_path, include_optimizer=False)
+        model.save(model_path, include_optimizer=False)
         start_epoch = 0
 
     optimizer = tf.keras.optimizers.get(conf.get('optimizer', 'Adam'))
     optimizer.learning_rate = conf.get('learning_rate', 1e-3)
-    training_model.compile(optimizer, loss='mean_squared_error')
+    model.compile(optimizer, loss=masked_mean_squared_error)
     callbacks = create_callbacks(model_dir)
     log_ram_usage()
 
@@ -75,16 +75,16 @@ def deep_q_learning(args):
         play_matches(model_path, conf['softmax_scale'], conf['reward'], train_data_path, conf['n_matches_play'],
                      template_path=conf['play_template'], play_against_top_n=conf.get('play_against_top_n', 0),
                      n_learning_agents=conf.get('n_learning_agents', 1), n_agents_for_experience=conf['n_agents_for_experience'])
-        train_model(training_model, model, conf, callbacks, epoch_idx, other_metrics, n_agents_for_experience=conf['n_agents_for_experience'])
+        train_model(model, conf, callbacks, epoch_idx, other_metrics, n_agents_for_experience=conf['n_agents_for_experience'])
         model_path = os.path.join(model_dir, 'epoch_%04d.h5' % epoch_idx)
-        training_model.save(model_path, include_optimizer=False)
+        model.save(model_path, include_optimizer=False)
         if epoch_idx % conf.get('evaluation_period', 1) == 0 and epoch_idx:
             other_metrics = evaluate_model(model_path, conf['evaluate_template'], conf['n_matches_eval'])
         else:
             other_metrics = dict()
 
 
-def train_model(training_model, model, conf, callbacks, epoch_idx, other_metrics, n_agents_for_experience):
+def train_model(model, conf, callbacks, epoch_idx, other_metrics, n_agents_for_experience):
     if 'random_matches' in conf:
         other_metrics['state_value'] = compute_state_value_evolution(
             model, os.path.join(conf['model_dir'], conf['random_matches']), conf['pred_batch_size'])
@@ -94,14 +94,20 @@ def train_model(training_model, model, conf, callbacks, epoch_idx, other_metrics
     other_metrics['mean_goose_size'] = np.mean(np.sum(train_data[0][:, 2:-2, :, 2], axis=(1, 2)))
     other_metrics['mean_match_steps'] = steps_last_file/n_agents_for_experience/conf['n_matches_play']
     target = compute_q_learning_target(model, train_data, conf['discount_factor'], conf['pred_batch_size'])
-    train_data = train_data[:3] + [target]
+
+    training_mask = train_data[2]
+    model_output = np.concatenate([np.expand_dims(target, axis=2), np.expand_dims(training_mask, axis=2)], axis=2)
+    train_data = train_data[:2] + [model_output, model_output]
     train_data = apply_all_simetries(train_data)
+
+    model_input = train_data[:2]
+    model_output = train_data[2]
 
     log_ram_usage()
     initial_epoch = int(epoch_idx*conf['fit_epochs'])
     aditional_callbacks = [LogConstantValue(key, value) for key, value in other_metrics.items()]
-    training_model.fit(
-        x=train_data[:3], y=train_data[3], batch_size=conf['train_batch_size'],
+    model.fit(
+        x=model_input, y=model_output, batch_size=conf['train_batch_size'],
         callbacks=(aditional_callbacks + callbacks), initial_epoch=initial_epoch,
         epochs=(initial_epoch + conf['fit_epochs']),
         **conf['fit_params'])
@@ -151,9 +157,10 @@ def sample_train_data(model_dir, aditional_files, epochs_to_sample):
 
 
 def load_data(filepath, verbose=True):
+    """ Returns: board, features, training_mask, rewards, is_not_terminal """
     if verbose: logger.info('loading %s' % filepath)
     data = np.load(filepath)
-    output = [data['boards'], data['features'], data['actions'], data['rewards'], data['is_not_terminal']]
+    output = [data['boards'], data['features'], data['training_mask'], data['rewards'], data['is_not_terminal']]
     log_ram_usage()
     if verbose: logger.info('data types: %s' % str([array.dtype for array in output]))
     if verbose: logger.info('data shapes: %s' % str([array.shape for array in output]))
@@ -163,7 +170,7 @@ def load_data(filepath, verbose=True):
 def compute_q_learning_target(model, train_data, discount_factor, batch_size):
     reward = train_data[3]
     is_not_terminal = train_data[4]
-    state_value = compute_state_value(model, train_data, batch_size)
+    state_value = np.expand_dims(compute_state_value(model, train_data, batch_size), axis=1)
     target = reward + is_not_terminal*discount_factor*state_value
     return target
 
