@@ -1491,6 +1491,45 @@ higher scores.
 After implementing the semi safe agent I have decided to try again with epsilon greedy agents again
 because if we avoid simple deaths that agent has a closer policy to production. So it may learn better.
 
+The agents seem to be slightly better than softmax. So we have made the full circle: started with epsilon-greedy,
+switch to softmax, and back to epsilon greedy after playing safe.
+
+### Results
+
+I have implemented a great redesign in the code and in the agents. However I have not been able to improve
+the scores yet. I have discovered a bug in the representation of the state of the game that was creating
+wrong representation for agents with idx != 0. I believe this was causing a wall around 1700 elo score.
+On the next iteration we will fix that error and hopefully continue climbing the ladder.
+
+## Iteration 8. The great bug
+
+### Goal
+
+The goal of this iteration is to fix the bug in all the agents and run new trains with the hope that
+this will allow to create new and much more powerful agents.
+
+### Development
+
+#### Explain the bug
+
+#### Why I didn't see the bug until now
+
+#### Jump on score after fixing the bug
+
+![jump in elo score of 100](res/2021-05-10-07-44-35.png)
+
+#### Correcting frozen agents elo score
+
+#### How does the elo score of last trained agents changes after the fix
+
+It should go down as the agents is facing are better.
+
+#### Train new agents
+
+I have launched two new trainings. My hope is that after fixing the bug I will be able to create a new
+generation of more powerful agents.
+
+### Results
 
 <!---
 
