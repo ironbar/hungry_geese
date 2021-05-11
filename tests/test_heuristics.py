@@ -23,6 +23,7 @@ def test_get_certain_death_mask(observation, mask):
 
 @pytest.mark.parametrize('future_position, observation, is_doomed', [
     (1, {'index': 0, 'geese': [[1, 2]]}, 1),
+    (1, {'index': 0, 'geese': [[1]]}, 0), # if the len is 1 it is safe to move to the head
     (63, {'index': 0, 'geese': [[1, 2]]}, 0),
     (63, {'index': 0, 'geese': [[1, 2], []]}, 0),
     (2, {'index': 0, 'geese': [[], [1, 2]], 'food': [0]}, 0.5),

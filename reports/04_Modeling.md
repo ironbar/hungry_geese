@@ -1529,6 +1529,34 @@ It should go down as the agents is facing are better.
 I have launched two new trainings. My hope is that after fixing the bug I will be able to create a new
 generation of more powerful agents.
 
+#### Add more metrics
+
+```python
+import numpy as np
+data = dict(**np.load('/mnt/hdd0/Kaggle/hungry_geese/models/39_more_trains_after_bugfix/02_epsilon_greedy_01_discount_factor_1/epoch_1182.npz'))
+data.keys()
+data['is_not_terminal'][:10]
+np.sum(data['is_not_terminal'], axis=1)[:20]
+terminal_rewards = data['rewards'][np.sum(data['is_not_terminal'], axis=1) == 0]
+terminal_rewards
+len(terminal_rewards)
+np.max(terminal_rewards, axis=1)
+np.max(terminal_rewards, axis=1) > 0
+np.sum(np.max(terminal_rewards, axis=1) > 0)
+np.sum(np.max(terminal_rewards, axis=1) >= 0)
+np.sum(np.max(terminal_rewards, axis=1) < 0)
+# todo: terminal rewards allow to find the length of the match, see if those 64 correspond to matches that last until epoch 200
+np.arange(len(data['is_not_terminal']))[np.sum(data['is_not_terminal'], axis=1) == 0]
+match_durations = np.arange(len(data['is_not_terminal']))[np.sum(data['is_not_terminal'], axis=1) == 0]
+match_durations[1:] -= match_durations[:-1]
+match_durations
+np.max(terminal_rewards, axis=1)
+len(terminal_rewards)
+terminal_rewards[2:5]
+terminal_rewards[np.max(terminal_rewards, axis=1) == 0]
+history
+```
+
 ### Results
 
 <!---
