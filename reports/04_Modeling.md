@@ -1546,35 +1546,33 @@ I have launched two new trainings. My hope is that after fixing the bug I will b
 generation of more powerful agents.
 
 After five days of training the model with discount factor 1 is clearly better than the one with 0.95. However it only reaches the level of the best agent without surpassing it.
-When checking the train data I find signs that there might be problems with the rewards.
 
 #### Add more metrics
 
-```python
-import numpy as np
-data = dict(**np.load('/mnt/hdd0/Kaggle/hungry_geese/models/39_more_trains_after_bugfix/02_epsilon_greedy_01_discount_factor_1/epoch_1182.npz'))
-data.keys()
-data['is_not_terminal'][:10]
-np.sum(data['is_not_terminal'], axis=1)[:20]
-terminal_rewards = data['rewards'][np.sum(data['is_not_terminal'], axis=1) == 0]
-terminal_rewards
-len(terminal_rewards)
-np.max(terminal_rewards, axis=1)
-np.max(terminal_rewards, axis=1) > 0
-np.sum(np.max(terminal_rewards, axis=1) > 0)
-np.sum(np.max(terminal_rewards, axis=1) >= 0)
-np.sum(np.max(terminal_rewards, axis=1) < 0)
-# todo: terminal rewards allow to find the length of the match, see if those 64 correspond to matches that last until epoch 200
-np.arange(len(data['is_not_terminal']))[np.sum(data['is_not_terminal'], axis=1) == 0]
-match_durations = np.arange(len(data['is_not_terminal']))[np.sum(data['is_not_terminal'], axis=1) == 0]
-match_durations[1:] -= match_durations[:-1]
-match_durations
-np.max(terminal_rewards, axis=1)
-len(terminal_rewards)
-terminal_rewards[2:5]
-terminal_rewards[np.max(terminal_rewards, axis=1) == 0]
-history
-```
+I have added new metrics to be able to track better the agent performance during training:
+
+- terminal_rewards_negative_ratio (death ratio)
+- terminal_rewards_non_negative_ratio (reach the end ratio)
+- terminal_rewards_positive_ratio (win ratio)
+
+#### Epsilon greedy policy limitting agent learning
+
+When exploring the training data to create the new metrics I have realized that many of the deaths
+were caused by the epsilon greedy policy that was choosing a bad action that lead to death.
+
+| epsilon | epoch_mean_match_steps | epoch_mean_goose_size |
+|---------|------------------------|-----------------------|
+| 0.1     | 130                    | 8.5                   |
+| 0.05    | 130                    | 8.5                   |
+| 0.02    | 160                    | 10.5                  |
+| 0.01    | 160                    | 10.5                  |
+| 0       | 160                    | 10.5                  |
+
+The jump in performance is quite big. I was expecting a gradual shift but it did not happen with the
+chosen values (it may appear if using 0.04 and 0.03).
+
+I have launched longer trainings with 0.02 and 0.01 to see if epsilon was limitting the growth of
+the agents.
 
 ### Results
 
