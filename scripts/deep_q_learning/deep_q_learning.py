@@ -158,6 +158,28 @@ def gather_metrics_from_most_recent_matches(other_metrics, train_data, n_agents_
     other_metrics['mean_goose_size'] = np.mean(np.sum(train_data[0][:, 2:-2, :, 2], axis=(1, 2)))
     steps_last_file = len(train_data[0])
     other_metrics['mean_match_steps'] = steps_last_file/n_agents_for_experience/n_matches_play
+    terminal_rewards = get_terminal_reward(train_data)
+    other_metrics['terminal_rewards_negative_ratio'] = np.sum(terminal_rewards < 0)/len(terminal_rewards)
+    other_metrics['terminal_rewards_non_negative_ratio'] = np.sum(terminal_rewards >= 0)/len(terminal_rewards)
+    other_metrics['terminal_rewards_positive_ratio'] = np.sum(terminal_rewards > 0)/len(terminal_rewards)
+
+
+def get_terminal_indices(train_data):
+    """ Returns the indices of the states that are terminal """
+    is_not_terminal = train_data[4]
+    terminal_idx = np.arange(len(is_not_terminal))[np.sum(is_not_terminal, axis=1) == 0]
+    return terminal_idx
+
+
+def get_terminal_reward(train_data):
+    terminal_idx = get_terminal_indices(train_data)
+    rewards = train_data[3]
+    training_mask = train_data[2]
+    terminal_rewards = []
+    for rewards, mask in zip(rewards[terminal_idx], training_mask[terminal_idx]):
+        terminal_rewards.append(rewards[mask == 1])
+    terminal_rewards = np.array([max(rewards) for rewards in terminal_rewards])
+    return terminal_rewards
 
 
 def load_data(filepath, verbose=True):
