@@ -1512,22 +1512,41 @@ this will allow to create new and much more powerful agents.
 
 #### Explain the bug
 
+The bug was creating bad state representations for agents that where on a slot different than the first one (there are four slots because it's a four player game).
+
 #### Why I didn't see the bug until now
+
+Previously I was playing with two agents, so it is likely that the model learned to deal with
+this problem in the data. However now I'm playing with a single learning agent, and thus
+when the agent falls in another slot the score drops a lot.
 
 #### Jump on score after fixing the bug
 
 ![jump in elo score of 100](res/2021-05-10-07-44-35.png)
 
+The last point in the plot shows a jump in elo multi score of around 100 just by fixing the bug.
+
 #### Correcting frozen agents elo score
 
-#### How does the elo score of last trained agents changes after the fix
+| model       | ranking | new_ranking | diff |
+|-------------|---------|-------------|------|
+| rhaegar     | 1680    | 1612        | -68  |
+| balerion    | 1638    | 1565        | -73  |
+| icedragon   | 1602    | 1562        | -40  |
+| iceberg     | 1548    | 1490        | -58  |
+| wallbreaker | 1515    | 1460        | -55  |
+| ram         | 1463    | 1450        | -13  |
+| clasic      | 1365    | 1314        | -51  |
 
-It should go down as the agents is facing are better.
+We can see that we get lower elo scores after fixing the bug.
 
 #### Train new agents
 
 I have launched two new trainings. My hope is that after fixing the bug I will be able to create a new
 generation of more powerful agents.
+
+After five days of training the model with discount factor 1 is clearly better than the one with 0.95. However it only reaches the level of the best agent without surpassing it.
+When checking the train data I find signs that there might be problems with the rewards.
 
 #### Add more metrics
 
