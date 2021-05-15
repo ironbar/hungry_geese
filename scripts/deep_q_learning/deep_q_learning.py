@@ -89,10 +89,9 @@ def train_model(model, conf, callbacks, epoch_idx, other_metrics, n_agents_for_e
         other_metrics['state_value'] = compute_state_value_evolution(
             model, os.path.join(conf['model_dir'], conf['random_matches']), conf['pred_batch_size'])
 
-    train_data, steps_last_file = sample_train_data(
+    train_data, recent_train_data = sample_train_data(
         conf['model_dir'], conf['aditional_files_for_training'], conf['epochs_to_sample_files_for_training'])
-    other_metrics['mean_goose_size'] = np.mean(np.sum(train_data[0][:, 2:-2, :, 2], axis=(1, 2)))
-    other_metrics['mean_match_steps'] = steps_last_file/n_agents_for_experience/conf['n_matches_play']
+    gather_metrics_from_most_recent_matches(other_metrics, recent_train_data, n_agents_for_experience, conf['n_matches_play'])
     target = compute_q_learning_target(model, train_data, conf['discount_factor'], conf['pred_batch_size'])
 
     training_mask = train_data[2]
@@ -142,7 +141,6 @@ def evaluate_model(model_path, template_path, n_matches):
 def sample_train_data(model_dir, aditional_files, epochs_to_sample):
     filepaths = sorted(glob.glob(os.path.join(model_dir, 'epoch*.npz')))
     train_data = [load_data(filepaths[-1])]
-    steps_last_file = len(train_data[0][0])
     if aditional_files:
         candidates = filepaths[-epochs_to_sample-1:-1]
         if candidates:
@@ -153,7 +151,13 @@ def sample_train_data(model_dir, aditional_files, epochs_to_sample):
             for sample in samples:
                 logger.info('Loading aditional file for training: %s' % sample)
                 train_data += [load_data(sample, verbose=False)]
-    return combine_data(train_data), steps_last_file
+    return combine_data(train_data), train_data[0]
+
+
+def gather_metrics_from_most_recent_matches(other_metrics, train_data, n_agents_for_experience, n_matches_play):
+    other_metrics['mean_goose_size'] = np.mean(np.sum(train_data[0][:, 2:-2, :, 2], axis=(1, 2)))
+    steps_last_file = len(train_data[0])
+    other_metrics['mean_match_steps'] = steps_last_file/n_agents_for_experience/n_matches_play
 
 
 def load_data(filepath, verbose=True):
