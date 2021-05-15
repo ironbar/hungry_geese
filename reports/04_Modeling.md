@@ -1560,13 +1560,13 @@ I have added new metrics to be able to track better the agent performance during
 When exploring the training data to create the new metrics I have realized that many of the deaths
 were caused by the epsilon greedy policy that was choosing a bad action that lead to death.
 
-| epsilon | epoch_mean_match_steps | epoch_mean_goose_size |
-|---------|------------------------|-----------------------|
-| 0.1     | 130                    | 8.5                   |
-| 0.05    | 130                    | 8.5                   |
-| 0.02    | 160                    | 10.5                  |
-| 0.01    | 160                    | 10.5                  |
-| 0       | 160                    | 10.5                  |
+| epsilon | epoch_mean_match_steps | epoch_mean_goose_size | terminal_rewards_negative_ratio |
+|---------|------------------------|-----------------------|---------------------------------|
+| 0.1     | 130                    | 8.5                   | 0.75                            |
+| 0.05    | 130                    | 8.5                   | 0.75                            |
+| 0.02    | 160                    | 10.5                  | 0.46                            |
+| 0.01    | 160                    | 10.5                  | 0.46                            |
+| 0       | 160                    | 10.5                  | 0.46                            |
 
 The jump in performance is quite big. I was expecting a gradual shift but it did not happen with the
 chosen values (it may appear if using 0.04 and 0.03).
