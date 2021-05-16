@@ -135,7 +135,7 @@ def evaluate_model(model_path, template_path, n_matches):
     elo_single = int(output[-1].split('score: ')[-1])
     logger.info('Multi agent elo score: %i' % elo_multi)
     logger.info('Single agent elo score: %i' % elo_single)
-    return dict(elo_multi=elo_multi, elo_single=elo_single)
+    return dict(elo_multi=elo_multi, elo_single=elo_single, elo_mean=(elo_multi + elo_single)/2)
 
 
 def sample_train_data(model_dir, aditional_files, epochs_to_sample):
