@@ -145,3 +145,16 @@ class QValueSafeAgentDataAugmentation(QValueSafeAgent):
         fixed_preds[1::2, 2] = preds[1::2, 0]
         q_value = np.mean(fixed_preds, axis=0)
         return q_value
+
+
+class QValueSemiSafeAgentDataAugmentation(QValueSemiSafeAgent):
+    def _predict_q_value(self, board, features):
+        data_augmented = apply_all_simetries(
+            [np.expand_dims(board, axis=0), np.expand_dims(features, axis=0), np.zeros((1, 3)), np.zeros((1, 3))])[:2]
+        preds = self.model.predict_on_batch(data_augmented)
+        fixed_preds = preds.copy()
+        # horizontal simmetry
+        fixed_preds[1::2, 0] = preds[1::2, 2]
+        fixed_preds[1::2, 2] = preds[1::2, 0]
+        q_value = np.mean(fixed_preds, axis=0)
+        return q_value
