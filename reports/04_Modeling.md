@@ -1574,6 +1574,10 @@ chosen values (it may appear if using 0.04 and 0.03).
 I have launched longer trainings with 0.02 and 0.01 to see if epsilon was limitting the growth of
 the agents.
 
+![elo score grows after decreasing epsilon](res/2021-05-18-11-04-22.png)
+
+There is a clear jump in score when reducing epsilon, so it was clearly hurting the model capacity.
+
 ### Results
 
 <!---
