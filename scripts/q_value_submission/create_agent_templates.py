@@ -38,7 +38,7 @@ def get_weights():
 
 weights_b64 = get_weights()
 model.set_weights(pickle.loads(bz2.decompress(base64.b64decode(weights_b64))))
-q_value_agent = QValueSafeAgent(model)
+q_value_agent = QValueSemiSafeAgent(model)
 
 def agent(obs, config):
     return q_value_agent(obs, config)
@@ -52,13 +52,13 @@ def main(args=None):
     code = gather_code_from_modules()
 
     code = code + DEFAULT_ENDING
-    with open('safe_q_value_agent_template.py', 'w') as f:
+    with open('semisafe_q_value_agent_template.py', 'w') as f:
         f.write(code)
 
     code = code.replace(
-        'q_value_agent = QValueSafeAgent(model)',
-        'q_value_agent = QValueSafeAgentDataAugmentation(model)')
-    with open('safe_q_value_agent_data_augmentation_template.py', 'w') as f:
+        'q_value_agent = QValueSemiSafeAgent(model)',
+        'q_value_agent = QValueSemiSafeAgentDataAugmentation(model)')
+    with open('semisafe_q_value_agent_data_augmentation_template.py', 'w') as f:
         f.write(code)
 
 def gather_code_from_modules():
