@@ -15,9 +15,9 @@ def main(args=None):
 
     if args.data_augmentation:
         print('Creating agent with data augmentation')
-        template_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'safe_q_value_agent_data_augmentation_template.py')
+        template_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'semisafe_q_value_agent_data_augmentation_template.py')
     else:
-        template_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'safe_q_value_agent_template.py')
+        template_path = os.path.join(os.path.realpath(os.path.dirname(__file__)), 'semisafe_q_value_agent_template.py')
     with open(template_path, 'r') as f:
         template_text = f.read()
 
