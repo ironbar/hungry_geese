@@ -1578,7 +1578,14 @@ the agents.
 
 There is a clear jump in score when reducing epsilon, so it was clearly hurting the model capacity.
 
+#### Train from zero to see metrics evolution
+
+I'm going to train from zero with epsilon greedy 0.01 to see how the metrics evolve over time.
+
 ### Results
+
+I have been able to train a new better agent `gargantua` that scores 1627 on noramal mode and 1667 on
+data augmenation model.
 
 <!---
 
