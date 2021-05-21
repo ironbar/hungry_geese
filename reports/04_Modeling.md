@@ -1582,10 +1582,18 @@ There is a clear jump in score when reducing epsilon, so it was clearly hurting 
 
 I'm going to train from zero with epsilon greedy 0.01 to see how the metrics evolve over time.
 
+- I have been able to reach a better score than gargantua in 1/4 of the epochs.
+- Thus it seems that epsilon was very relevant
+- Lowering the learning rate during training seemed to improve elo score
+
 ### Results
 
 I have been able to train a new better agent `gargantua` that scores 1627 on noramal mode and 1667 on
-data augmenation model.
+data augmenation model. This model reaches 1173 and 7 position on leaderboard on the first day. It is likely
+that it will go down but if we can continue improving the agents there is hope to be between the best
+people.
+
+![nice position on the leaderboard](res/2021-05-18-20-22-17.png)
 
 <!---
 
