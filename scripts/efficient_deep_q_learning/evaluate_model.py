@@ -31,7 +31,7 @@ def main(args=None):
     n_matches = conf['n_matches_eval']
     evaluation_period = conf['evaluation_period']
     already_evaluated = set()
-    tensorboard_writer = tf.summary.create_file_writer(os.path.join(model_dir, 'logs_debug'))
+    tensorboard_writer = tf.summary.create_file_writer(os.path.join(model_dir, 'logs'))
 
     while 1:
         model_path = get_latest_model_path(model_dir)
