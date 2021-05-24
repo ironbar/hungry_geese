@@ -1678,6 +1678,17 @@ I should keep a file with all the already used games.
 I want to keep logging as good or even better than the previous implementation. This implies that I have
 to log both on train and play.
 
+The snippet below logs to tensorboard. Every time the snippet is called a new log file is created inside the
+folder `play`. I can add new metrics as will. So this solves the problem of logging from different scripts.
+
+```python
+import tensorflow as tf
+import random
+from hungry_geese.utils import log_to_tensorboard
+tensorboard_writer = tf.summary.create_file_writer('play')
+[log_to_tensorboard('win_ratio', random.uniform(0, 1), epoch, tensorboard_writer) for epoch in range(11, 20)]
+```
+
 #### File locks
 
 I have to use file locks to avoid the problem of trying to read a file when it's not written already.
