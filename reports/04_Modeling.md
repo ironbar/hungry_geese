@@ -1585,15 +1585,117 @@ I'm going to train from zero with epsilon greedy 0.01 to see how the metrics evo
 - I have been able to reach a better score than gargantua in 1/4 of the epochs.
 - Thus it seems that epsilon was very relevant
 - Lowering the learning rate during training seemed to improve elo score
+- The bigger memory buffer for training the better
+- On the negative side the metrics that reflect the results of the games played for learning do not
+show significative changes after epoch 400. Maybe I need more capacity or a better reward function.
+
+#### Increase model capacity
+
+On this experiment I want to increase the model capacity to see if it is able to improve the train
+metrics. The hypothesis is that the current model is not able to improve those metrics due to limited capacity.
+
+Number of parameters: 600k (baseline), 1.4M, 2.4M
+
+After 400 epochs it seems that the models are reaching the same 40% death limit of the previous model.
+We have to wait for longer to see what happens. One day later at 1100 epochs the limit stil there, but
+elo score is rising so I'm going to leave as it is.
+
+I also have done a quick experiment playing against weaker agents (top20 instead of top3) and death
+ratio decreases to around 20%, while victory ratio raises to 25% from 10%. This probes that it is
+possible to get better ratios.
+
+The strange thing is that elo improves while training metrics do not change too much. (Maybe metrics are not correct, for example there might
+be times when the agent reaches final position leading)
 
 ### Results
 
-I have been able to train a new better agent `gargantua` that scores 1627 on noramal mode and 1667 on
+I have been able to train a new better agent `gargantua` that scores 1627 on normal mode and 1667 on
 data augmenation model. This model reaches 1173 and 7 position on leaderboard on the first day. It is likely
 that it will go down but if we can continue improving the agents there is hope to be between the best
 people.
 
 ![nice position on the leaderboard](res/2021-05-18-20-22-17.png)
+
+
+## Iteration 9. Optimize training
+
+### Goal
+
+The goal of this iteration is to optimize training so I can train around 2 times faster.
+
+Instead of doing two trainings at the same time I will do a single train twice as fast.
+
+### Current implementation vs new
+
+![schema](res/2021-05-24-12-31-26.png)
+
+The current implementation sequentially plays and trains, and eventually evaluates the model. This is
+not efficient because playing is cpu intensive while training is gpu intensive. Half of the time
+is devoted to training and the other half to evaluation. When it's playing the gpu is iddle and when
+it's training the cpu is iddle.
+
+To aliviate this ineficiency I'm training two models at the same time with the hope that when one of
+the model is playing the other one is training. But this is not always the case.
+
+On the new implementation I propose to decouple play and evaluation from training. By doing so I will
+have a better use of the computer resources. The two processes will comunicate by saving files (game data and models)
+and I will use locks to avoid problems.
+
+My hope is that I will be able to train twice as fast, and I could also try what happens if I train
+on data without playing. That could be useful to pretrain models and to gain more understanding
+of the training process.
+
+### Development
+
+#### Eval script
+
+This script should search for the latest model and eval if it is required. We are currently only evaluating
+a model every 40 epochs. It may happen that evaluation and play is running at the same time, but that isn't a problem,
+they will run slower and that's all. It should keep a record of already evaluated models to avoid evaluating
+multiple times the same model if the train script is very slow.
+
+If train script is running very fast it may happen that evaluation may skip some models, but that isn't either a problem.
+
+So this script should be very simple to make since its responsability is very clear. The only challenge I foreseen
+is how to log the results to tensorboard.
+
+#### Play script
+
+This script should search for the latest model, play games with it and save those games to file.
+
+It is possible that a model will be used more than once and that is not a problem, we will save the matches
+with a different name and that's all.
+
+#### Train script
+
+This script will load saved games and use them to train a model and save it to file.
+
+I would like to give priority to last saved games, those should be used first. To be able to do that
+I should keep a file with all the already used games.
+
+#### Keep logging with tensorboard
+
+I want to keep logging as good or even better than the previous implementation. This implies that I have
+to log both on train and play.
+
+#### File locks
+
+I have to use file locks to avoid the problem of trying to read a file when it's not written already.
+
+#### Better metrics
+
+I could create better metrics because I could directly use the information from the matches.
+
+#### Deal with asyncronous tasks
+
+The new scripts need to be able to handle the problem of asynchronism. For example two models could
+be saved while the other scripts plays or viceversa.
+
+
+
+
+### Results
+
 
 <!---
 
