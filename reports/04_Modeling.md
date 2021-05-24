@@ -1673,6 +1673,8 @@ This script will load saved games and use them to train a model and save it to f
 I would like to give priority to last saved games, those should be used first. To be able to do that
 I should keep a file with all the already used games.
 
+TODO: how to deal with the start of the training when there is no model?
+
 #### Keep logging with tensorboard
 
 I want to keep logging as good or even better than the previous implementation. This implies that I have
