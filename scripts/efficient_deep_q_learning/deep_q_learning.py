@@ -64,22 +64,17 @@ def get_model(model_dir, conf):
     -------
     model, start_epoch
     """
-    if 'pretrained_model' in conf or get_last_saved_model(model_dir):
-        if 'pretrained_model' in conf:
-            start_epoch = 0
-            model_path = os.path.join(model_dir, conf['pretrained_model'])
-            logger.info('loading pretrained model: %s' % conf['pretrained_model'])
-        else:
-            model_path = get_last_saved_model(model_dir)
-            logger.info('continuing training from: %s' % os.path.basename(model_path))
-            start_epoch = int(model_path.split('epoch_')[-1].split('.h5')[0]) + 1
+    if get_last_saved_model(model_dir):
+        model_path = get_last_saved_model(model_dir)
+        logger.info('continuing training from: %s' % os.path.basename(model_path))
+        start_epoch = int(model_path.split('epoch_')[-1].split('.h5')[0]) + 1
         model = tf.keras.models.load_model(model_path)
     else:
         logger.info('creating model')
         model = globals()[conf['model']](**conf['model_params'])
         model_path = os.path.join(model_dir, 'epoch_00000.h5')
         model.save(model_path, include_optimizer=False)
-        start_epoch = 0
+        start_epoch = 1
 
     model.summary()
 
