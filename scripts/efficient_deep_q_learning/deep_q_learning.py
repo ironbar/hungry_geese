@@ -77,10 +77,11 @@ def get_model(model_dir, conf):
     else:
         logger.info('creating model')
         model = globals()[conf['model']](**conf['model_params'])
-        model.summary()
-        model_path = os.path.join(model_dir, 'random.h5')
+        model_path = os.path.join(model_dir, 'epoch_00000.h5')
         model.save(model_path, include_optimizer=False)
         start_epoch = 0
+
+    model.summary()
 
     optimizer = tf.keras.optimizers.get(conf.get('optimizer', 'Adam'))
     optimizer.learning_rate = conf.get('learning_rate', 1e-3)
