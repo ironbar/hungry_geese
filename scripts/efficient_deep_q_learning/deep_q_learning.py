@@ -116,7 +116,8 @@ def get_model_input_and_output(model, conf):
     training_mask = train_data[2]
     model_output = np.concatenate([np.expand_dims(target, axis=2), np.expand_dims(training_mask, axis=2)], axis=2)
     train_data = train_data[:2] + [model_output, model_output]
-    train_data = apply_all_simetries(train_data)
+    if conf['data_augmentation']:
+        train_data = apply_all_simetries(train_data)
 
     model_input = train_data[:2]
     model_output = train_data[2]
@@ -124,18 +125,34 @@ def get_model_input_and_output(model, conf):
 
 
 def sample_train_data(model_dir, aditional_files, epochs_to_sample):
+    """
+    New implementation does not give preference to new files, that needs to be implemented. Currently
+    it simply samples from the last n files
+    """
+    # filepaths = sorted(glob.glob(os.path.join(model_dir, 'epoch*.npz')))
+    # train_data = [load_data(filepaths[-1])]
+    # if aditional_files:
+    #     candidates = filepaths[-epochs_to_sample-1:-1]
+    #     if candidates:
+    #         if len(candidates) > aditional_files:
+    #             samples = np.random.choice(candidates, aditional_files, replace=False)
+    #         else:
+    #             samples = candidates
+    #         for sample in samples:
+    #             logger.info('Loading aditional file for training: %s' % sample)
+    #             train_data += [load_data(sample, verbose=False)]
+    aditional_files = aditional_files + 1
     filepaths = sorted(glob.glob(os.path.join(model_dir, 'epoch*.npz')))
-    train_data = [load_data(filepaths[-1])]
-    if aditional_files:
-        candidates = filepaths[-epochs_to_sample-1:-1]
-        if candidates:
-            if len(candidates) > aditional_files:
-                samples = np.random.choice(candidates, aditional_files, replace=False)
-            else:
-                samples = candidates
-            for sample in samples:
-                logger.info('Loading aditional file for training: %s' % sample)
-                train_data += [load_data(sample, verbose=False)]
+    train_data = []
+
+    candidates = filepaths[-epochs_to_sample-1:]
+    if len(candidates) > aditional_files:
+        samples = np.random.choice(candidates, aditional_files, replace=False)
+    else:
+        samples = candidates
+    for sample in samples:
+        logger.info('Loading file for training: %s' % sample)
+        train_data += [load_data(sample, verbose=False)]
     return combine_data(train_data)
 
 
@@ -172,6 +189,7 @@ def compute_state_value_evolution(model, data_path, batch_size):
 
 
 def get_last_saved_model(model_dir):
+    # TODO: move to library
     models = sorted(glob.glob(os.path.join(model_dir, 'epoch*.h5')))
     if models:
         return models[-1]
