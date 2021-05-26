@@ -1704,8 +1704,10 @@ I could create better metrics because I could directly use the information from 
 The new scripts need to be able to handle the problem of asynchronism. For example two models could
 be saved while the other scripts plays or viceversa.
 
+#### Speedup training
 
-
+I have been able to speedup up training script close to x2 by using the two gpus and also by loading
+the data in parallel.
 
 ### Results
 
