@@ -48,10 +48,12 @@ def deep_q_learning(args):
         tensorboard_writer = tf.summary.create_file_writer(os.path.join(model_dir, 'logs'))
         callbacks = create_callbacks(model_dir)
         log_ram_usage()
+        data_enqueuer = create_data_enqueuer(conf)
+        data_generator = data_enqueuer.get()
 
         for epoch_idx in range(start_epoch, conf['max_epochs']):
             logger.info('Starting epoch %i' % epoch_idx)
-            train_model(model, conf, callbacks, epoch_idx, tensorboard_writer)
+            train_model(model, conf, callbacks, epoch_idx, tensorboard_writer, data_generator)
             model_path = os.path.join(model_dir, 'epoch_%05d.h5' % epoch_idx)
             model.save(model_path, include_optimizer=False)
 
@@ -85,8 +87,8 @@ def get_model(model_dir, conf):
     return model, start_epoch
 
 
-def train_model(model, conf, callbacks, epoch_idx, tensorboard_writer):
-    model_input, model_output = get_model_input_and_output(model, conf)
+def train_model(model, conf, callbacks, epoch_idx, tensorboard_writer, data_generator):
+    model_input, model_output = get_model_input_and_output(model, conf, data_generator)
 
     log_ram_usage()
     initial_epoch = int(epoch_idx*conf['fit_epochs'])
@@ -105,13 +107,25 @@ def train_model(model, conf, callbacks, epoch_idx, tensorboard_writer):
     gc.collect()
 
 
-def get_model_input_and_output(model, conf):
+def create_data_enqueuer(conf):
+    logger.info('Creating data enqueuer')
+    def simple_generator(conf):
+        while 1:
+            train_data = sample_train_data(conf['model_dir'], conf['aditional_files_for_training'],
+                                           conf['epochs_to_sample_files_for_training'])
+            yield train_data
+
+    enqueuer = tf.keras.utils.GeneratorEnqueuer(simple_generator(conf))
+    enqueuer.start()
+    return enqueuer
+
+
+def get_model_input_and_output(model, conf, data_generator):
     """
     Samples train data and uses the model to compute the target, then applies data augmentation
     and returns the model input and output for training
     """
-    train_data = sample_train_data(
-        conf['model_dir'], conf['aditional_files_for_training'], conf['epochs_to_sample_files_for_training'])
+    train_data = next(data_generator)
     target = compute_q_learning_target(model, train_data, conf['discount_factor'], conf['pred_batch_size'])
 
     training_mask = train_data[2]
@@ -152,7 +166,7 @@ def sample_train_data(model_dir, aditional_files, epochs_to_sample):
     else:
         samples = candidates
     for sample in samples:
-        logger.info('Loading file for training: %s' % sample)
+        # logger.info('Loading file for training: %s' % sample)
         train_data += [load_data(sample, verbose=False)]
     return combine_data(train_data)
 
@@ -162,7 +176,7 @@ def load_data(filepath, verbose=True):
     if verbose: logger.info('loading %s' % filepath)
     data = np.load(filepath)
     output = [data['boards'], data['features'], data['training_mask'], data['rewards'], data['is_not_terminal']]
-    log_ram_usage()
+    if verbose: log_ram_usage()
     if verbose: logger.info('data types: %s' % str([array.dtype for array in output]))
     if verbose: logger.info('data shapes: %s' % str([array.shape for array in output]))
     return output
