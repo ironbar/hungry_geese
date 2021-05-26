@@ -43,16 +43,17 @@ def deep_q_learning(args):
     model_dir = os.path.dirname(os.path.realpath(args.config_path))
     conf['model_dir'] = model_dir
 
-    model, start_epoch = get_model(model_dir, conf)
-    tensorboard_writer = tf.summary.create_file_writer(os.path.join(model_dir, 'logs'))
-    callbacks = create_callbacks(model_dir)
-    log_ram_usage()
+    with tf.distribute.MirroredStrategy().scope():
+        model, start_epoch = get_model(model_dir, conf)
+        tensorboard_writer = tf.summary.create_file_writer(os.path.join(model_dir, 'logs'))
+        callbacks = create_callbacks(model_dir)
+        log_ram_usage()
 
-    for epoch_idx in range(start_epoch, conf['max_epochs']):
-        logger.info('Starting epoch %i' % epoch_idx)
-        train_model(model, conf, callbacks, epoch_idx, tensorboard_writer)
-        model_path = os.path.join(model_dir, 'epoch_%05d.h5' % epoch_idx)
-        model.save(model_path, include_optimizer=False)
+        for epoch_idx in range(start_epoch, conf['max_epochs']):
+            logger.info('Starting epoch %i' % epoch_idx)
+            train_model(model, conf, callbacks, epoch_idx, tensorboard_writer)
+            model_path = os.path.join(model_dir, 'epoch_%05d.h5' % epoch_idx)
+            model.save(model_path, include_optimizer=False)
 
 
 def get_model(model_dir, conf):
@@ -68,7 +69,7 @@ def get_model(model_dir, conf):
         model_path = get_last_saved_model(model_dir)
         logger.info('continuing training from: %s' % os.path.basename(model_path))
         start_epoch = int(model_path.split('epoch_')[-1].split('.h5')[0]) + 1
-        model = tf.keras.models.load_model(model_path)
+        model = tf.keras.models.load_model(model_path, compile=False)
     else:
         logger.info('creating model')
         model = globals()[conf['model']](**conf['model_params'])
