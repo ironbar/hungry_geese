@@ -1673,8 +1673,6 @@ This script will load saved games and use them to train a model and save it to f
 I would like to give priority to last saved games, those should be used first. To be able to do that
 I should keep a file with all the already used games.
 
-TODO: how to deal with the start of the training when there is no model?
-
 #### Keep logging with tensorboard
 
 I want to keep logging as good or even better than the previous implementation. This implies that I have
@@ -1693,7 +1691,9 @@ tensorboard_writer = tf.summary.create_file_writer('play')
 
 #### File locks
 
-I have to use file locks to avoid the problem of trying to read a file when it's not written already.
+I may have to use file locks to avoid the problem of trying to read a file when it's not written already.
+However I have run the scripst without locking the files and there are no problems, so maybe they are
+using locks internally (numpy and tensorflow)
 
 #### Better metrics
 
@@ -1716,8 +1716,55 @@ If each file has 100 matches that is 20k matches.
 
 ### Results
 
+I have been able to implement a much more efficient training that is roughly 4 times faster than the previous script.
+
+## Iteration 10. Just train without playing
+
+### Goal
+
+The goal of this iteration is to explore how good an agent can get just by training on data.
+
+I have seen that I'm able to train good agents just by using data, without training, and I want to
+see how different parameters affect to this training. Hopefully the conclusions will expand to normal training.
+
+### Development
+
+#### Can I reach the same score of the agent that produced the data?
+
+#### Does elo score degrades if training for longer?
+
+#### Model capacity
+
+Let's see how model capacity affects to agent elo score.
+
+#### Learning rate
+
+Does decreasing the learning rate help to achieve better results?
+
+#### Dataset size
+
+What happens if I use more matches for training?
+
+#### Number of files per epoch
+
+Does reducing or augmenting the number of files per epoch affect the speed or final result of the training?
+
+### Results
+
 
 <!---
+## Iteration n. title
+
+### Goal
+
+### Development
+
+### Results
+
+
+
+
+
 
 ## Iteration 8. Monte Carlo Tree Search
 
