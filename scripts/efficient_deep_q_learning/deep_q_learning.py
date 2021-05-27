@@ -172,11 +172,26 @@ def sample_train_data(model_dir, aditional_files, epochs_to_sample):
 
 
 def random_data_augmentation(data):
-    return player_simmetry(data, np.random.choice(range(3), 3, replace=False))
+    data = random_horizontal_simmetry(data)
+    data = player_simmetry(data, np.random.choice(range(3), 3, replace=False))
+    return data
+
+
+def random_horizontal_simmetry(data):
+    """ Randomly applies horizontal simmetry on board, training_mask, rewards and is_not_terminal"""
+    if random.randint(0, 1):
+        return data
+    data = data[0][:, :, ::-1], data[1], data[2][:, ::-1], data[3][:, ::-1], data[4][:, ::-1]
+    return data
 
 
 def load_data(filepath, verbose=True):
-    """ Returns: board, features, training_mask, rewards, is_not_terminal """
+    """
+    Returns
+    --------
+    board, features, training_mask, rewards, is_not_terminal
+    [(None, 11, 11, 17), (None, 9), (None, 3), (None, 3), (None, 3)]
+    """
     if verbose: logger.info('loading %s' % filepath)
     data = np.load(filepath)
     output = [data['boards'], data['features'], data['training_mask'], data['rewards'], data['is_not_terminal']]
