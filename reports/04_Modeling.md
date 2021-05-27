@@ -1707,7 +1707,7 @@ be saved while the other scripts plays or viceversa.
 #### Speedup training
 
 I have been able to speedup up training script close to x2 by using the two gpus and also by loading
-the data in parallel.
+the data in parallel. Compared to the previous implementation the speedup is near x4.
 
 ### Results
 

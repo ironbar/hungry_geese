@@ -116,7 +116,7 @@ def create_data_enqueuer(conf):
             yield train_data
 
     enqueuer = tf.keras.utils.GeneratorEnqueuer(simple_generator(conf))
-    enqueuer.start()
+    enqueuer.start(max_queue_size=1)
     return enqueuer
 
 
