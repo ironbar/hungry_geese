@@ -319,7 +319,7 @@ def player_simmetry(data, new_positions):
         boards[:, :, :, 4*(new_idx+1):4*(new_idx+2)] = data[0][:, :, :, 4*(old_idx+1):4*(old_idx+2)]
         features[:, 3+new_idx] = data[1][:, 3+old_idx]
         features[:, 6+new_idx] = data[1][:, 6+old_idx]
-    return boards, features, data[2], data[3]
+    return (boards, features) + tuple(data[2:])
 
 def apply_all_simetries(data):
     all_data = []

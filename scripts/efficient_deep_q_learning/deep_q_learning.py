@@ -21,7 +21,7 @@ from hungry_geese.callbacks import (
     LogEpochTime, LogLearningRate, LogRAM, LogCPU, LogGPU, LogETA, GarbageCollector, LogConstantValue
 )
 from hungry_geese.utils import log_ram_usage, configure_logging, log_to_tensorboard
-from hungry_geese.state import apply_all_simetries, get_ohe_opposite_actions, combine_data
+from hungry_geese.state import player_simmetry, get_ohe_opposite_actions, combine_data
 from hungry_geese.loss import masked_mean_squared_error
 
 
@@ -131,8 +131,6 @@ def get_model_input_and_output(model, conf, data_generator):
     training_mask = train_data[2]
     model_output = np.concatenate([np.expand_dims(target, axis=2), np.expand_dims(training_mask, axis=2)], axis=2)
     train_data = train_data[:2] + [model_output, model_output]
-    if conf['data_augmentation']:
-        train_data = apply_all_simetries(train_data)
 
     model_input = train_data[:2]
     model_output = train_data[2]
@@ -167,8 +165,14 @@ def sample_train_data(model_dir, aditional_files, epochs_to_sample):
         samples = candidates
     for sample in samples:
         # logger.info('Loading file for training: %s' % sample)
-        train_data += [load_data(sample, verbose=False)]
+        data = load_data(sample, verbose=False)
+        data = random_data_augmentation(data)
+        train_data.append(data)
     return combine_data(train_data)
+
+
+def random_data_augmentation(data):
+    return player_simmetry(data, np.random.choice(range(3), 3, replace=False))
 
 
 def load_data(filepath, verbose=True):

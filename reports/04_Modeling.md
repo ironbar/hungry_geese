@@ -1709,6 +1709,11 @@ be saved while the other scripts plays or viceversa.
 I have been able to speedup up training script close to x2 by using the two gpus and also by loading
 the data in parallel. Compared to the previous implementation the speedup is near x4.
 
+#### Maximum number of files
+
+It seems that 200 is the maximum number of files I can use for training due to memory limitations.
+If each file has 100 matches that is 20k matches.
+
 ### Results
 
 
