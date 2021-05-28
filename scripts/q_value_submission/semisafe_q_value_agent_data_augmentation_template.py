@@ -424,7 +424,7 @@ def player_simmetry(data, new_positions):
         boards[:, :, :, 4*(new_idx+1):4*(new_idx+2)] = data[0][:, :, :, 4*(old_idx+1):4*(old_idx+2)]
         features[:, 3+new_idx] = data[1][:, 3+old_idx]
         features[:, 6+new_idx] = data[1][:, 6+old_idx]
-    return boards, features, data[2], data[3]
+    return (boards, features) + tuple(data[2:])
 
 def apply_all_simetries(data):
     all_data = []
@@ -825,11 +825,11 @@ def get_reward(*args, **kwargs):
     return 0
 get_cumulative_reward = get_reward
 
-
+n_units = 128
 model = simple_model(
-    conv_filters=[128, 128, 128, 128],
+    conv_filters=[n_units, n_units, n_units, n_units],
     conv_activations=['relu', 'relu', 'relu', 'relu'],
-    mlp_units=[128, 128],
+    mlp_units=[n_units, n_units],
     mlp_activations=['relu', 'tanh'])
 
 def get_weights():
