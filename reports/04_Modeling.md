@@ -1729,9 +1729,30 @@ see how different parameters affect to this training. Hopefully the conclusions 
 
 ### Development
 
+#### Baseline
+
+I have trained a model from zero for almost a day. It's able to reach the and elo mean score of 1718
+in 11 hours (epoch 1100). In comparison the agent that produced the data reached 1592 elo at 11 hours, and reached
+1680 elo after 3 days and 15 hours (epoch 2720).
+
+This shows that new training script is much faster, and also seems to be more efficient. This probably
+is related to using more real data instead of data augmented repetitions of same data.
+
 #### Can I reach the same score of the agent that produced the data?
 
+Yes, as it is said above I was able to improve over the agent.
+
 #### Does elo score degrades if training for longer?
+
+It seems so as the baseline shows:
+
+![baseline score degrades after a long train](res/2021-05-28-07-48-17.png)
+
+#### Dataset size
+
+Let's double the dataset size to see the effect on elo score.
+
+
 
 #### Model capacity
 
@@ -1741,9 +1762,9 @@ Let's see how model capacity affects to agent elo score.
 
 Does decreasing the learning rate help to achieve better results?
 
-#### Dataset size
+On the baseline I did not have to reduce the learning rate to reach good elo scores.
 
-What happens if I use more matches for training?
+
 
 #### Number of files per epoch
 
