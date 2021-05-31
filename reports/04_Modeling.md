@@ -1752,7 +1752,9 @@ It seems so as the baseline shows:
 
 Let's double the dataset size to see the effect on elo score.
 
+#### Number of files per epoch
 
+Does reducing or augmenting the number of files per epoch affect the speed or final result of the training?
 
 #### Model capacity
 
@@ -1766,9 +1768,7 @@ On the baseline I did not have to reduce the learning rate to reach good elo sco
 
 
 
-#### Number of files per epoch
 
-Does reducing or augmenting the number of files per epoch affect the speed or final result of the training?
 
 ### Results
 

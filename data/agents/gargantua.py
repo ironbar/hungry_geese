@@ -839,7 +839,7 @@ def get_weights():
 
 ###############################################################################
 # /mnt/hdd0/Kaggle/hungry_geese/models/40_study_effect_of_epsilon/04_epsilon_greedy_001/epoch_7920.h5
-# paste_model_score_here
+# (1619, 1609)
 ###############################################################################
 
 weights_b64 = get_weights()
