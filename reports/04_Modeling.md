@@ -1750,15 +1750,30 @@ It seems so as the baseline shows:
 
 #### Dataset size
 
-Let's double the dataset size to see the effect on elo score.
+Let's double the dataset size to see the effect on elo score. When training with a model with 256 units
+the elo score is almost the same. Thus adding more data is not helpful, or the model capacity is full.
+
+- `/mnt/hdd0/Kaggle/hungry_geese/models/43_just_train_without_playing/01_baseline_just_train_from_zero_with_data_augmentation`
+- `/mnt/hdd0/Kaggle/hungry_geese/models/43_just_train_without_playing/02_double_dataset_size`
 
 #### Number of files per epoch
 
 Does reducing or augmenting the number of files per epoch affect the speed or final result of the training?
 
+I have experienced with 50, 100 and 200 files. Each file has 100 matches. I have found that the smaller
+the number of files, the bigger the loss at the start of the training and also the bigger the overestiation
+of state value.
+
+![state value vs number of files](res/2021-05-31-10-53-51.png)
+
 #### Model capacity
 
 Let's see how model capacity affects to agent elo score.
+
+64 150k
+128 600k
+256 2.4M
+512 9.7M
 
 #### Learning rate
 
