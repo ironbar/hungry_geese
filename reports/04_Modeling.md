@@ -1785,12 +1785,52 @@ Does decreasing the learning rate help to achieve better results?
 
 On the baseline I did not have to reduce the learning rate to reach good elo scores.
 
+| learning rate | steps to 1700 elo mean | steps to 1650 elo mean | Speedup 1700 | Speedup 1600 |
+|---------------|------------------------|------------------------|--------------|--------------|
+| 2E-05         | 362                    | 261                    | 1.0          | 1.0          |
+| 4E-05         | 199                    | 117                    | 1.8          | 2.2          |
+| 1E-04         | 96                     | 51                     | 3.8          | 5.1          |
+| 2E-04         | 67                     | 42                     | 5.4          | 6.2          |
 
+Big surprise and good news here, I could speedup the training up to 6x over the baseline, that was
+already speedup over old implementation x4. So we are talking about reaching 1700 elo mean score
+in just one hour whereas previously could take days.
 
-
+Also it does not seem that we have to lower the learning rate during training, since we are able
+to achieve the same results without lowering the learning rate.
 
 ### Results
 
+- I could improve training speed x6 just by increasing the learning rate
+- It does not seem that we have to lower learning rate during training
+- It seems that the more the capacity the better.
+- The more the files per epoch the better. 200 seems a good compromise for this PC
+- We were able to achieve better or same score than the agent that produced the data just by training without playing
+
+## Iteration 11. Train from zero on different rewards
+
+### Goal
+
+Now that we have probed we were able to train very strong agents in just one hour provided enough
+data it's time to see if we can do the same training and agent that needs to create its own data.
+
+I will also explore with a new reward that hopefully will unlock all the potential of the agent.
+
+### Development
+
+#### Train from zero on baseline reward
+
+I can create 1 file per minute, 3600 files a day. On just train experiments I was using around 7k files
+so that would be two days of play.
+
+First training has problems at the start because I'm able to train much faster than I play. Thus
+learning is not continuous. I have launched a second train that uses data from the first one and seems
+to be better.
+
+Maybe I have to decrease the learning rate, or even sleep some time after training to allow to play
+new matches.
+
+### Results
 
 <!---
 ## Iteration n. title
