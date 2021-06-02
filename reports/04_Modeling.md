@@ -1770,10 +1770,14 @@ of state value.
 
 Let's see how model capacity affects to agent elo score.
 
-64 150k
-128 600k
-256 2.4M
-512 9.7M
+| units per layer | parameters | max elo mean |
+|-----------------|------------|--------------|
+| 64              | 0.15M      | 1617         |
+| 128             | 0.6M       | 1716         |
+| 256             | 2.4M       | 1730         |
+| 512             | 9.7M       | 1758         |
+
+There is a clear relation between model capacity and elo score.
 
 #### Learning rate
 
