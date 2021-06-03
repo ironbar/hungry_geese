@@ -159,12 +159,8 @@ def sample_train_data(model_dir, aditional_files, epochs_to_sample):
     train_data = []
 
     candidates = filepaths[-epochs_to_sample-1:]
-    if len(candidates) > aditional_files:
-        samples = np.random.choice(candidates, aditional_files, replace=False)
-    else:
-        samples = candidates
+    samples = np.random.choice(candidates, aditional_files, replace=len(candidates) > aditional_files)
     for sample in samples:
-        # logger.info('Loading file for training: %s' % sample)
         data = load_data(sample, verbose=False)
         data = random_data_augmentation(data)
         train_data.append(data)

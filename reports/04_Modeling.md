@@ -1820,8 +1820,8 @@ I will also explore with a new reward that hopefully will unlock all the potenti
 
 #### Train from zero on baseline reward
 
-I can create 1 file per minute, 3600 files a day. On just train experiments I was using around 7k files
-so that would be two days of play.
+I can create 1 file per minute, ~1500 files a day. On just train experiments I was using around 7k files
+so that would be four days of play.
 
 First training has problems at the start because I'm able to train much faster than I play. Thus
 learning is not continuous. I have launched a second train that uses data from the first one and seems
