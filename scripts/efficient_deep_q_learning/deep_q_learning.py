@@ -105,6 +105,8 @@ def train_model(model, conf, callbacks, epoch_idx, tensorboard_writer, data_gene
     if 'random_matches' in conf:
         history['state_value'] = compute_state_value_evolution(
             model, os.path.join(conf['model_dir'], conf['random_matches']), conf['pred_batch_size'])
+    history['n_train_files'] = len(_get_train_data_filepaths(conf['model_dir']))
+    history['n_matches_played'] = history['n_train_files']*conf['n_matches_play']
 
     for key, value in history.items():
         log_to_tensorboard(key, np.mean(value), initial_epoch, tensorboard_writer)
@@ -159,7 +161,7 @@ def sample_train_data(model_dir, aditional_files, epochs_to_sample):
     #             logger.info('Loading aditional file for training: %s' % sample)
     #             train_data += [load_data(sample, verbose=False)]
     aditional_files = aditional_files + 1
-    filepaths = sorted(glob.glob(os.path.join(model_dir, 'epoch*.npz')))
+    filepaths = _get_train_data_filepaths(model_dir)
     train_data = []
 
     candidates = filepaths[-epochs_to_sample-1:]
@@ -169,6 +171,11 @@ def sample_train_data(model_dir, aditional_files, epochs_to_sample):
         data = random_data_augmentation(data)
         train_data.append(data)
     return combine_data(train_data)
+
+
+def _get_train_data_filepaths(model_dir):
+    filepaths = sorted(glob.glob(os.path.join(model_dir, 'epoch*.npz')))
+    return filepaths
 
 
 def random_data_augmentation(data):
