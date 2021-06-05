@@ -1857,6 +1857,15 @@ die at the same time. To compute the value correctly we should give previous and
 On a first step I'm going to implement and test the new reward. I think I could reuse existing
 code. On a second I will have to update the play_games script to better compute the certain death reward.
 
+I have been using this command to generate new matches
+
+```bash
+python play_matches_one_round.py "/mnt/hdd0/Kaggle/hungry_geese/models/45_train_from_zero/05_play_matches_with_frozen_model/epoch_02854.h5" 1e-2 terminal_kill_and_grow_reward_10_2_1 "/mnt/hdd0/Kaggle/hungry_geese/models/46_train_from_zero_on/01_first_steps/debug.npz" "/mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/scripts/deep_q_learning/epsilon_semi_safe_agent_template.py" --n_matches 20 --play_against_top_n 3 --n_learning_agents 1 --n_agents_for_experience 1
+```
+
+Everything seems to be working, but let's check the training data on a jupyter notebook to be
+completely sure.
+
 ### Results
 
 <!---
