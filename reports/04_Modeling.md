@@ -1830,6 +1830,33 @@ to be better.
 Maybe I have to decrease the learning rate, or even sleep some time after training to allow to play
 new matches.
 
+There are evidences of disconection between reward and elo score. For example this win ratio evolution,
+we can see that it peaks at 0.45 and then decreases. Probably with a better reward that should not
+happen.
+
+![win ratio evolution](res/2021-06-03-18-00-57.png)
+
+#### New reward
+
+The new reward will have three components:
+
+- Terminal reward: this will be given if the agent dies or reaches the terminal state. It will be
+proportional to the ranking of the agent, f.e. 5, -5, -10, -15. This is a difference with current
+reward that was not giving reward on the terminal state. This way the agent will not find any
+difference on dying on step 190 or reaching step 200 on second position if only two goose are left.
+It will incentivate taking more risks for winning.
+- Kill reward. this is already present on current reward and I think is a good incentive. Sometimes
+the other agents will die by themselves, but if the agent learns to kill them that would be a good
+ability. We could give for example 2 for each killed agent.
+- Eat reward. I also think that encourage growing eases the learning.
+
+One thing that I have to be careful with is that with the new implementation the agent is learning
+also death reward from certain death movements. There might be some discrepancies if many agents
+die at the same time. To compute the value correctly we should give previous and new observation.
+
+On a first step I'm going to implement and test the new reward. I think I could reuse existing
+code. On a second I will have to update the play_games script to better compute the certain death reward.
+
 ### Results
 
 <!---
