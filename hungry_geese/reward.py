@@ -96,17 +96,22 @@ def _get_terminal_sparse_reward(current_observation, previous_observation):
     it is the winner. It gives 1 point for each smaller or death agent, and 0.5 for each agent
     of the same size
     """
-    reward = get_n_geese_alive(previous_observation['geese']) - get_n_geese_alive(current_observation['geese'])
-    goose_len = len(current_observation['geese'][current_observation['index']])
-    for idx, goose in enumerate(current_observation['geese']):
-        if idx == current_observation['index']:
+    current_geese_len = _get_geese_len(current_observation)
+    previous_geese_len = _get_geese_len(previous_observation)
+    goose_idx = current_observation['index']
+    goose_len = current_geese_len[goose_idx]
+    reward = 0
+    for idx, (current_len, previous_len) in enumerate(zip(current_geese_len, previous_geese_len)):
+        if idx == goose_idx:
             continue
-        other_goose_len = len(goose)
-        if other_goose_len: # do not add rewards for already dead geese
-            if goose_len > other_goose_len:
-                reward += 1
-            elif goose_len == other_goose_len:
-                reward += 0.5
+        if not previous_len:
+            reward += 1
+            continue
+        if goose_len > current_len:
+            reward += 1
+        elif goose_len == current_len:
+            reward += 0.5
+
     return reward
 
 

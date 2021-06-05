@@ -4,7 +4,8 @@ import numpy as np
 from hungry_geese.reward import (
     get_n_geese_alive, get_sparse_reward, get_ranking_reward, get_cumulative_reward,
     get_clipped_len_reward, get_grow_and_kill_reward, get_just_survive_reward,
-    get_death_reward_from_name
+    get_death_reward_from_name, get_terminal_kill_and_grow_reward,
+    _get_terminal_sparse_reward
 )
 
 @pytest.mark.parametrize('geese, n',  [
@@ -109,3 +110,34 @@ def test_just_survive_reward(current_observation, reward_name, reward):
 ])
 def test_get_death_reward_from_name(reward_name, death_reward):
     assert death_reward == get_death_reward_from_name(reward_name)
+
+@pytest.mark.parametrize('reward_name', ['terminal_kill_and_grow_10_2_1'])
+@pytest.mark.parametrize('configuration', [{'episodeSteps': 200}])
+@pytest.mark.parametrize('reward, current_observation, previous_observation', [
+    (0, {'geese': [[1], [2], [3], [4]], 'index':0, 'step': 5}, {'geese': [[1], [2], [3], [4]], 'index':0}), # no change
+    (2, {'geese': [[1], [], [3], [4]], 'index':0, 'step': 5}, {'geese': [[1], [2], [3], [4]], 'index':0}), # kill other
+    (-25, {'geese': [[], [2], [3], [4]], 'index':0, 'step': 5}, {'geese': [[1], [2], [3], [4]], 'index':0}), # die on last position
+    (1, {'geese': [[1, 2], [2], [3], [4]], 'index':0, 'step': 5}, {'geese': [[1], [2], [3], [4]], 'index':0}), # grow
+    (3, {'geese': [[1, 2], [], [3], [4]], 'index':0, 'step': 5}, {'geese': [[1], [2], [3], [4]], 'index':0}), # grow and kill
+    (5, {'geese': [[1, 2], [], [], [4]], 'index':0, 'step': 5}, {'geese': [[1], [2], [3], [4]], 'index':0}), # grow and kill 2
+    (3, {'geese': [[1, 2], [], [], [4]], 'index':0, 'step': 5}, {'geese': [[1], [], [3], [4]], 'index':0}), # grow and kill
+    (0, {'geese': [[1], [2], [3], [4]], 'index':0, 'step': 5}, {'geese': [[1, 2], [2], [3], [4]], 'index':0}), # decrease
+    (-10, {'geese': [[1], [2], [3], [4]], 'index':0, 'step': 199}, {'geese': [[1], [2], [3], [4]], 'index':0}), # end on tie
+    (5, {'geese': [[1, 2], [2], [3], [4]], 'index':0, 'step': 199}, {'geese': [[1], [2], [3], [4]], 'index':0}), # win
+])
+def test_get_terminal_kill_and_grow_reward(reward, current_observation, previous_observation, reward_name, configuration):
+    assert reward == get_terminal_kill_and_grow_reward(current_observation, previous_observation, reward_name, configuration)
+
+@pytest.mark.parametrize('reward, current_observation, previous_observation', [
+    (0, {'geese': [[], [2], [3], [4]], 'index':0}, {'geese': [[1], [2], [3], [4]], 'index':0}), # die on last position
+    (0.5, {'geese': [[], [], [3], [4]], 'index':0}, {'geese': [[1], [2], [3], [4]], 'index':0}), # die at same time
+    (1, {'geese': [[], [], [], [4]], 'index':0}, {'geese': [[1], [2], [3], [4]], 'index':0}), # die at same time
+    (1.5, {'geese': [[], [], [], []], 'index':0}, {'geese': [[1], [2], [3], [4]], 'index':0}), # die at same time
+    (2, {'geese': [[], [], [], []], 'index':0}, {'geese': [[1], [2], [3], []], 'index':0}), # die at same time
+    (2.5, {'geese': [[], [], [], []], 'index':0}, {'geese': [[1], [2], [], []], 'index':0}), # die at same time
+    (3, {'geese': [[1], [], [], []], 'index':0}, {'geese': [[1], [2], [], []], 'index':0}), # wins
+    (3, {'geese': [[1, 2], [], [], []], 'index':0}, {'geese': [[1], [2], [], []], 'index':0}), # wins
+    (3, {'geese': [[1, 2], [2], [], []], 'index':0}, {'geese': [[1], [2], [], []], 'index':0}), # wins
+])
+def test_get_terminal_sparse_reward(reward, current_observation, previous_observation):
+    assert reward == _get_terminal_sparse_reward(current_observation, previous_observation)
