@@ -51,11 +51,15 @@ def deep_q_learning(args):
         data_enqueuer = create_data_enqueuer(conf)
         data_generator = data_enqueuer.get()
 
+        sleep_between_epochs = conf.get('sleep_between_epochs', 0)
         for epoch_idx in range(start_epoch, conf['max_epochs']):
             logger.info('Starting epoch %i' % epoch_idx)
             train_model(model, conf, callbacks, epoch_idx, tensorboard_writer, data_generator)
             model_path = os.path.join(model_dir, 'epoch_%05d.h5' % epoch_idx)
             model.save(model_path, include_optimizer=False)
+            if sleep_between_epochs:
+                print('Sleeping %i seconds' % sleep_between_epochs)
+                time.sleep(sleep_between_epochs)
 
 
 def get_model(model_dir, conf):
@@ -159,7 +163,7 @@ def sample_train_data(model_dir, aditional_files, epochs_to_sample):
     train_data = []
 
     candidates = filepaths[-epochs_to_sample-1:]
-    samples = np.random.choice(candidates, aditional_files, replace=len(candidates) > aditional_files)
+    samples = np.random.choice(candidates, aditional_files, replace=len(candidates) < aditional_files)
     for sample in samples:
         data = load_data(sample, verbose=False)
         data = random_data_augmentation(data)
