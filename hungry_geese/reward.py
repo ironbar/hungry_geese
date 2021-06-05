@@ -228,7 +228,7 @@ def _get_goose_growth(current_observation, previous_observation):
 
 
 def _get_terminal_kill_and_grow_reward_params_from_name(reward_name):
-    """ terminal_kill_and_grow_10_2_1 """
+    """ terminal_kill_and_grow_reward_10_2_1 """
     terminal_reward_scale, kill_reward, grow_reward = [float(value) for value in reward_name.split('_')[-3:]]
     return terminal_reward_scale, kill_reward, grow_reward
 
