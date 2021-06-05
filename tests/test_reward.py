@@ -112,7 +112,7 @@ def test_get_death_reward_from_name(reward_name, death_reward):
     assert death_reward == get_death_reward_from_name(reward_name)
 
 @pytest.mark.parametrize('reward_name', ['terminal_kill_and_grow_10_2_1'])
-@pytest.mark.parametrize('configuration', [{'episodeSteps': 200}])
+@pytest.mark.parametrize('configuration', [{'episodeSteps': 200, 'hunger_rate': 40}])
 @pytest.mark.parametrize('reward, current_observation, previous_observation', [
     (0, {'geese': [[1], [2], [3], [4]], 'index':0, 'step': 5}, {'geese': [[1], [2], [3], [4]], 'index':0}), # no change
     (2, {'geese': [[1], [], [3], [4]], 'index':0, 'step': 5}, {'geese': [[1], [2], [3], [4]], 'index':0}), # kill other
@@ -125,6 +125,7 @@ def test_get_death_reward_from_name(reward_name, death_reward):
     (-10, {'geese': [[1], [2], [3], [4]], 'index':0, 'step': 199}, {'geese': [[1], [2], [3], [4]], 'index':0}), # end on tie
     (5, {'geese': [[1, 2], [2], [3], [4]], 'index':0, 'step': 199}, {'geese': [[1], [2], [3], [4]], 'index':0}), # win
     (5, {'geese': [[1, 2], [], [], []], 'index':0, 'step': 5}, {'geese': [[1], [2], [3], [4]], 'index':0}), # win
+    (1, {'geese': [[1], [2], [3], [4]], 'index':0, 'step': 40}, {'geese': [[1], [2], [3], [4]], 'index':0}), # eat when geese decreases
 ])
 def test_get_terminal_kill_and_grow_reward(reward, current_observation, previous_observation, reward_name, configuration):
     assert reward == get_terminal_kill_and_grow_reward(current_observation, previous_observation, reward_name, configuration)

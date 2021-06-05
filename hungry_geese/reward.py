@@ -193,7 +193,7 @@ def get_terminal_kill_and_grow_reward(current_observation, previous_observation,
         return terminal_reward
     else:
         reward = kill_reward * _get_killed_geese(current_observation, previous_observation)
-        reward += grow_reward * _get_goose_growth(current_observation, previous_observation)
+        reward += grow_reward * _get_goose_growth(current_observation, previous_observation, configuration)
         return reward
 
 
@@ -237,10 +237,12 @@ def _get_killed_geese(current_observation, previous_observation):
     return get_n_geese_alive(previous_observation['geese']) - get_n_geese_alive(current_observation['geese'])
 
 
-def _get_goose_growth(current_observation, previous_observation):
+def _get_goose_growth(current_observation, previous_observation, configuration):
     """ Returns 1 if the goose is bigger, 0 otherwise """
     current_len = _get_geese_len(current_observation)[current_observation['index']]
     previous_len = _get_geese_len(previous_observation)[previous_observation['index']]
+    if current_observation['step'] % configuration['hunger_rate'] == 0 and current_observation['step']:
+        current_len += 1
     if current_len > previous_len:
         return 1
     return 0
