@@ -133,49 +133,8 @@ def create_train_data(matches_results, reward_name, output_path, agent_idx_range
         match = matches_results[0]
         # logger.debug('Match steps: %i' % len(match))
         for agent_idx in agent_idx_range:
-            first_action = match[1][agent_idx]['action']
-            if first_action == 'SOUTH':
-                state.reset(previous_action='SOUTH')
-            else:
-                state.reset()
-            certain_death_masks = []
-
-            for step_idx, step in enumerate(match):
-                if step_idx:
-                    action = step[agent_idx]['action']
-                    state.add_action(action)
-                observation = step[0]['observation'].copy()
-                observation['index'] = agent_idx
-                state.update(observation, conf)
-
-                if not observation['geese'][agent_idx]:
-                    break
-                certain_death_mask = get_certain_death_mask(observation, conf)
-                certain_death_mask = adapt_mask_to_3d_action(certain_death_mask, state.get_last_action())
-                certain_death_mask = np.floor(certain_death_mask)
-                certain_death_masks.append(certain_death_mask)
-
-            data = state.prepare_data_for_training()
-            # create rewards for taken actions
-            rewards = np.expand_dims(data[-1], axis=1)
-            ohe_actions = data[-2]
-            rewards = rewards*ohe_actions
-            # add certain death reward
-            certain_death_masks = np.array(certain_death_masks)[:len(rewards)]
-            death_reward = get_death_reward_from_name(reward_name)
-            rewards += np.clip(certain_death_masks - ohe_actions, 0, 1)*death_reward
-            # is_not_terminal
-            is_not_terminal = np.ones_like(rewards)
-            is_not_terminal -= certain_death_masks
-            is_not_terminal[-1] = 0
-            # mask for training
-            training_mask = np.zeros_like(rewards)
-            training_mask += ohe_actions
-            training_mask += certain_death_masks
-            training_mask = np.clip(training_mask, 0, 1)
-
-            train_data.append(data[:2] + [rewards, is_not_terminal, training_mask])
-            # logger.debug('Data shapes %s' % str([data.shape for data in train_data[-1]]))
+            train_data.append(create_match_data_for_training(match, agent_idx, state,
+                                                             conf, reward_name))
         del matches_results[0]
 
     log_ram_usage()
@@ -202,6 +161,67 @@ def create_train_data(matches_results, reward_name, output_path, agent_idx_range
     del train_data
     log_ram_usage()
 
+
+def create_match_data_for_training(match, agent_idx, state, conf, reward_name):
+    """
+    Creates data from the match for training
+
+    Parameters
+    ----------
+    match : list
+        The typical match returned by hungry geese game
+    agent_idx : int
+    state : GameState
+    conf : dict
+        Configuration of the game
+    reward_name : str
+
+    Returns
+    -------
+    boards, features, rewards, is_not_terminal, training_mask
+    """
+    first_action = match[1][agent_idx]['action']
+    if first_action == 'SOUTH':
+        state.reset(previous_action='SOUTH')
+    else:
+        state.reset()
+    certain_death_masks = []
+
+    for step_idx, step in enumerate(match):
+        if step_idx:
+            action = step[agent_idx]['action']
+            state.add_action(action)
+        observation = step[0]['observation'].copy()
+        observation['index'] = agent_idx
+        state.update(observation, conf)
+
+        if not observation['geese'][agent_idx]:
+            break
+        certain_death_mask = get_certain_death_mask(observation, conf)
+        certain_death_mask = adapt_mask_to_3d_action(certain_death_mask, state.get_last_action())
+        certain_death_mask = np.floor(certain_death_mask)
+        certain_death_masks.append(certain_death_mask)
+
+    data = state.prepare_data_for_training()
+    # create rewards for taken actions
+    rewards = np.expand_dims(data[-1], axis=1)
+    ohe_actions = data[-2]
+    rewards = rewards*ohe_actions
+    # add certain death reward
+    certain_death_masks = np.array(certain_death_masks)[:len(rewards)]
+    death_reward = get_death_reward_from_name(reward_name)
+    rewards += np.clip(certain_death_masks - ohe_actions, 0, 1)*death_reward
+    # is_not_terminal
+    is_not_terminal = np.ones_like(rewards)
+    is_not_terminal -= certain_death_masks
+    is_not_terminal[-1] = 0
+    # mask for training
+    training_mask = np.zeros_like(rewards)
+    training_mask += ohe_actions
+    training_mask += certain_death_masks
+    training_mask = np.clip(training_mask, 0, 1)
+
+    return data[:2] + [rewards, is_not_terminal, training_mask]
 
 def gather_metrics_from_matches(matches, agent_idx=0):
     """
