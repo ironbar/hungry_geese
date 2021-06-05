@@ -124,6 +124,7 @@ def test_get_death_reward_from_name(reward_name, death_reward):
     (0, {'geese': [[1], [2], [3], [4]], 'index':0, 'step': 5}, {'geese': [[1, 2], [2], [3], [4]], 'index':0}), # decrease
     (-10, {'geese': [[1], [2], [3], [4]], 'index':0, 'step': 199}, {'geese': [[1], [2], [3], [4]], 'index':0}), # end on tie
     (5, {'geese': [[1, 2], [2], [3], [4]], 'index':0, 'step': 199}, {'geese': [[1], [2], [3], [4]], 'index':0}), # win
+    (5, {'geese': [[1, 2], [], [], []], 'index':0, 'step': 5}, {'geese': [[1], [2], [3], [4]], 'index':0}), # win
 ])
 def test_get_terminal_kill_and_grow_reward(reward, current_observation, previous_observation, reward_name, configuration):
     assert reward == get_terminal_kill_and_grow_reward(current_observation, previous_observation, reward_name, configuration)

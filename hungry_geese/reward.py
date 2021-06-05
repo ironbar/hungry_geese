@@ -186,8 +186,7 @@ def get_just_survive_reward(current_observation, reward_name):
 
 def get_terminal_kill_and_grow_reward(current_observation, previous_observation, reward_name, configuration):
     terminal_reward_scale, kill_reward, grow_reward = _get_terminal_kill_and_grow_reward_params_from_name(reward_name)
-    is_terminal_state = _is_goose_death(current_observation) or _is_final_state(current_observation, configuration)
-    if is_terminal_state:
+    if is_terminal_state(current_observation, configuration):
         terminal_reward = _get_terminal_sparse_reward(current_observation, previous_observation)
         terminal_reward -= 2.5 # this only gives positive reward for winning, [-2.5, 0.5]
         terminal_reward *= terminal_reward_scale
@@ -198,10 +197,30 @@ def get_terminal_kill_and_grow_reward(current_observation, previous_observation,
         return reward
 
 
+def is_terminal_state(current_observation, configuration):
+    if _is_goose_death(current_observation):
+        return True
+    if _is_final_state(current_observation, configuration):
+        return True
+    if _are_all_other_goose_death(current_observation):
+        return True
+    return False
+
+
 def _is_goose_death(observation):
     geese_len = _get_geese_len(observation)
     goose_len = geese_len[observation['index']]
     return not goose_len
+
+
+def _are_all_other_goose_death(observation):
+    geese_len = _get_geese_len(observation)
+    for idx, goose_len in enumerate(geese_len):
+        if idx == observation['index']:
+            continue
+        if goose_len:
+            return False
+    return True
 
 
 def _get_geese_len(observation):
