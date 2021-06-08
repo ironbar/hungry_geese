@@ -48,7 +48,11 @@ def get_reward(current_observation, previous_observation, configuration, reward_
     elif reward_name.startswith('just_survive'):
         return get_just_survive_reward(current_observation, reward_name)
     elif reward_name.startswith('terminal_kill_and_grow_reward'):
-        return get_terminal_kill_and_grow_reward(current_observation, previous_observation, reward_name, configuration)
+        return get_terminal_kill_and_grow_reward(
+            current_observation, previous_observation, reward_name, configuration)
+    elif reward_name.startswith('v2_terminal_kill_and_grow_reward'):
+        return get_v2_terminal_kill_and_grow_reward(
+            current_observation, previous_observation, reward_name, configuration)
     else:
         raise KeyError(reward_name)
 
@@ -196,6 +200,20 @@ def get_terminal_kill_and_grow_reward(current_observation, previous_observation,
         reward += grow_reward * _get_goose_growth(current_observation, previous_observation, configuration)
         return reward
 
+def get_v2_terminal_kill_and_grow_reward(current_observation, previous_observation, reward_name, configuration):
+    ret = _get_v2_terminal_kill_and_grow_reward_params_from_name(reward_name)
+    terminal_reward_scale, max_death_reward, win_reward, kill_reward, grow_reward = ret
+    if is_terminal_state(current_observation, configuration):
+        terminal_reward = _get_terminal_sparse_reward(current_observation, previous_observation)
+        if terminal_reward == 3:
+            return win_reward
+        terminal_reward = (terminal_reward - 2.5)*terminal_reward_scale + max_death_reward
+        return terminal_reward
+    else:
+        reward = kill_reward * _get_killed_geese(current_observation, previous_observation)
+        reward += grow_reward * _get_goose_growth(current_observation, previous_observation, configuration)
+        return reward
+
 
 def is_terminal_state(current_observation, configuration):
     if _is_goose_death(current_observation):
@@ -252,6 +270,15 @@ def _get_terminal_kill_and_grow_reward_params_from_name(reward_name):
     """ terminal_kill_and_grow_reward_10_2_1 """
     terminal_reward_scale, kill_reward, grow_reward = [float(value) for value in reward_name.split('_')[-3:]]
     return terminal_reward_scale, kill_reward, grow_reward
+
+def _get_v2_terminal_kill_and_grow_reward_params_from_name(reward_name):
+    """
+    v2_terminal_kill_and_grow_reward_2_-5_5_2_1
+    terminal_reward_scale, max_death_reward, win_reward, kill_reward, grow_reward
+    """
+    ret = [float(value) for value in reward_name.split('_')[-5:]]
+    terminal_reward_scale, max_death_reward, win_reward, kill_reward, grow_reward  = ret
+    return terminal_reward_scale, max_death_reward, win_reward, kill_reward, grow_reward
 
 
 def get_death_reward_from_name(reward_name):
