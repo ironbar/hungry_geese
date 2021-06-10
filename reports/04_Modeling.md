@@ -1903,6 +1903,21 @@ In red we see training with death reward propagation, it reaches a higher elo sc
 
 I'm going to integrate this propagation into the training script.
 
+#### Continue improving the training
+
+We have seen that when using a high learning rate such as 1e-4 the model learns very fast but also
+overfits to the train data. If I want to play and train continually I have to use a smaller learning
+rate.
+
+I'm planning to continue training from the best model with this configuration:
+
+- Smaller learning rate such as 2e-5 or 1e-5
+- v2 reward
+- Add new and more powerful agents to the baseline
+- Play against the top 5
+
+I would like to reach 1800 elo mean score with a single agent.
+
 ### Results
 
 <!---
