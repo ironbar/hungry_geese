@@ -118,7 +118,8 @@ def create_data_enqueuer(conf):
     def simple_generator(conf):
         while 1:
             train_data = sample_train_data(conf['model_dir'], conf['aditional_files_for_training'],
-                                           conf['epochs_to_sample_files_for_training'])
+                                           conf['epochs_to_sample_files_for_training'],
+                                           conf['discount_factor'])
             yield train_data
 
     enqueuer = tf.keras.utils.GeneratorEnqueuer(simple_generator(conf))
@@ -143,7 +144,7 @@ def get_model_input_and_output(model, conf, data_generator):
     return model_input, model_output
 
 
-def sample_train_data(model_dir, aditional_files, epochs_to_sample):
+def sample_train_data(model_dir, aditional_files, epochs_to_sample, discount_factor):
     """
     New implementation does not give preference to new files, that needs to be implemented. Currently
     it simply samples from the last n files
@@ -167,7 +168,7 @@ def sample_train_data(model_dir, aditional_files, epochs_to_sample):
     candidates = filepaths[-epochs_to_sample-1:]
     samples = np.random.choice(candidates, aditional_files, replace=len(candidates) < aditional_files)
     for sample in samples:
-        data = load_data(sample, verbose=False)
+        data = load_data(sample, verbose=False, discount_factor=discount_factor)
         data = random_data_augmentation(data)
         train_data.append(data)
     return combine_data(train_data)
@@ -192,7 +193,7 @@ def random_horizontal_simmetry(data):
     return data
 
 
-def load_data(filepath, verbose=True):
+def load_data(filepath, verbose=True, discount_factor=1):
     """
     Returns
     --------
@@ -201,11 +202,38 @@ def load_data(filepath, verbose=True):
     """
     if verbose: logger.info('loading %s' % filepath)
     data = np.load(filepath)
+    update_data_propagating_death_reward(data, discount_factor=discount_factor)
     output = [data['boards'], data['features'], data['training_mask'], data['rewards'], data['is_not_terminal']]
     if verbose: log_ram_usage()
     if verbose: logger.info('data types: %s' % str([array.dtype for array in output]))
     if verbose: logger.info('data shapes: %s' % str([array.shape for array in output]))
     return output
+
+
+def update_data_propagating_death_reward(data, discount_factor=1):
+    indices = find_indices_of_all_terminal_and_learnable_actions(data)
+    for step in indices:
+        propagate_death_reward_backwards(step, data, discount_factor=discount_factor)
+
+
+def find_indices_of_all_terminal_and_learnable_actions(data):
+    indices = np.arange(len(data['rewards']))[((1 - np.max(data['is_not_terminal'], axis=1))*np.min(data['training_mask'], axis=1)) == 1]
+    return indices
+
+
+def propagate_death_reward_backwards(step, data, verbose=False, discount_factor=1):
+    """
+    Propagates death information from step to step -1, and
+    continues to step -2 and so on if necessary
+    """
+    if verbose: print('Propagating death reward from step %i' % step)
+    action_idx = np.arange(3)[(data['is_not_terminal'][step - 1]*data['training_mask'][step - 1]) == 1]
+    if not action_idx.size: # I think this is very unlikely, but let's be cautious
+        return
+    data['is_not_terminal'][step - 1, action_idx] = 0
+    data['rewards'][step - 1, action_idx] += np.max(data['rewards'][step])*discount_factor
+    if np.max(data['is_not_terminal'][step - 1]) == 0 and np.min(data['training_mask'][step - 1]) == 1:
+        propagate_death_reward_backwards(step - 1, data, verbose)
 
 
 def compute_q_learning_target(model, train_data, discount_factor, batch_size):
