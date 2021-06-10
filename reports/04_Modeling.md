@@ -1873,6 +1873,14 @@ a reward of 0. The new reward fixes that. I'm going to copy training data modify
 so I can directly compare the two implementations. My guess is that they will be very similar, but hopefully
 the new version will be slighlty better.
 
+![comparison of training metrics](res/2021-06-10-12-03-19.png)
+
+On blue we have v2 reward and on gray the first implementation. We can see that elo score is almost
+the same. Loss is much higher because death has a smaller reward. The evolution of state value is
+more interesting on v2 metric because there is no oscilation.
+
+Thus I will be using v2 reward from now on.
+
 ### Results
 
 <!---
