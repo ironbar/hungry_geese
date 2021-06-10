@@ -1866,6 +1866,13 @@ python play_matches_one_round.py "/mnt/hdd0/Kaggle/hungry_geese/models/45_train_
 Everything seems to be working, but let's check the training data on a jupyter notebook to be
 completely sure.
 
+#### v2 reward
+
+I have made a simple update to the reward because previously a tie between the last two gooses returned
+a reward of 0. The new reward fixes that. I'm going to copy training data modifying the rewards
+so I can directly compare the two implementations. My guess is that they will be very similar, but hopefully
+the new version will be slighlty better.
+
 ### Results
 
 <!---
