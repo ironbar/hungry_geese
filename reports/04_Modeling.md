@@ -1881,6 +1881,28 @@ more interesting on v2 metric because there is no oscilation.
 
 Thus I will be using v2 reward from now on.
 
+#### Direct death reward propagation when all movements lead to death
+
+Sometimes the goose moves to a position where it is doomed. It can only take one action and at the
+end it dies. In those situations I could give the reward directly to the model instead of using
+the model to estimate the value of the next state. This will likely improve the learning.
+
+![example of certain death](res/2021-06-10-12-10-17.png)
+
+For example above the agent has been taking action 1 (move forward) unitl it dies. It could not move
+to the sides because it would have died. In that case we can directly give a death reward for all those
+states.
+
+![propagate death reward](res/2021-06-10-12-12-05.png)
+
+This way we enable faster learning because the model can learn from the start the value of those states instead of having to learn step by step.
+
+![training metrics](res/2021-06-10-12-13-31.png)
+
+In red we see training with death reward propagation, it reaches a higher elo score.
+
+I'm going to integrate this propagation into the training script.
+
 ### Results
 
 <!---
