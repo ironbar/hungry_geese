@@ -1901,7 +1901,9 @@ This way we enable faster learning because the model can learn from the start th
 
 In red we see training with death reward propagation, it reaches a higher elo score.
 
-I'm going to integrate this propagation into the training script.
+I'm going to integrate this propagation into the training script. However I have found that it was
+slowing down the train script. Instead I have decided to do it on the playing of matches. **WARNING**
+This will force to use `discount_factor=1` since now on.
 
 #### Continue improving the training
 
