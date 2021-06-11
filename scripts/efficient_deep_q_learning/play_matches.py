@@ -6,6 +6,7 @@ import logging
 import yaml
 import subprocess
 import tensorflow as tf
+import time
 
 from hungry_geese.utils import configure_logging, log_to_tensorboard, get_timestamp
 
@@ -59,12 +60,14 @@ def play_matches(model_path, softmax_scale, reward_name, train_data_path, n_matc
                  template_path, play_against_top_n, n_learning_agents, n_agents_for_experience):
     logger.info('Playing matches in parallel with: %s' % model_path)
     command = 'python "%s" "%s" %.1f %s "%s" "%s" --n_matches %i --play_against_top_n %i' % (
-        '/mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/scripts/efficient_deep_q_learning/play_matches_one_round.py',
+        '/mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/scripts/efficient_deep_q_learning/faster_play_matches_one_round.py',
         model_path, softmax_scale, reward_name, train_data_path, template_path, n_matches, play_against_top_n)
     command += ' --n_learning_agents %i --n_agents_for_experience %i' % (n_learning_agents, n_agents_for_experience)
-    output = subprocess.getoutput(command).split('\n')[-1]
+    t0 = time.time()
+    output = eval(subprocess.getoutput(command).split('\n')[-1])
+    output['play_time'] = time.time() - t0
     print(output)
-    return eval(output)
+    return output
 
 
 def parse_args(args):

@@ -1920,6 +1920,12 @@ I'm planning to continue training from the best model with this configuration:
 
 I would like to reach 1800 elo mean score with a single agent.
 
+#### Speedup playing
+
+I think I can speedup playing. Currently it plays the games in parallel, but prepares the train
+data sequentially. If I do everything in parallel except from saving the data to file that will
+likely improve playing speed.
+
 ### Results
 
 With Tiberio agent I'm back at gold medal, at least for some time.

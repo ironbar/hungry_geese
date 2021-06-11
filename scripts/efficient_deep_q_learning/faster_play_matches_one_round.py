@@ -18,7 +18,7 @@ os.environ['TF_CPP_MIN_VLOG_LEVEL'] = '3'
 
 logger = logging.getLogger(__name__)
 
-from hungry_geese.evaluation import play_matches_in_parallel, monitor_progress
+from hungry_geese.evaluation import monitor_progress
 from hungry_geese.elo import EloRanking
 from hungry_geese.definitions import INITIAL_ELO_RANKING, AGENT_TO_SCRIPT
 from hungry_geese.utils import log_ram_usage
@@ -43,13 +43,14 @@ def simple_model_softmax_policy_data_generation(model_path, softmax_scale, outpu
                                                 n_matches, reward_name, template_path,
                                                 play_against_top_n, n_learning_agents,
                                                 n_agents_for_experience):
+    if n_agents_for_experience > 1: raise NotImplementedError('Currently only supported 1 agent for experience (%i)' % n_agents_for_experience)
     with tempfile.TemporaryDirectory() as tempdir:
         agent_filepath = create_temporal_agent(tempdir, template_path, model_path, softmax_scale)
         sample_func = get_sample_func_for_playing_against_top_n(
             agent_filepath, play_against_top_n, n_learning_agents)
-        matches = play_matches_in_parallel(agents=sample_func, n_matches=n_matches)
+        matches, train_data = play_matches_in_parallel(agents=sample_func, n_matches=n_matches, reward_name=reward_name)
         metrics = gather_metrics_from_matches(matches)
-        create_train_data(matches, reward_name, output_path, agent_idx_range=list(range(n_agents_for_experience)))
+        save_train_data(train_data, output_path)
         print(metrics) # for capturing this print with subprocess
 
 
@@ -80,7 +81,7 @@ def get_sample_func_for_playing_against_top_n(agent_filepath, play_against_top_n
     return sample_func
 
 
-def play_matches_in_parallel(agents, max_workers=20, n_matches=1000, running_on_notebook=False):
+def play_matches_in_parallel(agents, reward_name, max_workers=20, n_matches=1000, running_on_notebook=False):
     """
     Plays n_matches in parallel using ProcessPoolExecutor
 
@@ -95,55 +96,28 @@ def play_matches_in_parallel(agents, max_workers=20, n_matches=1000, running_on_
         submits = []
         for _ in range(n_matches):
             if isinstance(agents, list):
-                submits.append(pool.submit(play_game, agents=agents))
+                submits.append(pool.submit(play_game_and_create_match_data, agents=agents, reward_name=reward_name))
             elif callable(agents):
-                submits.append(pool.submit(play_game, agents=agents()))
+                submits.append(pool.submit(play_game_and_create_match_data, agents=agents(), reward_name=reward_name))
             else:
                 raise TypeError(type(agents))
         monitor_progress(submits, running_on_notebook)
         matches_results = [submit.result() for submit in submits]
     log_ram_usage()
-    return matches_results
+    matches = [ret[0] for ret in matches_results]
+    train_data= [ret[1] for ret in matches_results]
+    return matches, train_data
 
 
-def play_game(agents):
+def play_game_and_create_match_data(agents, reward_name):
     env = make("hungry_geese")
-    return env.run(agents=agents)
+    match = env.run(agents=agents)
+    match_data = create_match_data_for_training(match, agent_idx=0, conf=env.configuration,
+                                                reward_name=reward_name)
+    return match, match_data
 
 
-def create_train_data(matches_results, reward_name, output_path, agent_idx_range=None):
-    """
-    Creates train data without any simmetry
-
-    Parameters
-    ----------
-    saved_games_paths : list of str
-        Path to the games that we want to use
-    reward_name : str
-        Name of the reward function that we want to use
-    output_path : str
-        Path to the file were we are going to save the results
-    max_workers : int
-    agent_idx_range : list of int
-        Idx of the agents we want to use for collecting data, if None all the agents
-        will be used
-    """
-    env = make("hungry_geese")
-    conf = env.configuration
-
-    state = GameState(reward_name=reward_name, apply_reward_acumulation=False)
-    train_data = []
-    agent_idx_range = agent_idx_range or list(range(4))
-
-
-    for _ in tqdm(range(len(matches_results)), desc='Creating game data'):
-        match = matches_results[0]
-        # logger.debug('Match steps: %i' % len(match))
-        for agent_idx in agent_idx_range:
-            train_data.append(create_match_data_for_training(match, agent_idx, state,
-                                                             conf, reward_name))
-        del matches_results[0]
-
+def save_train_data(train_data, output_path):
     log_ram_usage()
     logger.info('Going to combine the data')
     train_data = combine_data(train_data)
@@ -164,7 +138,6 @@ def create_train_data(matches_results, reward_name, output_path, agent_idx_range
         training_mask=train_data[4])
     update_data_propagating_death_reward(data)
     np.savez_compressed(output_path, **data)
-    del state
     del train_data
     log_ram_usage()
 
@@ -194,7 +167,7 @@ def propagate_death_reward_backwards(step, data, discount_factor=1):
         propagate_death_reward_backwards(step - 1, data, discount_factor=discount_factor)
 
 
-def create_match_data_for_training(match, agent_idx, state, conf, reward_name):
+def create_match_data_for_training(match, agent_idx, conf, reward_name):
     """
     Creates data from the match for training
 
@@ -203,7 +176,6 @@ def create_match_data_for_training(match, agent_idx, state, conf, reward_name):
     match : list
         The typical match returned by hungry geese game
     agent_idx : int
-    state : GameState
     conf : dict
         Configuration of the game
     reward_name : str
@@ -212,6 +184,7 @@ def create_match_data_for_training(match, agent_idx, state, conf, reward_name):
     -------
     boards, features, rewards, is_not_terminal, training_mask
     """
+    state = GameState(reward_name=reward_name, apply_reward_acumulation=False)
     first_action = match[1][agent_idx]['action']
     if first_action == 'SOUTH':
         state.reset(previous_action='SOUTH')
@@ -252,6 +225,7 @@ def create_match_data_for_training(match, agent_idx, state, conf, reward_name):
     training_mask += ohe_actions
     training_mask += certain_death_masks
     training_mask = np.clip(training_mask, 0, 1)
+    del state
 
     return data[:2] + [rewards, is_not_terminal, training_mask]
 
