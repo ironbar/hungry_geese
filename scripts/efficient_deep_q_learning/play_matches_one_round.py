@@ -149,17 +149,42 @@ def create_train_data(matches_results, reward_name, output_path, agent_idx_range
     output_path = os.path.realpath(output_path)
     logger.info('Saving data on: %s' % output_path)
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    np.savez_compressed(
-        output_path,
+    data = dict(
         boards=train_data[0],
         features=train_data[1],
         rewards=train_data[2],
         is_not_terminal=train_data[3],
-        training_mask=train_data[4],
-    )
+        training_mask=train_data[4])
+    update_data_propagating_death_reward(data)
+    np.savez_compressed(output_path, **data)
     del state
     del train_data
     log_ram_usage()
+
+
+def update_data_propagating_death_reward(data, discount_factor=1):
+    indices = find_indices_of_all_terminal_and_learnable_actions(data)
+    for step in indices:
+        propagate_death_reward_backwards(step, data, discount_factor=discount_factor)
+
+
+def find_indices_of_all_terminal_and_learnable_actions(data):
+    indices = np.arange(len(data['rewards']))[((1 - np.max(data['is_not_terminal'], axis=1))*np.min(data['training_mask'], axis=1)) == 1]
+    return indices
+
+
+def propagate_death_reward_backwards(step, data, discount_factor=1):
+    """
+    Propagates death information from step to step -1, and
+    continues to step -2 and so on if necessary
+    """
+    action_idx = np.arange(3)[(data['is_not_terminal'][step - 1]*data['training_mask'][step - 1]) == 1]
+    if not action_idx.size: # I think this is very unlikely, but let's be cautious
+        return
+    data['is_not_terminal'][step - 1, action_idx] = 0
+    data['rewards'][step - 1, action_idx] += np.max(data['rewards'][step])*discount_factor
+    if np.max(data['is_not_terminal'][step - 1]) == 0 and np.min(data['training_mask'][step - 1]) == 1:
+        propagate_death_reward_backwards(step - 1, data, discount_factor=discount_factor)
 
 
 def create_match_data_for_training(match, agent_idx, state, conf, reward_name):
@@ -235,6 +260,7 @@ def get_certain_death_reward(observation, step_idx, match, agent_idx, conf, rewa
     future_observation = _create_future_observation_where_agent_is_death(match, step_idx, agent_idx)
     return get_reward(future_observation, observation, conf, reward_name)
 
+
 def _create_future_observation_where_agent_is_death(match, step_idx, agent_idx):
     future_observation = match[step_idx + 1][0]['observation'].copy()
     future_observation['index'] = agent_idx
@@ -280,6 +306,7 @@ def gather_metrics_from_matches(matches, agent_idx=0):
         'win_ratio': np.mean(final_score == 3),
     }
     return metrics
+
 
 def get_final_score(rewards, agent_idx=0):
     """
