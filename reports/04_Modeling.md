@@ -1920,6 +1920,10 @@ I would like to reach 1800 elo mean score with a single agent.
 
 ### Results
 
+With Tiberio agent I'm back at gold medal, at least for some time.
+
+![tiberio agent 2021-06-11](res/2021-06-11-10-20-16.png)
+
 <!---
 ## Iteration n. title
 
