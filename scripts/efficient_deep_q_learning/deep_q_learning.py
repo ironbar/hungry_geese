@@ -202,38 +202,11 @@ def load_data(filepath, verbose=True, discount_factor=1):
     """
     if verbose: logger.info('loading %s' % filepath)
     data = np.load(filepath)
-    update_data_propagating_death_reward(data, discount_factor=discount_factor)
     output = [data['boards'], data['features'], data['training_mask'], data['rewards'], data['is_not_terminal']]
     if verbose: log_ram_usage()
     if verbose: logger.info('data types: %s' % str([array.dtype for array in output]))
     if verbose: logger.info('data shapes: %s' % str([array.shape for array in output]))
     return output
-
-
-def update_data_propagating_death_reward(data, discount_factor=1):
-    indices = find_indices_of_all_terminal_and_learnable_actions(data)
-    for step in indices:
-        propagate_death_reward_backwards(step, data, discount_factor=discount_factor)
-
-
-def find_indices_of_all_terminal_and_learnable_actions(data):
-    indices = np.arange(len(data['rewards']))[((1 - np.max(data['is_not_terminal'], axis=1))*np.min(data['training_mask'], axis=1)) == 1]
-    return indices
-
-
-def propagate_death_reward_backwards(step, data, verbose=False, discount_factor=1):
-    """
-    Propagates death information from step to step -1, and
-    continues to step -2 and so on if necessary
-    """
-    if verbose: print('Propagating death reward from step %i' % step)
-    action_idx = np.arange(3)[(data['is_not_terminal'][step - 1]*data['training_mask'][step - 1]) == 1]
-    if not action_idx.size: # I think this is very unlikely, but let's be cautious
-        return
-    data['is_not_terminal'][step - 1, action_idx] = 0
-    data['rewards'][step - 1, action_idx] += np.max(data['rewards'][step])*discount_factor
-    if np.max(data['is_not_terminal'][step - 1]) == 0 and np.min(data['training_mask'][step - 1]) == 1:
-        propagate_death_reward_backwards(step - 1, data, verbose)
 
 
 def compute_q_learning_target(model, train_data, discount_factor, batch_size):
