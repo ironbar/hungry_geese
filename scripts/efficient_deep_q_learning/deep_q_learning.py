@@ -117,9 +117,7 @@ def create_data_enqueuer(conf):
     logger.info('Creating data enqueuer')
     def simple_generator(conf):
         while 1:
-            train_data = sample_train_data(conf['model_dir'], conf['aditional_files_for_training'],
-                                           conf['epochs_to_sample_files_for_training'],
-                                           conf['discount_factor'])
+            train_data = sample_train_data(conf['model_dir'], conf['train_memory'])
             yield train_data
 
     enqueuer = tf.keras.utils.GeneratorEnqueuer(simple_generator(conf))
@@ -144,33 +142,36 @@ def get_model_input_and_output(model, conf, data_generator):
     return model_input, model_output
 
 
-def sample_train_data(model_dir, aditional_files, epochs_to_sample, discount_factor):
+def sample_train_data(model_dir, memory_conf):
     """
-    New implementation does not give preference to new files, that needs to be implemented. Currently
-    it simply samples from the last n files
+    Samples data for training an epoch
+
+    Parameters
+    -----------
+    model_dir : str
+    memory_conf : dict
+        Dictionary with the configuration for sampling. The initial idea is to use short term and
+        long term memory::
+
+            train_memory:
+                short_term:
+                    files_to_sample: 12
+                    epochs_to_sample: 12
+                long_term:
+                    files_to_sample: 188
+                    epochs_to_sample: 20000
     """
-    # filepaths = sorted(glob.glob(os.path.join(model_dir, 'epoch*.npz')))
-    # train_data = [load_data(filepaths[-1])]
-    # if aditional_files:
-    #     candidates = filepaths[-epochs_to_sample-1:-1]
-    #     if candidates:
-    #         if len(candidates) > aditional_files:
-    #             samples = np.random.choice(candidates, aditional_files, replace=False)
-    #         else:
-    #             samples = candidates
-    #         for sample in samples:
-    #             logger.info('Loading aditional file for training: %s' % sample)
-    #             train_data += [load_data(sample, verbose=False)]
-    aditional_files = aditional_files + 1
     filepaths = _get_train_data_filepaths(model_dir)
     train_data = []
 
-    candidates = filepaths[-epochs_to_sample-1:]
-    samples = np.random.choice(candidates, aditional_files, replace=len(candidates) < aditional_files)
-    for sample in samples:
-        data = load_data(sample, verbose=False, discount_factor=discount_factor)
-        data = random_data_augmentation(data)
-        train_data.append(data)
+    for sampling_conf in memory_conf.values():
+        candidates = filepaths[-sampling_conf['epochs_to_sample'] - 1:]
+        samples = np.random.choice(candidates, sampling_conf['files_to_sample'],
+                                   replace=len(candidates) < sampling_conf['files_to_sample'])
+        for sample in samples:
+            data = load_data(sample, verbose=False)
+            data = random_data_augmentation(data)
+            train_data.append(data)
     return combine_data(train_data)
 
 
@@ -193,7 +194,7 @@ def random_horizontal_simmetry(data):
     return data
 
 
-def load_data(filepath, verbose=True, discount_factor=1):
+def load_data(filepath, verbose=True):
     """
     Returns
     --------
