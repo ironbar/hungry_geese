@@ -1926,6 +1926,13 @@ I think I can speedup playing. Currently it plays the games in parallel, but pre
 data sequentially. If I do everything in parallel except from saving the data to file that will
 likely improve playing speed.
 
+Speedup was very small.
+
+#### Short term and long term memory
+
+I have modified the training script to allow combining short term and long term memory. This way
+each epoch the model receives the last matches it has played and also the whole history.
+
 ### Results
 
 With Tiberio agent I'm back at gold medal, at least for some time.

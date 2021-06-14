@@ -169,9 +169,12 @@ def sample_train_data(model_dir, memory_conf):
         samples = np.random.choice(candidates, sampling_conf['files_to_sample'],
                                    replace=len(candidates) < sampling_conf['files_to_sample'])
         for sample in samples:
-            data = load_data(sample, verbose=False)
-            data = random_data_augmentation(data)
-            train_data.append(data)
+            try:
+                data = load_data(sample, verbose=False)
+                data = random_data_augmentation(data)
+                train_data.append(data)
+            except ValueError:
+                logger.error('Could not load: %s' % sample)
     return combine_data(train_data)
 
 
