@@ -11,6 +11,7 @@ import time
 import random
 import subprocess
 import gc
+import traceback
 
 from kaggle_environments import make
 import tensorflow as tf
@@ -173,7 +174,8 @@ def sample_train_data(model_dir, memory_conf):
                 data = load_data(sample, verbose=False)
                 data = random_data_augmentation(data)
                 train_data.append(data)
-            except ValueError:
+            except Exception as exception:
+                traceback.print_exc()
                 logger.error('Could not load: %s' % sample)
     return combine_data(train_data)
 
