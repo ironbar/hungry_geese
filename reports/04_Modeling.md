@@ -1933,6 +1933,23 @@ Speedup was very small.
 I have modified the training script to allow combining short term and long term memory. This way
 each epoch the model receives the last matches it has played and also the whole history.
 
+I don't see significative changes after implementing this.
+
+#### Batch size
+
+I have tried reducing the batch size from 4096 to 1024. I also reduce the learning rate accordingly.
+Althought it has learned slower it has achieved higher peak elo scores: 1814 vs 1797.
+
+I'm going to halve the batch size again to 512 while keeping the learning rate to see if I can
+achieve faster training and better elo score.
+
+#### The biggest model possible
+
+I have tried creating a model with 768 filters per layer and the agent takes 104 MB. Thus I should
+remove some filters to be able to fit into the 100 MB limit.
+
+Using 736 filters results in 99.9 MB, and 702 in 92.3 MB.
+
 ### Results
 
 With Tiberio agent I'm back at gold medal, at least for some time.
