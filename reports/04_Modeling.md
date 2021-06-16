@@ -1941,7 +1941,10 @@ I have tried reducing the batch size from 4096 to 1024. I also reduce the learni
 Althought it has learned slower it has achieved higher peak elo scores: 1814 vs 1797.
 
 I'm going to halve the batch size again to 512 while keeping the learning rate to see if I can
-achieve faster training and better elo score.
+achieve faster training and better elo score. This is able to reach 1824 peak elo score during training.
+
+So there seems to be evidence favouring smaller batch size, but the fact that the number of training
+files is increasing each experiment could be biasing this result.
 
 #### The biggest model possible
 
