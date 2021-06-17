@@ -1959,6 +1959,13 @@ With Tiberio agent I'm back at gold medal, at least for some time.
 
 ![tiberio agent 2021-06-11](res/2021-06-11-10-20-16.png)
 
+With agent trajano I'm able to reach LB 1194 score (and position 10) in just one hour. It is a combination of a good
+agent and luck. After that LB score is frozen, probably until tomorrow.
+
+![trajano agent 2021-06-16](res/2021-06-16-15-21-26.png)
+
+It seems I should reach 1900-2000 elo mean score to reach the top positions.
+
 <!---
 ## Iteration n. title
 
