@@ -1966,6 +1966,40 @@ agent and luck. After that LB score is frozen, probably until tomorrow.
 
 It seems I should reach 1900-2000 elo mean score to reach the top positions.
 
+Agent nerva is also promising, just uploaded.
+
+
+## Iteration 12. Keep climbing
+
+### Goal
+
+There is just one month until the end of the challenge, and now the goal is to continue training
+and improving the models. It seems I need to get an elo score close to 2000 to be able to win the
+challenge.
+
+### Development
+
+#### Improve Q value estimation by using certain death information
+
+The idea is that instead of relying on the model to estimate the value of the future state use the
+certain death information when available instead. Hopefully this will lead to a better estimate
+and better training.
+
+To try this idea I'm thinking of just training without playing. I want this to be a fast experiment,
+like one day or so. So I will keep the model small and the batch size big to train fast.
+
+#### Bigger models
+
+Probably training a bigger model could improve elo score.
+
+#### Download matches from the leaderboard
+
+If I can download matches from the leaderboard I may able to give a boost to trainings by having a larger
+and more diverse dataset.
+
+### Results
+
+
 <!---
 ## Iteration n. title
 
