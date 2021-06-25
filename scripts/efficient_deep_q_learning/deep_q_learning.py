@@ -225,9 +225,20 @@ def compute_q_learning_target(model, train_data, discount_factor, batch_size):
 
 def compute_next_state_value(model, train_data, batch_size):
     pred_q_values = model.predict(train_data[:2], batch_size=batch_size, verbose=1)
+    pred_q_values = replace_q_value_prediction_when_the_action_is_known_to_be_terminal(pred_q_values, train_data)
     pred_q_values[:-1] = pred_q_values[1:] # we use the next state for the prediction
     next_state_value = np.max(pred_q_values, axis=1, keepdims=True)
     return next_state_value
+
+
+def replace_q_value_prediction_when_the_action_is_known_to_be_terminal(pred_q_values, train_data):
+    """
+    If we know by the rules of the game that the action leads to death, then instead of relying
+    on the model to estimate the value of the next state we can directly use the death reward
+    """
+    rewards, is_not_terminal = train_data[-2:]
+    pred_q_values[is_not_terminal == 0] = rewards[is_not_terminal == 0]
+    return pred_q_values
 
 
 def compute_state_value_evolution(model, data_path, batch_size):
