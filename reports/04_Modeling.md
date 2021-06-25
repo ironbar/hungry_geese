@@ -1988,9 +1988,13 @@ and better training.
 To try this idea I'm thinking of just training without playing. I want this to be a fast experiment,
 like one day or so. So I will keep the model small and the batch size big to train fast.
 
+Results show a difference in train loss, the new version has a higher loss. However elo score and
+state value are equivalent.
+
 #### Bigger models
 
-Probably training a bigger model could improve elo score.
+Probably training a bigger model could improve elo score. I'm going to train a model with 718 filters.
+This model will have close to 20M parameters compared to the 512 model that has around 9M of parameters.
 
 #### Download matches from the leaderboard
 
