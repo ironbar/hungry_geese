@@ -218,21 +218,21 @@ def load_data(filepath, verbose=True):
 def compute_q_learning_target(model, train_data, discount_factor, batch_size):
     reward = train_data[3]
     is_not_terminal = train_data[4]
-    state_value = np.expand_dims(compute_state_value(model, train_data, batch_size), axis=1)
-    target = reward + is_not_terminal*discount_factor*state_value
+    next_state_value = compute_next_state_value(model, train_data, batch_size)
+    target = reward + is_not_terminal*discount_factor*next_state_value
     return target
 
 
-def compute_state_value(model, train_data, batch_size):
+def compute_next_state_value(model, train_data, batch_size):
     pred_q_values = model.predict(train_data[:2], batch_size=batch_size, verbose=1)
     pred_q_values[:-1] = pred_q_values[1:] # we use the next state for the prediction
-    state_value = np.max(pred_q_values, axis=1)
-    return state_value
+    next_state_value = np.max(pred_q_values, axis=1, keepdims=True)
+    return next_state_value
 
 
 def compute_state_value_evolution(model, data_path, batch_size):
     data = load_data(data_path)
-    state_value = compute_state_value(model, data, batch_size)
+    state_value = compute_next_state_value(model, data, batch_size)
     return np.mean(state_value)
 
 
