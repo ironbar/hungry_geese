@@ -133,8 +133,11 @@ def create_train_data(matches_results, reward_name, output_path, agent_idx_range
         match = matches_results[0]
         # logger.debug('Match steps: %i' % len(match))
         for agent_idx in agent_idx_range:
-            train_data.append(create_match_data_for_training(match, agent_idx, state,
-                                                             conf, reward_name))
+            try:
+                train_data.append(create_match_data_for_training(match, agent_idx, state,
+                                                                conf, reward_name))
+            except Exception as exception:
+                logger.error('Could not add match data: %s' % str(exception))
         del matches_results[0]
 
     log_ram_usage()
