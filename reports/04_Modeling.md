@@ -2001,6 +2001,21 @@ This model will have close to 20M parameters compared to the 512 model that has 
 If I can download matches from the leaderboard I may able to give a boost to trainings by having a larger
 and more diverse dataset.
 
+There is a [notebook](https://www.kaggle.com/robga/simulations-episode-scraper-match-downloader) in the forum
+that allows to download the matches.
+
+I have studied that notebook and adapted to create a csv with a sorted list of the matches that will
+allow to download them from higher to lower score.
+
+I will be using information from the four players in the game to generate train data. If I want to mantain
+the same format as my own data I should download 25 games and package them in an npz file. I need to
+create an script to do this.
+
+It is possible that the API has some limits, but I have been unable to find official documentation of that.
+
+Saving the matches to json could allow to later change the reward, but will also use more disk and be slower.
+I'm thinking on leaving that for later.
+
 ### Results
 
 
