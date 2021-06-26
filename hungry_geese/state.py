@@ -362,4 +362,6 @@ def get_relative_movement_from_action_indices(action_indices):
     """
     diff = action_indices[1:] - action_indices[:-1]
     movements = (diff + 1)%4
+    # ilegal movements are converted to forward
+    movements[movements > 2] = 1
     return movements
