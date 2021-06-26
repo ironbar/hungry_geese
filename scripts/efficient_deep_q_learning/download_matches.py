@@ -27,20 +27,20 @@ def main(args=None):
     logger.info('starting to download matches')
     already_downloaded = get_already_downloaded_episodes(args.json_output)
     matches = []
-    for episode_id in sorted_episodes.EpisodeId.values:
+    for episode_id, mean_score in zip(sorted_episodes.EpisodeId.values, sorted_episodes.UpdatedScore.values):
         if episode_id in already_downloaded:
             continue
         try:
             match = download_match(episode_id)
             already_downloaded.add(episode_id)
             matches.append(match)
-            logger.info('Downloaded %i (%i steps)' % (episode_id, len(match)))
+            logger.info('Downloaded %i (%i steps, %.2f LB)' % (episode_id, len(match), mean_score))
             with open(os.path.join(args.json_output, '%s.json' % episode_id), 'w') as outfile:
                 json.dump(match, outfile)
         except IOError as exception:
             logger.error(str(exception))
         if len(matches) >= args.group_matches:
-            output_path = os.path.join(args.npz_output, '%s.npz' % get_timestamp())
+            output_path = os.path.join(args.npz_output, 'epoch_00000_%s.npz' % get_timestamp())
             logger.info('Saving train data on: %s' % output_path)
             create_train_data(matches, args.reward_name, output_path)
 
