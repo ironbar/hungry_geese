@@ -31,7 +31,7 @@ def main(args=None):
     while 1:
         model_path = get_latest_model_path(model_dir)
         epoch = get_epoch_from_model_path(model_path)
-        train_data_path = os.path.join(model_dir, 'epoch_%05d_timestamp_%s.npz' % (epoch, get_timestamp()))
+        train_data_path = os.path.join(conf['train_data_dir'], 'epoch_%05d_timestamp_%s.npz' % (epoch, get_timestamp()))
         play_results = play_matches(
             model_path=model_path,
             softmax_scale=conf['softmax_scale'],
