@@ -1996,6 +1996,11 @@ state value are equivalent.
 Probably training a bigger model could improve elo score. I'm going to train a model with 718 filters.
 This model will have close to 20M parameters compared to the 512 model that has around 9M of parameters.
 
+At least with frozen train data there is no significative difference between using 512 or 718 filters.
+Elo mean score is the same.
+
+![512 filters vs 718 on frozen train data](res/2021-06-27-09-44-10.png)
+
 #### Download matches from the leaderboard
 
 If I can download matches from the leaderboard I may able to give a boost to trainings by having a larger
@@ -2012,9 +2017,26 @@ the same format as my own data I should download 25 games and package them in an
 create an script to do this.
 
 It is possible that the API has some limits, but I have been unable to find official documentation of that.
+After downloading around 10.5k matches I get 429 error wich means "Too Many Requests".
 
-Saving the matches to json could allow to later change the reward, but will also use more disk and be slower.
-I'm thinking on leaving that for later.
+I have to thus find a way to circunvent this error. I believe that probably by changing the IP I could
+keep downloading.
+
+#### Batch normalization
+
+Unlike supervised learning where the targets are fixed on deep Q learning we have a non stationary target.
+I had the fear that this could be causing problems inside the network that might lead to stuck in a bad
+optima because neurons could be death at the beginning and may be needed later. Batch normalization could
+probably solve this problem (if it exists) because distributions of activations inside the network
+will always be normal.
+
+The first training using batch normalization shows a dynamic totally different from previous trainings.
+
+![train dynamic is totally different](res/2021-06-27-09-53-36.png)
+
+The state value raises much faster and does not seem to converge. Maybe the model now has too much
+capacity. Realimentation through playing could also help.
+
 
 ### Results
 
