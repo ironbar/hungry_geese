@@ -42,7 +42,6 @@ def deep_q_learning(args):
     with open(args.config_path, 'r') as f:
         conf = yaml.safe_load(f)
     model_dir = os.path.dirname(os.path.realpath(args.config_path))
-    conf['model_dir'] = model_dir
 
     with tf.distribute.MirroredStrategy().scope():
         model, start_epoch = get_model(model_dir, conf)
@@ -105,8 +104,8 @@ def train_model(model, conf, callbacks, epoch_idx, tensorboard_writer, data_gene
 
     if 'random_matches' in conf:
         history['state_value'] = compute_state_value_evolution(
-            model, os.path.join(conf['model_dir'], conf['random_matches']), conf['pred_batch_size'])
-    history['n_train_files'] = len(_get_train_data_filepaths(conf['model_dir']))
+            model, os.path.join(conf['train_data_dir'], conf['random_matches']), conf['pred_batch_size'])
+    history['n_train_files'] = len(_get_train_data_filepaths(conf['train_data_dir']))
     history['n_matches_played'] = history['n_train_files']*conf['n_matches_play']
 
     for key, value in history.items():
@@ -118,7 +117,7 @@ def create_data_enqueuer(conf):
     logger.info('Creating data enqueuer')
     def simple_generator(conf):
         while 1:
-            train_data = sample_train_data(conf['model_dir'], conf['train_memory'])
+            train_data = sample_train_data(conf['train_data_dir'], conf['train_memory'])
             yield train_data
 
     enqueuer = tf.keras.utils.GeneratorEnqueuer(simple_generator(conf))
@@ -143,13 +142,13 @@ def get_model_input_and_output(model, conf, data_generator):
     return model_input, model_output
 
 
-def sample_train_data(model_dir, memory_conf):
+def sample_train_data(train_data_dir, memory_conf):
     """
     Samples data for training an epoch
 
     Parameters
     -----------
-    model_dir : str
+    train_data_dir : str
     memory_conf : dict
         Dictionary with the configuration for sampling. The initial idea is to use short term and
         long term memory::
@@ -162,7 +161,7 @@ def sample_train_data(model_dir, memory_conf):
                     files_to_sample: 188
                     epochs_to_sample: 20000
     """
-    filepaths = _get_train_data_filepaths(model_dir)
+    filepaths = _get_train_data_filepaths(train_data_dir)
     train_data = []
 
     for sampling_conf in memory_conf.values():
@@ -180,8 +179,8 @@ def sample_train_data(model_dir, memory_conf):
     return combine_data(train_data)
 
 
-def _get_train_data_filepaths(model_dir):
-    filepaths = sorted(glob.glob(os.path.join(model_dir, 'epoch*.npz')))
+def _get_train_data_filepaths(train_data_dir):
+    filepaths = sorted(glob.glob(os.path.join(train_data_dir, 'epoch*.npz')))
     return filepaths
 
 
