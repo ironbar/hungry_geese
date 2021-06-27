@@ -66,7 +66,7 @@ def get_already_downloaded_episodes(folder):
 
 def parse_args(args):
     epilog = """
-    python scripts/deep_q_learning_v2/play_matches.py /mnt/hdd0/Kaggle/hungry_geese/models/31_iterating_over_softmax_policy/01_it1_2000_lr4e4/pretrained_model.h5 8 ranking_reward_-4_4 delete.npz "/mnt/hdd0/MEGA/AI/22 Kaggle/hungry_geese/scripts/deep_q_learning_v2/softmax_safe_agent_template.py" --n_matches 50
+    python download_matches.py v2_terminal_kill_and_grow_reward_2_-5_5_2_1 /mnt/hdd0/Kaggle/hungry_geese/downloads/train_data /mnt/hdd0/Kaggle/hungry_geese/downloads/matches
     """
     parser = argparse.ArgumentParser(
         description='Play matches in parallel using a model',
