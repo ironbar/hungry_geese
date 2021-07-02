@@ -2022,6 +2022,13 @@ After downloading around 10.5k matches I get 429 error wich means "Too Many Requ
 I have to thus find a way to circunvent this error. I believe that probably by changing the IP I could
 keep downloading.
 
+#### Rotating the ip to try to keep downloading data
+
+https://www.scrapehero.com/how-to-rotate-proxies-and-ip-addresses-using-python-3/
+
+I have tried using proxies as it is shown above but without success. In the other hand I have created
+a collab notebook that hopefully will allow to download many more matches.
+
 #### Batch normalization
 
 Unlike supervised learning where the targets are fixed on deep Q learning we have a non stationary target.
