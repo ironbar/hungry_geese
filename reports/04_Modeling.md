@@ -2044,6 +2044,26 @@ The first training using batch normalization shows a dynamic totally different f
 The state value raises much faster and does not seem to converge. Maybe the model now has too much
 capacity. Realimentation through playing could also help.
 
+##### Frozen data
+
+When being trained on frozen data using batch normalization the elo score are clearly worse than without
+using BN. Trainings with BN overestimate state value.
+
+![BN on frozen data](res/2021-07-02-16-28-25.png)
+
+On orange we have the baseline training with BN.
+
+##### Training with feedback
+
+Trainining with 512 filters and BN totally blows up due to overestimation of the state value.
+
+In the other hand using 256 filters yields a very similar result when using or not using BN.
+
+![BN when having feedack](res/2021-07-02-16-32-37.png)
+
+##### Summary
+
+It seems that BN does not bring value to the model, instead it hurts performance.
 
 ### Results
 
