@@ -2065,7 +2065,35 @@ In the other hand using 256 filters yields a very similar result when using or n
 
 It seems that BN does not bring value to the model, instead it hurts performance.
 
+#### Training with matches from the leaderboard
+
+I have made experiments training with frozen data from the leaderboard. Elo score is clearly worse
+than when using matches played locally.
+
+![elo score comparison](res/2021-07-04-08-47-57.png)
+
+If I mix both sources of data there is no big difference with the baseline of using local files. It
+might be better but there is not enough evidence.
+
+#### Architecture search
+
+It's time for the last efforts. I only see room for improvement on the architecture: we can change
+the depth and width of the network, and use regularization.
+
+These experiments should use feedback from playing because there is clear evidence that scores are
+better. This will make comparisons between experiments not trivial, but I only want to get better
+elo scores so that is enough at this stage of the challenge.
+
+##### Regularization
+
+##### Architecture variations
+
+[512, 512, 512, 512, 512] -> [64, 128, 256, 512, 1024] 8M
+
+[128, 256, 512, 1024, 2048] 33M
+
 ### Results
+
 
 
 <!---
