@@ -17,7 +17,7 @@ from kaggle_environments import make
 import tensorflow as tf
 from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping, ReduceLROnPlateau
 
-from hungry_geese.model import simple_model, torus_model, create_model_for_training
+from hungry_geese.model import simple_model, torus_model, create_model_for_training, simple_l2_regularized_model
 from hungry_geese.callbacks import (
     LogEpochTime, LogLearningRate, LogRAM, LogCPU, LogGPU, LogETA, GarbageCollector, LogConstantValue
 )

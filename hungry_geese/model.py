@@ -23,6 +23,27 @@ def simple_model(conv_filters, conv_activations, mlp_units, mlp_activations, bat
     return model
 
 
+def simple_l2_regularized_model(conv_filters, conv_activations, mlp_units, mlp_activations, l2_regularization):
+    board_input, features_input = _create_model_input()
+    regularizer = keras.regularizers.l2(l2_regularization)
+
+
+    board_encoder = board_input
+    for n_filters, activation in zip(conv_filters, conv_activations):
+        board_encoder = keras.layers.Conv2D(n_filters, (3, 3), activation=activation, padding='valid',
+                                            kernel_regularizer=regularizer)(board_encoder)
+    board_encoder = keras.layers.Flatten()(board_encoder)
+
+    output = keras.layers.concatenate([board_encoder, features_input])
+    for units, activation in zip(mlp_units, mlp_activations):
+        output = keras.layers.Dense(units, activation=activation,
+                                    kernel_regularizer=regularizer)(output)
+    output = keras.layers.Dense(N_ACTIONS, activation='linear', name='action', use_bias=False)(output)
+
+    model = keras.models.Model(inputs=[board_input, features_input], outputs=output)
+    return model
+
+
 def _create_model_input():
     board_input = keras.layers.Input((11, 11, 17), name='board_input')
     features_input = keras.layers.Input((9,), name='features_input')
