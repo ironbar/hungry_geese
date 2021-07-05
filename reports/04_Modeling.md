@@ -2086,6 +2086,11 @@ elo scores so that is enough at this stage of the challenge.
 
 ##### Regularization
 
+Experiments with 1e-3 and 1e-4 l2 regularization have been done and elo score is worse than the baseline
+that does not use regularization.
+
+It thus seems that we have a big enough dataset and reducing the model capacity is only hurting.
+
 ##### Architecture variations
 
 [512, 512, 512, 512, 512] -> [64, 128, 256, 512, 1024] 8M
