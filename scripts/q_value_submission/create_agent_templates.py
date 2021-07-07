@@ -19,17 +19,13 @@ def get_reward(*args, **kwargs):
     return 0
 get_cumulative_reward = get_reward
 
-n_units = 128
-model = simple_model(
-    conv_filters=[n_units, n_units, n_units, n_units],
-    conv_activations=['relu', 'relu', 'relu', 'relu'],
-    mlp_units=[n_units, n_units],
-    mlp_activations=['relu', 'tanh'])
-
 def get_weights():
     weights_b64 = paste_weights_here
-
     return weights_b64
+
+model_params = paste_model_params_here
+model = paste_model_name_here(**model_params)
+
 
 ###############################################################################
 # paste_model_path_here

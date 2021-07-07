@@ -467,6 +467,8 @@ def get_relative_movement_from_action_indices(action_indices):
     """
     diff = action_indices[1:] - action_indices[:-1]
     movements = (diff + 1)%4
+    # ilegal movements are converted to forward
+    movements[movements > 2] = 1
     return movements
 
 
@@ -729,17 +731,42 @@ import tensorflow.keras as keras
 
 N_ACTIONS = 3
 
-def simple_model(conv_filters, conv_activations, mlp_units, mlp_activations):
+def simple_model(conv_filters, conv_activations, mlp_units, mlp_activations, batch_norm=False):
     board_input, features_input = _create_model_input()
 
     board_encoder = board_input
     for n_filters, activation in zip(conv_filters, conv_activations):
         board_encoder = keras.layers.Conv2D(n_filters, (3, 3), activation=activation, padding='valid')(board_encoder)
+        if batch_norm:
+            board_encoder = keras.layers.BatchNormalization()(board_encoder)
     board_encoder = keras.layers.Flatten()(board_encoder)
 
     output = keras.layers.concatenate([board_encoder, features_input])
     for units, activation in zip(mlp_units, mlp_activations):
         output = keras.layers.Dense(units, activation=activation)(output)
+        if batch_norm:
+            output = keras.layers.BatchNormalization()(output)
+    output = keras.layers.Dense(N_ACTIONS, activation='linear', name='action', use_bias=False)(output)
+
+    model = keras.models.Model(inputs=[board_input, features_input], outputs=output)
+    return model
+
+
+def simple_l2_regularized_model(conv_filters, conv_activations, mlp_units, mlp_activations, l2_regularization):
+    board_input, features_input = _create_model_input()
+    regularizer = keras.regularizers.l2(l2_regularization)
+
+
+    board_encoder = board_input
+    for n_filters, activation in zip(conv_filters, conv_activations):
+        board_encoder = keras.layers.Conv2D(n_filters, (3, 3), activation=activation, padding='valid',
+                                            kernel_regularizer=regularizer)(board_encoder)
+    board_encoder = keras.layers.Flatten()(board_encoder)
+
+    output = keras.layers.concatenate([board_encoder, features_input])
+    for units, activation in zip(mlp_units, mlp_activations):
+        output = keras.layers.Dense(units, activation=activation,
+                                    kernel_regularizer=regularizer)(output)
     output = keras.layers.Dense(N_ACTIONS, activation='linear', name='action', use_bias=False)(output)
 
     model = keras.models.Model(inputs=[board_input, features_input], outputs=output)
@@ -825,17 +852,13 @@ def get_reward(*args, **kwargs):
     return 0
 get_cumulative_reward = get_reward
 
-n_units = 128
-model = simple_model(
-    conv_filters=[n_units, n_units, n_units, n_units],
-    conv_activations=['relu', 'relu', 'relu', 'relu'],
-    mlp_units=[n_units, n_units],
-    mlp_activations=['relu', 'tanh'])
-
 def get_weights():
     weights_b64 = paste_weights_here
-
     return weights_b64
+
+model_params = paste_model_params_here
+model = paste_model_name_here(**model_params)
+
 
 ###############################################################################
 # paste_model_path_here

@@ -5,6 +5,7 @@ import bz2
 import pickle
 import sys
 import argparse
+import yaml
 
 def main(args=None):
     if args is None:
@@ -12,6 +13,7 @@ def main(args=None):
     args = parse_args(args)
     model = tf.keras.models.load_model(args.model_path, compile=False)
     weight_base64 = base64.b64encode(bz2.compress(pickle.dumps(model.get_weights())))
+    model_conf = get_model_conf(args.model_path)
 
     if args.data_augmentation:
         print('Creating agent with data augmentation')
@@ -23,8 +25,18 @@ def main(args=None):
 
     template_text = template_text.replace('paste_weights_here', str(weight_base64))
     template_text = template_text.replace('paste_model_path_here', args.model_path)
+    template_text = template_text.replace('paste_model_params_here', str(model_conf['model_params']))
+    template_text = template_text.replace('paste_model_name_here', model_conf['model'])
     with open(args.agent_path, 'w') as f:
         f.write(template_text)
+
+
+def get_model_conf(model_path):
+    config_path = os.path.join(os.path.dirname(model_path), 'train_conf.yml')
+    with open(config_path, 'r') as f:
+        conf = yaml.safe_load(f)
+    return conf
+
 
 def parse_args(args):
     epilog = """
