@@ -2084,6 +2084,9 @@ These experiments should use feedback from playing because there is clear eviden
 better. This will make comparisons between experiments not trivial, but I only want to get better
 elo scores so that is enough at this stage of the challenge.
 
+I have not been able to improve the agents by modifying the architecture. I'm stuck on elo scores below
+1900.
+
 ##### Regularization
 
 Experiments with 1e-3 and 1e-4 l2 regularization have been done and elo score is worse than the baseline
@@ -2091,14 +2094,24 @@ that does not use regularization.
 
 It thus seems that we have a big enough dataset and reducing the model capacity is only hurting.
 
-##### Architecture variations
-
-[512, 512, 512, 512, 512] -> [64, 128, 256, 512, 1024] 8M
-
-[128, 256, 512, 1024, 2048] 33M
-
 ### Results
 
+I have not been able to improve over existing agents significatively. I'm stuck below 1900 elo score.
+Downloading more data, Batch Normalization, different architectures or regularization did not
+improve the new models.
+
+## Iteration 13. Keep calm and lower the learning rate
+
+### Goal
+
+The goal of the iteration is to just keep training the best model so far `domiciano` with lower learning rate.
+In the past (AnimalAI) training for longer has payed off. The final agent will be named `ironbar`.
+
+I will also be submitting copies of `domiciano` agent each day.
+
+### Development
+
+### Results
 
 
 <!---
