@@ -2111,6 +2111,11 @@ I will also be submitting copies of `domiciano` agent each day.
 
 ### Development
 
+I have been training during the nights due to summer heat, but I don't see progress on train metrics.
+
+However I have had the idea of using weight average, instead of submitting a single model I can
+average the weights of multiple models. There are four days to go and to try submitting that.
+
 ### Results
 
 ## Iteration 8. NEVER DONE. Monte Carlo Tree Search
