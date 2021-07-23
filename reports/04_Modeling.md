@@ -2113,22 +2113,7 @@ I will also be submitting copies of `domiciano` agent each day.
 
 ### Results
 
-
-<!---
-## Iteration n. title
-
-### Goal
-
-### Development
-
-### Results
-
-
-
-
-
-
-## Iteration 8. Monte Carlo Tree Search
+## Iteration 8. NEVER DONE. Monte Carlo Tree Search
 
 ### Goal
 
@@ -2195,13 +2180,7 @@ https://www.kaggle.com/johntermaat/hungry-geese-simple-monte-carlo-baseline?scri
 
 
 
-
-
-What are the advantages of Q* learning? Check paragraph from Atari paper.
-Also there is no proof of convergence.
-
-Next iteration should be about using a model for planning
-
+<!---
 ## Iteration n. title
 
 ### Goal
@@ -2210,8 +2189,4 @@ Next iteration should be about using a model for planning
 
 ### Results
 
-
-
-
-https://towardsdatascience.com/understanding-actor-critic-methods-931b97b6df3f
 --->
