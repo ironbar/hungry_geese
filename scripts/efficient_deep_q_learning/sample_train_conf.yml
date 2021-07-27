@@ -1,0 +1,45 @@
+train_batch_size: 4096
+pred_batch_size: 8192
+data_augmentation: False
+optimizer: Adam
+learning_rate: 5.e-5 #2.e-4 initial learning rate
+softmax_scale: 0.01
+reward: v2_terminal_kill_and_grow_reward_2_-5_5_2_1
+n_matches_play: 100
+n_matches_eval: 200
+discount_factor: 1.0
+max_epochs: 1500002
+fit_epochs: 1
+fit_params:
+  verbose: 1
+evaluation_period: 20
+random_matches: random_matches.npz # this is used to measure evolution of state value over training
+# train_memory:
+#   long_term:
+#     files_to_sample: 200
+#     epochs_to_sample: 200000
+train_memory:
+  short_term:
+    files_to_sample: 5
+    epochs_to_sample: 10
+  medium_term:
+    files_to_sample: 25
+    epochs_to_sample: 100
+  long_term:
+    files_to_sample: 170
+    epochs_to_sample: 2000000
+model: simple_model
+model_params:
+  # conv_filters: [64, 128, 256, 512, 1024]
+  conv_filters: [96,  192,  384,  768, 1536]
+  conv_activations: ['relu', 'relu', 'relu', 'relu', 'relu']
+  # mlp_units: [1024, 1024]
+  mlp_units: [1536, 1024, 512, 256, 128, 64]
+  mlp_activations: ['relu', 'relu', 'relu', 'relu', 'relu', 'relu']
+evaluate_template: hungry_geese/scripts/deep_q_learning/q_value_semi_safe_agent_template.py
+play_template: hungry_geese/scripts/deep_q_learning/epsilon_semi_safe_agent_template.py
+play_against_top_n: 10
+n_learning_agents: 1
+n_agents_for_experience: 1
+sleep_between_epochs: 0
+train_data_dir: /mnt/hdd0/Kaggle/hungry_geese/data/combine_kaggle_and_local
