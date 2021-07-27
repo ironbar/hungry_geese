@@ -6,11 +6,6 @@ Multiplayer agent competition in a Snake like environment
 
 https://www.kaggle.com/c/hungry-geese
 
-## Goal
-
-I want to learn more about MuZero by applying it to this challenge. I do not want to devote too much
-time to the challenge, ideally two weeks, less than one month.
-I'm planning to present the learnings to the Jedi Council after the challenge.
 
 ## Methodology
 
@@ -36,3 +31,8 @@ I have skipped Evaluation and Deployment steps because they are not usually done
      |_ tests: folder with tests for the library
      |_ data: folder with light data from teh challenge
      |_ rules: the official rules of the challenge
+
+## Final solution code
+
+The code to train, play and evaluate the final solution is located on `scripts/efficient_deep_q_learning`.
+Once trained an agent can be created with this script `scripts/q_value_submission/create_semisafe_q_value_agent.py`
