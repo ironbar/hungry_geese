@@ -36,3 +36,8 @@ I have skipped Evaluation and Deployment steps because they are not usually done
 
 The code to train, play and evaluate the final solution is located on `scripts/efficient_deep_q_learning`.
 Once trained an agent can be created with this script `scripts/q_value_submission/create_semisafe_q_value_agent.py`
+
+## Agents
+
+The most relevant agents are saved on `data/agents`, whereas the local elo ranking
+is saved on `data/agents.yml`
