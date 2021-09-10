@@ -6,6 +6,8 @@ Multiplayer agent competition in a Snake like environment
 
 https://www.kaggle.com/c/hungry-geese
 
+[Slides from presentation](https://docs.google.com/presentation/d/1Qcf1tAl4PdOCoZuRddUdJ5ESJmevntuUf9S9Th_U8Aw/edit?usp=sharing)
+
 
 ## Methodology
 
